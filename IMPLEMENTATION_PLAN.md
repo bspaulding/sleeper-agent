@@ -78,7 +78,7 @@ sleeper-agent/
 │   │   │   ├── vorp.py            # per-player VORP result
 │   │   │   └── recommendation.py  # Recommendation = TradeRecommendation | WaiverRecommendation | DraftRecommendation | FreeAgentRecommendation | KeeperRecommendation (tagged union, see PROJECT_PLAN.md §10.2)
 │   │   ├── sleeper_client/
-│   │   │   ├── http.py            # get_json(url, get=requests.get) -> dict; `get` is an injected parameter so tests pass a fake instead of mocking `requests`
+│   │   │   ├── http.py            # get_json(url) -> dict; SLEEPER_BASE_URL constant; each resource function below takes base_url: str = SLEEPER_BASE_URL as its test seam (see tests/support/mock_http.py)
 │   │   │   ├── league.py          # resolve + sync
 │   │   │   ├── players.py         # player dictionary sync w/ 24h cache
 │   │   │   ├── draft.py           # draft object + picks (public, no auth)
@@ -109,6 +109,8 @@ sleeper-agent/
 │   │   └── storage/
 │   │       └── parquet_store.py   # read/write helpers, schema versioning
 │   └── tests/
+│       ├── support/
+│       │   └── mock_http.py       # Request/Response dataclasses + mock_http_server() context manager, see PROJECT_PLAN.md §10.4
 │       ├── fixtures/              # recorded Sleeper + nflverse responses (JSON/parquet snippets)
 │       ├── test_sleeper_client.py
 │       ├── test_players_cache.py
@@ -139,7 +141,7 @@ every later phase depends on.
   `requests`, `nfl_data_py`, `pyyaml`; dev deps: `pytest`, `pytest-cov`, `ruff`, `ty`). No
   `typer`, no `pydantic`, and deliberately no HTTP-mocking library (`respx`/`responses`/etc.) —
   those work by intercepting `requests` under the hood, which is exactly the kind of
-  monkeypatching this project bans; see the DI-based approach below instead.
+  monkeypatching this project bans; see `tests/support/mock_http.py` below instead.
 - No `[tool.ruff]` section in `pyproject.toml` beyond what's needed to point ruff at `src/`/
   `tests/` — no `select`/`ignore` customization, per `PROJECT_PLAN.md` §10.1.
 - `config.py`: repo-root discovery (walk up from cwd looking for a marker like `.git` or
@@ -147,13 +149,22 @@ every later phase depends on.
   needed per assumption §0.6 — keep this file boring on purpose. Plain functions, no config
   class/singleton — callers that need paths take them as explicit parameters (or call the
   discovery function directly), per §10.2's "thread parameters through the call stack" rule.
-- `sleeper_client/http.py`: `get_json(url: str, *, get: Callable[[str], requests.Response] =
-  requests.get) -> dict` — a plain function with the request-making callable as an injectable
-  parameter (defaulting to the real `requests.get` for normal use). Tests pass a fake `get` that
-  returns canned fixture data directly — no network, no monkeypatching, no mocking library.
-  Retry-with-backoff on 429/5xx lives here too (our call volume is low enough that Sleeper's
-  1000 req/min ceiling is very unlikely to matter — this is a correctness/robustness measure,
-  not real rate limiting).
+- **`tests/support/mock_http.py`**: the `Request`/`Response` dataclasses + `mock_http_server()`
+  context manager specified in full in `PROJECT_PLAN.md` §10.4 — build this early in Phase A,
+  before `sleeper_client`, since every HTTP-touching test from here on depends on it. Takes a
+  single `Callable[[Request], Response]` handler, wraps stdlib `http.server`, yields the running
+  server's base URL as a plain string.
+- `sleeper_client/http.py`: `get_json(url: str) -> dict` — a plain function calling `requests.get`
+  directly (no injected transport parameter needed; the test seam is the URL, not the transport
+  — see below). Retry-with-backoff on 429/5xx lives here too (our call volume is low enough that
+  Sleeper's 1000 req/min ceiling is very unlikely to matter — this is a correctness/robustness
+  measure, not real rate limiting); the backoff's `sleep` is itself an explicit injectable
+  parameter (`sleep: Callable[[float], None] = time.sleep`) purely so retry tests don't have to
+  wait through real delays — this is normal parameter-threading, not the same thing as the
+  banned transport-mocking pattern, since it's not standing in for the thing being tested.
+  `SLEEPER_BASE_URL = "https://api.sleeper.app/v1"` lives here too; every resource-specific
+  function in `league.py`/`players.py`/`draft.py`/`trending.py` takes `base_url: str =
+  SLEEPER_BASE_URL`, which tests override to a `mock_http_server(...)`-provided URL.
 - `storage/parquet_store.py`: `read_table(path) -> polars.DataFrame`, `write_table(df, path)`,
   each table versioned with a `schema_version` column or sidecar so a future schema change
   doesn't silently corrupt old data — reader should fail loudly (a clear exception) on an
@@ -176,8 +187,12 @@ every later phase depends on.
      literal cases; doesn't replace `code-review.md` for the subtler ones.
 - `tests/fixtures/`: record a handful of real Sleeper responses (league object, rosters, players
   dictionary excerpt, a draft's picks) and a small nflverse weekly-stats slice, checked in as
-  static JSON/parquet files. Tests load these and pass them into functions via the DI parameters
-  above — never patched into `requests` or any other module at runtime.
+  static JSON/parquet files. For Sleeper fixtures, tests load the JSON and have their
+  `mock_http_server` handler return it as a `Response` body for the expected path — the fixture
+  data flows through a real HTTP round-trip, never patched into `requests` at runtime. For
+  nflverse, since there's no mock-server seam available (§10.4's closing note), fixtures are
+  loaded directly as the input to the transformation logic under test, bypassing the one
+  `# pragma: no cover`-marked `nfl_data_py` call site entirely.
 - **Author `.claude/skills/code-review.md` now**, before any real feature code exists, so it's
   available to review Phase B's code from the start rather than being bolted on later. Content
   outline: restate the mechanically-uncheckable parts of `PROJECT_PLAN.md` §10.2 (functional
@@ -186,10 +201,12 @@ every later phase depends on.
   change touching `cli/` — not just periodically.
 
 **Definition of done:** `uv run sleeper-agent --help` shows an empty-but-structured CLI;
-`uv run pytest --cov-fail-under=100` passes (even if trivially, on a smoke test — coverage of an
-almost-empty codebase is not a meaningful signal yet, but the gate itself must already be wired
-and green); `ruff check`, `ruff format --check`, and `ty check` are all clean; CI is green on a
-throwaway PR; `code-review.md` v1 exists.
+`mock_http_server` has at least one real test proving it round-trips a scripted response
+correctly (server starts, serves the handler's response, shuts down cleanly); `uv run pytest
+--cov-fail-under=100` passes (even if trivially, on a smoke test — coverage of an almost-empty
+codebase is not a meaningful signal yet, but the gate itself must already be wired and green);
+`ruff check`, `ruff format --check`, and `ty check` are all clean; CI is green on a throwaway PR;
+`code-review.md` v1 exists.
 
 ## 3. Phase B — League & stats data
 

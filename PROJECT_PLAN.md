@@ -237,6 +237,10 @@ All entry points live in the Python CLI (see §10.3 for the concrete stack: `arg
 
 ### 6.1 `sleeper` — league/team data
 
+Underlying client functions (`fetch_league`, `fetch_rosters`, etc.) each take an explicit
+`base_url: str = SLEEPER_BASE_URL` parameter — this is the test seam described in §10.4 (tests
+point it at a local mock server instead of injecting a fake transport callable).
+
 - `sleeper league resolve` — find the current season's league ID by walking forward/back the
   `previous_league_id` chain or querying `/user/<user_id>/leagues/nfl/<season>`; never hardcode.
 - `sleeper league sync` — pull league settings, scoring settings, rosters, users, matchups,
@@ -435,13 +439,14 @@ keeps them real instead of aspirational.
   FreeAgentRecommendation | KeeperRecommendation`, matched by `match`, not one flexible type with
   a `kind` field and a dozen optional attributes.
 - **No monkeypatching, no dynamic magic — thread parameters through the call stack instead,
-  even when that makes the diff bigger.** If a function needs an HTTP call, it takes the
-  request-making function as an explicit parameter (with a real default for normal use); a test
-  passes a fake one directly. No `unittest.mock.patch`, no `monkeypatch` fixture, no reaching
-  into another module's internals at runtime. A bigger, fully-explicit diff that's easy to trace
-  beats a smaller one that relies on patching something elsewhere to work correctly — this is a
-  deliberate tradeoff, not an oversight, and `code-review.md` should push back on anything that
-  takes a shortcut through implicit/global state instead.
+  even when that makes the diff bigger.** No `unittest.mock.patch`, no `monkeypatch` fixture, no
+  reaching into another module's internals at runtime. For HTTP specifically, this means testing
+  against a real local server (§10.4), not a faked-out request function — that exercises the
+  actual `requests`/HTTP code path (real status codes, real headers, real connection behavior)
+  instead of trusting that a hand-rolled fake behaves like the real thing. A bigger, fully-explicit
+  diff that's easy to trace beats a smaller one that relies on patching something elsewhere to
+  work correctly — this is a deliberate tradeoff, not an oversight, and `code-review.md` should
+  push back on anything that takes a shortcut through implicit/global state instead.
 
 ### 10.3 Stack summary
 
@@ -449,10 +454,149 @@ keeps them real instead of aspirational.
 - CLI framework: `argparse` (stdlib)
 - Data models: `dataclasses` + `TypedDict` + hand-written boundary parsers (no `pydantic`)
 - Tabular data: `polars` + Parquet
-- Testing: `pytest` + `pytest-cov` (100% enforced), dependency-injected fakes (no mocking libs)
+- Testing: `pytest` + `pytest-cov` (100% enforced), a local mock HTTP server for external-API
+  tests (§10.4) — no mocking libraries, no faked-out request functions
 - Type checking: `ty`
 - Linting: `ruff check` (default rules)
 - Formatting: `ruff format` (default settings)
+
+### 10.4 HTTP testing utility: a real local mock server, not a fake
+
+Sleeper's API is the only external HTTP boundary this project controls the calling code for
+(nflverse/`nfl_data_py` is a separate case — see the note at the end of this section). Rather
+than inject a fake `get`-like callable to stand in for `requests` (which only tests that our code
+calls *something* correctly, not that it behaves correctly against real HTTP), tests spin up a
+small, real local HTTP server with a scripted response, and point the client code at it via an
+explicit `base_url` parameter — no patching, and the real `requests` code path runs end-to-end.
+
+`cli/tests/support/mock_http.py` — a single reusable utility, function-based, `Request`/
+`Response` as plain frozen dataclasses operating on raw `bytes` (callers encode/decode UTF-8
+explicitly at the point they build a `Response` or read a `Request` body — the dataclasses stay
+pure data with no behavior of their own, consistent with §10.2):
+
+```python
+from __future__ import annotations
+
+import threading
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from dataclasses import dataclass, field
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+
+@dataclass(frozen=True)
+class Request:
+    method: str
+    path: str
+    headers: dict[str, str]
+    body: bytes
+
+
+@dataclass(frozen=True)
+class Response:
+    status: int
+    headers: dict[str, str] = field(default_factory=dict)
+    body: bytes = b""
+
+
+Handler = Callable[[Request], Response]
+
+
+def _handler_class(handler: Handler) -> type[BaseHTTPRequestHandler]:
+    class _Adapter(BaseHTTPRequestHandler):
+        def _dispatch(self) -> None:
+            length = int(self.headers.get("Content-Length", "0") or "0")
+            body = self.rfile.read(length) if length else b""
+            request = Request(
+                method=self.command,
+                path=self.path,
+                headers={key: value for key, value in self.headers.items()},
+                body=body,
+            )
+            response = handler(request)
+            self.send_response(response.status)
+            for key, value in response.headers.items():
+                self.send_header(key, value)
+            if "Content-Length" not in response.headers:
+                self.send_header("Content-Length", str(len(response.body)))
+            self.end_headers()
+            self.wfile.write(response.body)
+
+        def do_GET(self) -> None:
+            self._dispatch()
+
+        def do_POST(self) -> None:
+            self._dispatch()
+
+        def do_PUT(self) -> None:
+            self._dispatch()
+
+        def do_PATCH(self) -> None:
+            self._dispatch()
+
+        def do_DELETE(self) -> None:
+            self._dispatch()
+
+        def log_message(self, format: str, *args: object) -> None:
+            pass  # silence default request logging to stderr during tests
+
+    return _Adapter
+
+
+@contextmanager
+def mock_http_server(handler: Handler) -> Iterator[str]:
+    server = HTTPServer(("127.0.0.1", 0), _handler_class(handler))
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_address[1]}"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()
+```
+
+Notes on why this is still consistent with §10.2 despite using classes and a decorator:
+
+- `BaseHTTPRequestHandler`/`HTTPServer`/`threading.Thread` are stdlib classes used *as a
+  library* — `http.server`'s API requires a handler *class* (it instantiates one per request
+  internally), so `_handler_class` is a small factory that closes over the plain-function
+  `handler` and satisfies that contract. This isn't "our" class hierarchy or business logic in
+  class form; it's the minimum adapter needed to bridge a class-shaped stdlib API to a
+  function-shaped one.
+- `@contextmanager` (stdlib `contextlib`) turns a generator function into a context manager
+  without writing a class with `__enter__`/`__exit__` — it's the *more* functional-style option
+  here, not a violation, and is an explicit exception alongside `@dataclass` and `pytest`'s
+  decorators (§10.2).
+
+Usage from a `sleeper_client` test:
+
+```python
+def test_fetch_league() -> None:
+    def handler(request: Request) -> Response:
+        assert request.path == "/league/1180391690551980032"
+        body = b'{"league_id": "1180391690551980032", "name": "Only Gold"}'
+        return Response(status=200, headers={"Content-Type": "application/json"}, body=body)
+
+    with mock_http_server(handler) as base_url:
+        league = fetch_league("1180391690551980032", base_url=base_url)
+
+    assert league.name == "Only Gold"
+```
+
+This is why `sleeper_client` functions take an explicit `base_url: str = SLEEPER_BASE_URL`
+parameter (§6.1) rather than an injected request-making callable — the test seam is the URL, not
+the transport, which is simpler and exercises real HTTP.
+
+**nflverse/`nfl_data_py` is a different case**, worth flagging now rather than discovering it
+during Phase B: it makes its own HTTP calls to hardcoded GitHub release URLs with no base-URL
+parameter to redirect, so this mock-server pattern doesn't apply to it directly. The plan there:
+keep each `nfl_data_py` call to a single, thin line in `stats/nflverse.py` (e.g. `def
+_import_weekly(seasons: list[int]) -> pd.DataFrame: return nfl_data_py.import_weekly_data(seasons)`),
+test everything downstream of it with a fixture DataFrame passed in directly, and mark that one
+call site `# pragma: no cover` as a second, explicit, narrow exception to §10.1's coverage rule
+(the first being genuinely-unreachable code) — validated instead by an occasional manual run
+against the real library, not by the automated 100%-enforced suite.
 
 ## 11. Open questions / explicitly deferred
 
