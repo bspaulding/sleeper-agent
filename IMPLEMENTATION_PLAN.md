@@ -22,8 +22,10 @@ Cheap to correct if wrong — say so and this doc updates.
    actually determines how much slack Phases E/F/G below have.
 2. ~~Keeper cost rule is unknown~~ **Resolved.** Confirmed with Brad and verified against the
    real 2025 draft data: a kept player costs `last_round - 1` (the round they were last drafted
-   or kept at, minus one); if that would drop below round 1 the player isn't keeper-eligible at
-   all; a player can be kept for at most 2 consecutive seasons before returning to the open pool.
+   or kept at, minus one). Round 1 is a valid keeper cost; only a computed cost of round 0 is
+   invalid (i.e. the player was drafted or kept at round 1 last year — that player can't be kept
+   this year at all). A player can be kept for at most 2 consecutive seasons before returning to
+   the open pool.
    Also corrected while checking this: the draft itself is a **full 15-round snake draft**, not
    the 3-round supplemental draft assumed in the first pass of `PROJECT_PLAN.md` — confirmed from
    the real 2025 draft object (`type: snake`, `rounds: 15`, 180 picks, 17 of them flagged
@@ -290,7 +292,9 @@ For each player on the roster in question:
    roster, walking back until either a non-keeper (live) pick is hit or the chain ends.
 3. Apply the rule:
    - If already kept for **2 consecutive seasons**, not eligible — returns to the open pool.
-   - Else, `cost = last_round - 1`. If `cost < 1`, not eligible.
+   - Else, `cost = last_round - 1`. **`cost == 0` is the only invalid case** (i.e. `last_round
+     == 1`: drafted or kept at round 1 last year) — not `cost <= 1`. A player last drafted/kept
+     at round 2 has `cost = 1` and **is** eligible, at a round-1 keeper cost.
    - Else, eligible to keep at `cost`.
 
 This is genuinely the most involved piece of data-plumbing in Phase 1 (multi-season joins across
@@ -304,9 +308,12 @@ rather than being inlined into the `draft keepers` command.
 | `draft board [--league-id ID] [--rounds N] [--watch]` | On-demand best-available-by-value view across the full 15-round draft: cross-references `data/vorp` + `value rank` against already-drafted/kept players (via the draft's public picks endpoint, no auth needed, same approach as `bspaulding/nfl-vorp`'s `vorp-draft-cli.ts`), correctly treating pre-filled `is_keeper: true` picks as off the board from the start rather than waiting to see them "picked." `--watch` polls every ~30s and re-renders, and (if run as part of a Routine rather than interactively) writes/updates a running `decisions/.../<date>-draft-live.md` entry each time the board changes meaningfully — this is what makes both draft-day operating modes (interactive or semi-autonomous, see §0.4) work off the same command. |
 
 **Tests:** `keeper_history` tested against a synthetic multi-season fixture chain covering all
-three outcomes (never kept before, kept 1 consecutive year, kept 2 consecutive years already,
-and a round-1-cost-floor case); `draft board` filtering-out-drafted-and-kept-players logic tested
-against a fixture draft with a partial set of live picks plus pre-filled keeper picks.
+outcomes: never kept before, kept 1 consecutive year (eligible again), kept 2 consecutive years
+already (ineligible regardless of round), last_round == 2 (eligible, cost == 1), and last_round
+== 1 (ineligible, cost would be 0) — the last two specifically to pin down that round 1 is a
+valid keeper cost and only round 0 is not. `draft board` filtering-out-drafted-and-kept-players
+logic tested against a fixture draft with a partial set of live picks plus pre-filled keeper
+picks.
 
 **Skill: `.claude/skills/draft.md`** — outline: how to choose which ≤2 keepers to lock in
 (value-per-cost, not just raw value — a cheap round-9 keeper can beat an expensive round-2 one);

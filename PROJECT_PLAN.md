@@ -86,9 +86,11 @@ instance of `yellldarb`'s keeper league:
   as picks flagged `is_keeper: true` at a pre-computed round (17 such picks in the 2025 draft);
   every other roster spot is drafted live in the normal snake order. **Keeper cost rule**
   (confirmed with Brad, not in Sleeper's API): a kept player costs one round earlier than the
-  round they were last drafted or kept at (`cost = last_round - 1`); if that would go below
-  round 1, the player is **not keeper-eligible** at all (must be drafted normally by whoever
-  wants them, including their current owner); a player can be kept this way for **at most 2
+  round they were last drafted or kept at (`cost = last_round - 1`). **Round 1 is a valid
+  keeper cost** — e.g. drafted round 2 last year → keeper cost round 1 this year is fine. Only
+  `cost = 0` (i.e. the player was drafted *or* kept at round 1 last year) is invalid: that player
+  is **not keeper-eligible** at all this year (must be drafted normally by whoever wants them,
+  including their current owner). Separately, a player can be kept this way for **at most 2
   consecutive seasons**, after which they lose keeper eligibility and return to the open draft
   pool. Computing this requires walking the draft history across seasons via `previous_league_id`
   (see §6.5).
@@ -278,7 +280,7 @@ for data models, `pytest` for tests). Proposed command groups:
   players by VORP) into this CLI. It's a full 15-round snake draft (see §3), so the board needs
   to track a whole roster build, not a short supplemental round.
 - Also needs a `draft keepers` view: compute each rostered player's keeper eligibility and cost
-  per the rule in §3 (`last_round - 1`, ineligible below round 1, max 2 consecutive kept
+  per the rule in §3 (`last_round - 1`, ineligible only if that computes to round 0, max 2 consecutive kept
   seasons), which requires walking draft history across seasons via `previous_league_id`.
 
 ### 6.6 `waiver` and `freeagent` — in-season roster management
