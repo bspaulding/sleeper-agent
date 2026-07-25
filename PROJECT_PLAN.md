@@ -9,9 +9,10 @@ proves it wrong — don't let it drift out of sync with reality.
 
 Run an autonomously-managed Sleeper fantasy football team, where:
 
-- A **Python CLI** is the only thing that touches the outside world (Sleeper's API, stats
-  providers, news sources). It fetches data, computes analyses, and (once write access exists)
-  will execute actions. It is deterministic, testable, versioned code.
+- A **Python CLI** handles the outside-world calls that need to be structured and reproducible
+  (Sleeper's API, stats providers). It fetches data, computes analyses, and (once write access
+  exists) will execute actions. It is deterministic, testable, versioned code. News/context
+  research is the one exception — see §5.4 — and is done by the LLM directly, not the CLI.
 - An **LLM wiki** (markdown, git-tracked) is the team's long-term memory: player notes,
   team-building philosophy, past decisions and their reasoning, league dynamics, injury/news
   context. It's what the LLM reads before making a judgment call the CLI can't make on its own
@@ -127,7 +128,7 @@ sleeper-agent/
 |---|---|---|
 | Sleeper API | league/user/roster/matchup/transaction/draft/player data | public, read-only, no auth, keep under 1000 req/min |
 | [nflverse](https://github.com/nflverse) / `nfl_data_py` | play-by-play, weekly stats, snap counts, next-gen stats, rosters, schedules, injuries | free, Python-native |
-| Free news sources (TBD list) | injury updates, beat-reporter/transaction news for wiki context | scraping/RSS; identify concrete sources during implementation (team injury report pages, RSS feeds, etc.); keep a scraper-per-source design so one breaking doesn't take down the rest |
+| News/context (injuries, beat reports, transactions) | narrative context for wiki player notes | **not a CLI scraper** — the LLM fetches this itself via WebSearch/WebFetch during normal runs, guided by a skill (see §5.4, §9) |
 
 Use "any and all free metrics we can get" as the working principle — the CLI should be able to
 absorb new free data sources over time without a redesign; each source gets its own fetch
@@ -150,9 +151,10 @@ data/
 ├── stats/
 │   ├── weekly/<season>.parquet    # nflverse weekly stats
 │   └── snaps/<season>.parquet
-├── vorp/<season>.parquet          # computed VORP, see §6.2
-└── news/<season>.parquet          # scraped news items, timestamped
+└── vorp/<season>.parquet          # computed VORP, see §6.2
 ```
+
+News is not part of this store — see §5.4.
 
 Read/write with `polars` or `pandas` (pick one and standardize — recommend `polars`, faster and
 has first-class Parquet support). Decide at implementation time whether `data/` is git-tracked
@@ -179,6 +181,30 @@ wiki/
 The LLM is expected to read and update these files as part of its normal reasoning loop (this
 is the "living memory" the acceptance criteria calls for), not just the CLI.
 
+### 5.4 News research (LLM-driven, not scraped)
+
+Building and maintaining a scraper per news source is real ongoing maintenance for a
+low-structure payload (a paragraph of context, not a row of numbers). Instead: the LLM
+researches news itself, live, using WebSearch/WebFetch during its normal skill-driven runs, and
+writes what it finds directly into `wiki/players/*.md`. No `data/news/` table, no scraper code
+to maintain, no dedicated CLI command.
+
+The risk this gives up is structure — a scraper pipeline guarantees consistent coverage,
+cadence, and a queryable table; ad hoc LLM research doesn't, by default. That gap gets closed
+by a **skill** (`.claude/skills/news-research.md`, see §9), not code, covering things like:
+
+- which kinds of sources to prioritize (team injury reports, beat reporters, official
+  transaction wires) over low-quality aggregators;
+- a consistent filing convention — e.g. append a dated, tagged entry
+  (`YYYY-MM-DD [injury|depth-chart|trade|transaction] ...`) to the relevant
+  `wiki/players/<id>-<slug>.md` rather than writing free-form prose in inconsistent places;
+  frontmatter should record `last_researched: <date>` so a run can tell whether a player's news
+  is stale;
+- a check-before-you-write step — skim the player's existing wiki entry first so repeat runs
+  don't re-research or duplicate what's already recorded;
+- when to bother at all — e.g. always for rostered/targeted players ahead of a lineup-affecting
+  decision, opportunistically for others, rather than trying to cover the whole league every run.
+
 ## 6. Analysis & CLI capabilities
 
 All entry points live in the Python CLI (`typer` recommended for the CLI framework, `pydantic`
@@ -203,9 +229,6 @@ for data models, `pytest` for tests). Proposed command groups:
   already know this league's settings are non-default), replacement level derived from
   `roster_positions` (2 RB + 2 WR + 2 FLEX split, no K, single DEF) and league size (12), VORP =
   player points − replacement level, both season-total and per-game.
-- `stats news sync` — scrape configured free news sources, dedupe, append to `data/news/`, and
-  surface anything injury/trade-relevant into the wiki (`wiki/players/*.md`) for the LLM to pick
-  up during reasoning.
 
 ### 6.3 `value` — player valuation
 
@@ -277,6 +300,9 @@ shows what's needed):
   team-building narrative/roster fit.
 - `waivers.md` — FAAB bidding strategy (budget pacing across the season, not just per-bid value).
 - `free-agents.md` — add/drop heuristics between waiver periods.
+- `news-research.md` — how to fetch and catalog news/injury/transaction context into the wiki
+  without a scraper (source prioritization, filing/frontmatter convention, staleness checks,
+  when it's worth researching a player at all); see §5.4.
 - A meta-loop: periodically (e.g. end of season, or after notably good/bad decisions), the LLM
   is allowed to revise these skill files based on what the decision log shows worked or didn't —
   this is the "skills that update themselves" requirement. Treat skill edits like any other
@@ -296,8 +322,9 @@ shows what's needed):
 - **Write-access mechanism** (reverse-engineered internal Sleeper API vs. browser automation)
   — deferred until Phase 2. Revisit once Phase 1's recommendation quality is trusted.
 - **Notifications** — deferred; decision log + git history is the interface for now.
-- **Concrete free news sources** — to be identified during implementation rather than locked in
-  here.
+- **News-research skill details** (source prioritization, exact filing/frontmatter convention)
+  — sketched in §5.4, to be written as `.claude/skills/news-research.md` and refined once we see
+  what the LLM actually produces in practice.
 - **Parquet git-tracking vs. git-ignoring `data/`** — leaning tracked, not finalized.
 
 ## 12. Suggested milestones
@@ -307,10 +334,12 @@ shows what's needed):
    league scoring settings, validated against known 2025 outcomes for sanity-checking.
 3. Wiki + decision log scaffolding, with one manually-triggered end-to-end run: sync → analyze →
    write a recommendation to `decisions/` → commit/push.
-4. `waiver recommend` and `freeagent recommend`, since those recur most often in-season.
-5. `trade evaluate` / `trade propose`.
-6. `draft` tooling, timed for next draft window.
-7. First Claude Code Routine for a real recurring task (start with the weekly stats/news sync,
+4. `news-research.md` skill v1 + one manual run researching a handful of rostered players,
+   to validate the filing convention before leaning on it for real decisions.
+5. `waiver recommend` and `freeagent recommend`, since those recur most often in-season.
+6. `trade evaluate` / `trade propose`.
+7. `draft` tooling, timed for next draft window.
+8. First Claude Code Routine for a real recurring task (start with the weekly stats sync,
    lowest risk).
-8. Skills v1 for each domain, then the self-revision loop once there's decision-log history to
-   learn from.
+9. Skills v1 for the remaining domains, then the self-revision loop once there's decision-log
+   history to learn from.
