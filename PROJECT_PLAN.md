@@ -232,8 +232,8 @@ by a **skill** (`.claude/skills/news-research.md`, see §9), not code, covering 
 
 ## 6. Analysis & CLI capabilities
 
-All entry points live in the Python CLI (`typer` recommended for the CLI framework, `pydantic`
-for data models, `pytest` for tests). Proposed command groups:
+All entry points live in the Python CLI (see §10.3 for the concrete stack: `argparse`,
+`dataclasses`, `pytest`). Proposed command groups:
 
 ### 6.1 `sleeper` — league/team data
 
@@ -332,19 +332,127 @@ shows what's needed):
 - `news-research.md` — how to fetch and catalog news/injury/transaction context into the wiki
   without a scraper: source prioritization, the dated/linked filing convention onto player and
   NFL-team pages, frontmatter staleness checks, and when it's worth researching at all; see §5.4.
+- `code-review.md` — reviews the LLM's own changes to `cli/` against the parts of §10.2 that
+  ruff/`ty`/coverage can't mechanically check: functional style over classes/inheritance,
+  tagged unions + `match` for state modeling, no dynamic magic, explicit parameter-threading.
+  Run this before committing any change that touches `cli/`, not just periodically — see §10.2.
 - A meta-loop: periodically (e.g. end of season, or after notably good/bad decisions), the LLM
   is allowed to revise these skill files based on what the decision log shows worked or didn't —
   this is the "skills that update themselves" requirement. Treat skill edits like any other
   change: committed, with a decision-log-style rationale for what changed and why.
 
-## 10. Tech stack (defaults — adjust freely during implementation)
+## 10. Code quality: tooling & style
 
-- Python package/dependency management: `uv`
-- CLI framework: `typer`
-- Data models/validation: `pydantic`
+The CLI is meant to be edited by the LLM continuously, all season, without a human reviewing
+every diff (§1, §4). That only works if the codebase stays genuinely easy to reason about —
+these standards exist for that reason, not as style preference for its own sake. Split into
+what's mechanically enforced (§10.1, CI fails the build) and what needs judgment (§10.2, the
+`code-review.md` skill's job, since no linter can check "is this the right abstraction").
+
+### 10.1 Tooling (CI-enforced, mechanical)
+
+- **Dependency management: `uv`.** `uv.lock` is committed; CI checks the lockfile isn't stale
+  (`uv sync --locked` or equivalent) so "works on my machine" drift can't creep in.
+- **Type checking: [`ty`](https://github.com/astral-sh/ty).** All code must be fully typed; `ty
+  check` runs in CI and must be clean (zero errors) for every change. No `# type: ignore` used to
+  paper over a real type error — if `ty` can't be satisfied cleanly, the code is wrong or the
+  types need to model reality better (see §10.2 on tagged unions), not suppressed.
+- **Linting: `ruff check`, default rule set, unmodified.** No `[tool.ruff.lint]`
+  `select`/`ignore` customization in `pyproject.toml` — whatever ruff enables out of the box is
+  what we get. CI fails on any violation.
+- **Formatting: `ruff format --check`, default settings, unmodified.** CI fails if any file
+  isn't already formatted — formatting is never a manual step or a matter of taste here.
+- **Coverage: `pytest` + `pytest-cov`, 100% line coverage, enforced in CI**
+  (`--cov-fail-under=100`). This is a hard gate, not a target. `# pragma: no cover` is reserved
+  for the rare case of genuinely unreachable code (e.g. a `match` arm the type system proves
+  exhaustive but Python can't express without one) — never used to skip testing real logic.
+- **No monkeypatching/dynamic magic — backstopped by a CI grep-check, not just policy.** A
+  small CI step scans `cli/` for `unittest.mock`, `monkeypatch`, `setattr(`, `getattr(` (beyond
+  trivial safe uses), `exec(`, and `eval(`, and fails the build if any appear outside an
+  explicitly documented, reviewed exception. This catches the literal cases; the subtler
+  ones (see §10.2) are the `code-review.md` skill's job, because grep can't tell "clever
+  metaprogramming" from "reasonable code" the way a reviewer can.
+
+None of this is exotic — it's the same "make it safe for an LLM to keep editing this all season"
+argument that was already the rationale for testing at all. `ty` and `ruff` are both from
+Astral, same team as `uv`, so the toolchain stays small and consistent.
+
+### 10.2 Code style (guidance — enforced by the `code-review.md` skill, not a linter)
+
+These are things ruff's default rules and `ty` genuinely cannot check — they're about shape and
+architecture, not syntax errors or type mismatches. `code-review.md` (§9) is the mechanism that
+keeps them real instead of aspirational.
+
+- **Functional style: prefer plain functions and dataclasses over classes.** A "service" or
+  "client" isn't a class with methods and internal state — it's a module of functions that take
+  their dependencies as explicit parameters. `@dataclass` (usually `frozen=True`, since
+  immutable-by-default fits this style) is the standard way to define a data shape, and that's
+  an explicit exception to "avoid classes" — `@dataclass` and `Enum` are the two class forms this
+  project uses on purpose, everywhere else defaults to a plain function.
+- **Avoid decorators — including in the CLI framework and data-validation choice.** This ruled
+  out two defaults from an earlier pass of this plan: `typer` (decorator-registered commands,
+  signature introspection to build the CLI) and `pydantic` (decorator/metaclass-driven
+  validation). Replaced with:
+  - **CLI framework: stdlib `argparse`.** More boilerplate than `typer`, explicit rather than
+    inferred from function signatures — that's the point.
+  - **Data models: stdlib `dataclasses` for domain types, `TypedDict` for raw external JSON
+    shapes, and a hand-written `parse_*` function per external shape that converts one to the
+    other.** This is where "validate at the boundary" still happens (Sleeper/nflverse responses
+    are the untrusted input) — it just happens as ordinary, readable, testable Python instead of
+    a validation library's runtime magic. It's more code than a `pydantic.BaseModel` would need;
+    that's the accepted tradeoff (see "thread parameters..." below).
+  - Standard-library classes used *as libraries* (`argparse.ArgumentParser`, `polars.DataFrame`,
+    `pathlib.Path`) are fine to use — the constraint is on classes/inheritance/decorators we
+    write ourselves, not on every class-shaped thing in the stdlib.
+  - Pragmatic exception: `pytest` fixtures/parametrize decorators are the standard, expected way
+    to write tests in this ecosystem and there's no good decorator-free alternative that isn't a
+    worse fit (`unittest`'s class+inheritance style would be a worse violation of these same
+    principles) — this is a deliberate, narrow carve-out, not a loophole.
+- **Composition over inheritance.** No base classes, no mixins, no ABCs. If two things share
+  behavior, extract a function both call, not a shared superclass.
+- **Make impossible states impossible.** Prefer `Enum` and tagged unions (a `Union`/`|` of
+  distinct `@dataclass` types, matched structurally) over a single type with optional fields and
+  a runtime "well actually" invariant. Use `match`/`case` on these as the default control-flow
+  tool, not `if`/`elif` chains on a `.kind` string or a bag of nullable fields. Concrete example
+  already in this codebase's design — §6.5's keeper-cost result should be modeled as:
+  ```python
+  @dataclass(frozen=True)
+  class KeeperEligible:
+      cost_round: int
+
+  @dataclass(frozen=True)
+  class KeeperIneligibleMaxYearsReached: pass
+
+  @dataclass(frozen=True)
+  class KeeperIneligibleCostBelowRoundOne: pass
+
+  KeeperStatus = KeeperEligible | KeeperIneligibleMaxYearsReached | KeeperIneligibleCostBelowRoundOne
+  ```
+  instead of `eligible: bool, cost: int | None, reason: str | None` — the tagged-union version
+  makes "eligible but no cost" or "ineligible but a cost is present" unrepresentable, rather than
+  a bug that has to be caught by convention. The same pattern applies to `Recommendation` (§6.7):
+  a union of `TradeRecommendation | WaiverRecommendation | DraftRecommendation |
+  FreeAgentRecommendation | KeeperRecommendation`, matched by `match`, not one flexible type with
+  a `kind` field and a dozen optional attributes.
+- **No monkeypatching, no dynamic magic — thread parameters through the call stack instead,
+  even when that makes the diff bigger.** If a function needs an HTTP call, it takes the
+  request-making function as an explicit parameter (with a real default for normal use); a test
+  passes a fake one directly. No `unittest.mock.patch`, no `monkeypatch` fixture, no reaching
+  into another module's internals at runtime. A bigger, fully-explicit diff that's easy to trace
+  beats a smaller one that relies on patching something elsewhere to work correctly — this is a
+  deliberate tradeoff, not an oversight, and `code-review.md` should push back on anything that
+  takes a shortcut through implicit/global state instead.
+
+### 10.3 Stack summary
+
+- Dependency management: `uv`
+- CLI framework: `argparse` (stdlib)
+- Data models: `dataclasses` + `TypedDict` + hand-written boundary parsers (no `pydantic`)
 - Tabular data: `polars` + Parquet
-- Testing: `pytest`
-- Linting/formatting: `ruff`
+- Testing: `pytest` + `pytest-cov` (100% enforced), dependency-injected fakes (no mocking libs)
+- Type checking: `ty`
+- Linting: `ruff check` (default rules)
+- Formatting: `ruff format` (default settings)
 
 ## 11. Open questions / explicitly deferred
 

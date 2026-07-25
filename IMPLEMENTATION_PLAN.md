@@ -31,10 +31,11 @@ Cheap to correct if wrong — say so and this doc updates.
    the real 2025 draft object (`type: snake`, `rounds: 15`, 180 picks, 17 of them flagged
    `is_keeper: true` at their computed round). See `PROJECT_PLAN.md` §3 for the full writeup.
    Phase E below reflects this correction.
-3. **Full automated test coverage**, including fixture-recorded Sleeper/nflverse responses, not
-   just tests for pure computation. Rationale: this codebase is explicitly meant to be edited by
-   the LLM all season (`PROJECT_PLAN.md` §4); tests are what make that safe to do without a human
-   reviewing every diff.
+3. **100% test coverage, enforced in CI — not an assumption anymore, an explicit requirement**
+   (see item 7). Includes fixture-recorded Sleeper/nflverse responses for I/O-heavy commands, not
+   just pure computation. Rationale unchanged: this codebase is meant to be edited by the LLM all
+   season (`PROJECT_PLAN.md` §4); tests are what make that safe without a human reviewing every
+   diff.
 4. **Draft-day tooling supports both interactive and semi-autonomous use** rather than picking
    one: `draft board` is usable on-demand (Brad asks live during the draft) and also takes a
    `--watch` flag that polls and updates a decision-log entry unattended. Building both is
@@ -46,6 +47,17 @@ Cheap to correct if wrong — say so and this doc updates.
    are both public, unauthenticated data sources. This whole phase should need zero secrets —
    worth calling out because it simplifies Phase A a lot, and because Phase 2 (write access)
    will be the first time credential handling is a real concern.
+7. **Code quality standards adopted wholesale, not an assumption:** `uv`, `ty` (type checking),
+   `ruff check` + `ruff format --check` (both default rule sets, unmodified) all enforced in CI;
+   100% test coverage enforced in CI; functional style (plain functions + `@dataclass`/`Enum`,
+   no other custom classes, no inheritance); tagged unions + `match` for state modeling instead
+   of optional-field bags; no decorators beyond `@dataclass` and `pytest`'s; no monkeypatching or
+   other dynamic magic anywhere, dependency injection instead. Full detail in `PROJECT_PLAN.md`
+   §10. This changed two defaults from the first pass of this plan: `typer` → stdlib `argparse`
+   (decorator/introspection-based CLI registration is exactly the magic being avoided), and
+   `pydantic` → `dataclasses` + `TypedDict` + hand-written boundary parsers (same reasoning).
+   Every phase below (repo layout, command tables, module names) has been updated to match —
+   noting it here once instead of re-deriving the rationale in each phase.
 
 ## 1. Repo layout (target state)
 
@@ -58,15 +70,15 @@ sleeper-agent/
 │   ├── uv.lock
 │   ├── src/sleeper_agent/
 │   │   ├── __init__.py
-│   │   ├── main.py                # typer app, registers all subcommand groups
+│   │   ├── main.py                # builds the argparse.ArgumentParser tree, dispatches to plain functions
 │   │   ├── config.py              # repo-root discovery, path constants, no env-based secrets needed
-│   │   ├── models/
-│   │   │   ├── sleeper.py         # League, Roster, User, Player, Transaction, Draft, DraftPick
+│   │   ├── models/                # frozen @dataclass domain types + TypedDicts for raw external JSON
+│   │   │   ├── sleeper.py         # League, Roster, User, Player, Transaction, Draft, DraftPick (+ *Raw TypedDicts, parse_* functions)
 │   │   │   ├── stats.py           # weekly stat row, snap row, injury row
 │   │   │   ├── vorp.py            # per-player VORP result
-│   │   │   └── recommendation.py  # TradeRecommendation, WaiverRecommendation, DraftRecommendation, FreeAgentRecommendation, KeeperRecommendation
+│   │   │   └── recommendation.py  # Recommendation = TradeRecommendation | WaiverRecommendation | DraftRecommendation | FreeAgentRecommendation | KeeperRecommendation (tagged union, see PROJECT_PLAN.md §10.2)
 │   │   ├── sleeper_client/
-│   │   │   ├── http.py            # thin requests wrapper, retry/backoff on 429/5xx
+│   │   │   ├── http.py            # get_json(url, get=requests.get) -> dict; `get` is an injected parameter so tests pass a fake instead of mocking `requests`
 │   │   │   ├── league.py          # resolve + sync
 │   │   │   ├── players.py         # player dictionary sync w/ 24h cache
 │   │   │   ├── draft.py           # draft object + picks (public, no auth)
@@ -112,7 +124,8 @@ sleeper-agent/
 ├── data/                          # parquet store, see PROJECT_PLAN.md §5.2
 ├── wiki/                          # markdown wiki, see PROJECT_PLAN.md §5.3
 ├── decisions/                     # decision log, see PROJECT_PLAN.md §7
-└── .claude/skills/                # see §6 below
+└── .claude/skills/                # draft.md, trades.md, waivers.md, free-agents.md, news-research.md
+                                    # (authored in Phases E/F/G/C respectively) + code-review.md (Phase A)
 ```
 
 ## 2. Phase A — Foundations
@@ -122,32 +135,61 @@ every later phase depends on.
 
 **Tasks**
 
-- Initialize `uv` project under `cli/`: `pyproject.toml` (Python 3.12+, deps: `typer`,
-  `pydantic`, `polars`, `requests`, `nfl_data_py`, `pyyaml` for frontmatter; dev deps: `pytest`,
-  `ruff`, `respx` or `responses` for HTTP mocking).
+- Initialize `uv` project under `cli/`: `pyproject.toml` (Python 3.12+, runtime deps: `polars`,
+  `requests`, `nfl_data_py`, `pyyaml`; dev deps: `pytest`, `pytest-cov`, `ruff`, `ty`). No
+  `typer`, no `pydantic`, and deliberately no HTTP-mocking library (`respx`/`responses`/etc.) —
+  those work by intercepting `requests` under the hood, which is exactly the kind of
+  monkeypatching this project bans; see the DI-based approach below instead.
+- No `[tool.ruff]` section in `pyproject.toml` beyond what's needed to point ruff at `src/`/
+  `tests/` — no `select`/`ignore` customization, per `PROJECT_PLAN.md` §10.1.
 - `config.py`: repo-root discovery (walk up from cwd looking for a marker like `.git` or
   `PROJECT_PLAN.md`), and path constants for `data/`, `wiki/`, `decisions/`. No secrets/env vars
-  needed per assumption §0.6 — keep this file boring on purpose.
-- `sleeper_client/http.py`: a thin wrapper around `requests` with a base URL
-  (`https://api.sleeper.app/v1`), retry-with-backoff on 429/5xx (our call volume is low enough
-  that Sleeper's 1000 req/min ceiling is very unlikely to matter — this is a correctness/
-  robustness measure, not real rate limiting).
-- `storage/parquet_store.py`: `read(table_path) -> polars.DataFrame`, `write(df, table_path)`,
+  needed per assumption §0.6 — keep this file boring on purpose. Plain functions, no config
+  class/singleton — callers that need paths take them as explicit parameters (or call the
+  discovery function directly), per §10.2's "thread parameters through the call stack" rule.
+- `sleeper_client/http.py`: `get_json(url: str, *, get: Callable[[str], requests.Response] =
+  requests.get) -> dict` — a plain function with the request-making callable as an injectable
+  parameter (defaulting to the real `requests.get` for normal use). Tests pass a fake `get` that
+  returns canned fixture data directly — no network, no monkeypatching, no mocking library.
+  Retry-with-backoff on 429/5xx lives here too (our call volume is low enough that Sleeper's
+  1000 req/min ceiling is very unlikely to matter — this is a correctness/robustness measure,
+  not real rate limiting).
+- `storage/parquet_store.py`: `read_table(path) -> polars.DataFrame`, `write_table(df, path)`,
   each table versioned with a `schema_version` column or sidecar so a future schema change
-  doesn't silently corrupt old data — reader should fail loudly on an unexpected schema rather
-  than guess.
-- `wiki_tools/frontmatter.py`: parse/write YAML frontmatter + body for a markdown wiki page;
-  helper to append a dated entry to a page's "News" section (used by both the news-research
-  skill's instructions and — if useful — a small CLI assist, see Phase C).
-- CI: a GitHub Actions workflow (`.github/workflows/ci.yml`) running `ruff check` and
-  `pytest` on push/PR to the working branch. Cheap, keeps the "safe for the LLM to keep editing"
-  property real instead of aspirational.
+  doesn't silently corrupt old data — reader should fail loudly (a clear exception) on an
+  unexpected schema rather than guess.
+- `wiki_tools/frontmatter.py`: parse/write YAML frontmatter + body for a markdown wiki page as
+  plain functions over `@dataclass` types; helper to append a dated entry to a page's "News"
+  section (used by both the news-research skill's instructions and — if useful — a small CLI
+  assist, see Phase C).
+- **CI** (`.github/workflows/ci.yml`), every step a hard gate on push/PR to the working branch:
+  1. `uv sync --locked` (fails if `uv.lock` is stale relative to `pyproject.toml`).
+  2. `ruff check` (default rules, unmodified).
+  3. `ruff format --check` (default settings, unmodified).
+  4. `ty check` (zero errors).
+  5. `pytest --cov=sleeper_agent --cov-report=term-missing --cov-fail-under=100`.
+  6. A small custom script (e.g. `scripts/check_no_magic.py`, plain Python, no new dependency)
+     that greps `cli/src` and `cli/tests` for `unittest.mock`, `monkeypatch`, `setattr(`,
+     `getattr(` (beyond a short allow-list of genuinely safe uses, e.g. `getattr(x, name,
+     default)` on a known-safe object), `exec(`, `eval(` — fails the build if any appear outside
+     a documented exception. Backstops §10.1/§10.2's "no dynamic magic" rule mechanically for the
+     literal cases; doesn't replace `code-review.md` for the subtler ones.
 - `tests/fixtures/`: record a handful of real Sleeper responses (league object, rosters, players
   dictionary excerpt, a draft's picks) and a small nflverse weekly-stats slice, checked in as
-  static fixtures so tests don't hit the network.
+  static JSON/parquet files. Tests load these and pass them into functions via the DI parameters
+  above — never patched into `requests` or any other module at runtime.
+- **Author `.claude/skills/code-review.md` now**, before any real feature code exists, so it's
+  available to review Phase B's code from the start rather than being bolted on later. Content
+  outline: restate the mechanically-uncheckable parts of `PROJECT_PLAN.md` §10.2 (functional
+  style over classes/inheritance, tagged unions + `match`, no dynamic magic, explicit parameter
+  threading) as a concrete review checklist, and instruct that it runs before committing any
+  change touching `cli/` — not just periodically.
 
 **Definition of done:** `uv run sleeper-agent --help` shows an empty-but-structured CLI;
-`uv run pytest` passes (even if trivially, on a smoke test); CI is green on a throwaway PR.
+`uv run pytest --cov-fail-under=100` passes (even if trivially, on a smoke test — coverage of an
+almost-empty codebase is not a meaningful signal yet, but the gate itself must already be wired
+and green); `ruff check`, `ruff format --check`, and `ty check` are all clean; CI is green on a
+throwaway PR; `code-review.md` v1 exists.
 
 ## 3. Phase B — League & stats data
 
@@ -421,7 +463,10 @@ scheduled for after enough decision-log history exists (e.g., first bye week, or
 
 Pull this list out and literally check it off once Phases A–H are done:
 
-- [ ] `uv run pytest` and `ruff check` both pass in CI on the working branch.
+- [ ] All CI gates green on the working branch: `uv sync --locked`, `ruff check`,
+      `ruff format --check`, `ty check`, `pytest --cov-fail-under=100`, and the no-dynamic-magic
+      grep check (`PROJECT_PLAN.md` §10.1).
+- [ ] `code-review.md` exists and has actually been used to review at least one real change.
 - [ ] `sleeper league resolve` correctly finds/falls back for the current season, tested against
       the real "2026 doesn't exist yet" state.
 - [ ] `stats vorp` output has been sanity-checked against known real 2025 results.
