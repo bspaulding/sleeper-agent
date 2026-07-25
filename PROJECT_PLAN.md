@@ -53,11 +53,19 @@ carry real risk (ToS, breakage on any Sleeper internal change, account flags).
 
 ## 3. League context (grounding, not hypothetical)
 
-Pulled directly from Sleeper for league `1180391690551980032` ("Only Gold"):
+Our user is Sleeper user **`yellldarb`** (`user_id: 469022928223072256`), roster_id `5` in the
+league below. All Sleeper reads/writes are scoped to this user's team.
+
+Pulled directly from Sleeper for league `1180391690551980032` ("Only Gold"), the 2025-season
+instance of `yellldarb`'s keeper league:
 
 - **12-team keeper league**, `max_keepers: 2`. League IDs change every season in Sleeper
   (`previous_league_id` chains them together) — **never hardcode a league ID**; resolve the
-  current season's league ID at runtime (see §6.1).
+  current season's league ID at runtime via `/user/<user_id>/leagues/nfl/<season>` (see §6.1).
+  As of 2026-07-25 the 2025 league is `status: complete` and **no 2026 league exists yet** —
+  the commissioner hasn't rolled it over. Resolution logic needs to handle "current season's
+  league doesn't exist yet" as a real, expected state (fall back to the most recent prior
+  season's league until the new one appears), not an error.
 - **`best_ball: 1` is set** — this is *not* Sleeper's standalone draft-only Best Ball format.
   It's a regular league (waivers, trades, keepers, in-season transactions all enabled) where
   Sleeper auto-selects the highest-scoring legal lineup from the roster each week instead of
