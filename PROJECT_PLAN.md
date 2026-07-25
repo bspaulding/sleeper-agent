@@ -171,12 +171,18 @@ tables — it holds reasoning, not raw numbers:
 ```
 wiki/
 ├── players/<sleeper_id>-<slug>.md      # notes, injury history narrative, "how we value him and why"
-├── team/roster-philosophy.md
+├── nfl-teams/<team_code>.md            # NFL team pages: scheme/coaching, depth chart, the DEF unit itself
+├── team/roster-philosophy.md           # our fantasy team's strategy (singular "team" = us)
 ├── team/keeper-strategy.md
 ├── league/opponents/<roster_id>.md     # scouting notes on other GMs' tendencies
 ├── decisions.md                        # index into decisions/, see §7
 └── strategy/best-ball-scoring-notes.md # how auto-lineup-optimization changes value calculus
 ```
+
+Note the naming split: `team/` (singular) is our own fantasy team; `nfl-teams/` (plural, one per
+NFL team code) is real-world team context. `nfl-teams/` doubles as the "player page" for DEF —
+Sleeper rosters defenses by team code (e.g. `BUF`), not by individual player, so a DEF slot's
+notes/news live on its team page rather than a separate player page.
 
 The LLM is expected to read and update these files as part of its normal reasoning loop (this
 is the "living memory" the acceptance criteria calls for), not just the CLI.
@@ -186,7 +192,9 @@ is the "living memory" the acceptance criteria calls for), not just the CLI.
 Building and maintaining a scraper per news source is real ongoing maintenance for a
 low-structure payload (a paragraph of context, not a row of numbers). Instead: the LLM
 researches news itself, live, using WebSearch/WebFetch during its normal skill-driven runs, and
-writes what it finds directly into `wiki/players/*.md`. No `data/news/` table, no scraper code
+writes what it finds directly into the relevant `wiki/players/*.md` and/or `wiki/nfl-teams/*.md`
+pages (e.g. an injury update goes on the player page; a coaching/scheme change goes on the team
+page and is worth a note on that team's key players too). No `data/news/` table, no scraper code
 to maintain, no dedicated CLI command.
 
 The risk this gives up is structure — a scraper pipeline guarantees consistent coverage,
@@ -195,15 +203,19 @@ by a **skill** (`.claude/skills/news-research.md`, see §9), not code, covering 
 
 - which kinds of sources to prioritize (team injury reports, beat reporters, official
   transaction wires) over low-quality aggregators;
-- a consistent filing convention — e.g. append a dated, tagged entry
-  (`YYYY-MM-DD [injury|depth-chart|trade|transaction] ...`) to the relevant
-  `wiki/players/<id>-<slug>.md` rather than writing free-form prose in inconsistent places;
-  frontmatter should record `last_researched: <date>` so a run can tell whether a player's news
-  is stale;
-- a check-before-you-write step — skim the player's existing wiki entry first so repeat runs
-  don't re-research or duplicate what's already recorded;
-- when to bother at all — e.g. always for rostered/targeted players ahead of a lineup-affecting
-  decision, opportunistically for others, rather than trying to cover the whole league every run.
+- a consistent filing convention — append a dated, tagged entry to a "News" section on the
+  relevant page(s), and **always include a link to the source article**, not just a paraphrase:
+  `- YYYY-MM-DD [injury|depth-chart|trade|transaction] <note> ([source](<url>))`. Frontmatter
+  should record `last_researched: <date>` so a run can tell whether a page's news is stale;
+- linking, not duplicating, across pages — if one article is relevant to a player and their
+  team (or multiple players), link it from each relevant page rather than copying the summary
+  around; the article itself is the source of truth, wiki entries are pointers plus a one-line
+  takeaway;
+- a check-before-you-write step — skim the page's existing News section (including already-
+  linked article URLs) first so repeat runs don't re-research or duplicate what's already there;
+- when to bother at all — e.g. always for rostered/targeted players and their teams ahead of a
+  lineup-affecting decision, opportunistically for others, rather than trying to cover the whole
+  league every run.
 
 ## 6. Analysis & CLI capabilities
 
@@ -301,8 +313,8 @@ shows what's needed):
 - `waivers.md` — FAAB bidding strategy (budget pacing across the season, not just per-bid value).
 - `free-agents.md` — add/drop heuristics between waiver periods.
 - `news-research.md` — how to fetch and catalog news/injury/transaction context into the wiki
-  without a scraper (source prioritization, filing/frontmatter convention, staleness checks,
-  when it's worth researching a player at all); see §5.4.
+  without a scraper: source prioritization, the dated/linked filing convention onto player and
+  NFL-team pages, frontmatter staleness checks, and when it's worth researching at all; see §5.4.
 - A meta-loop: periodically (e.g. end of season, or after notably good/bad decisions), the LLM
   is allowed to revise these skill files based on what the decision log shows worked or didn't —
   this is the "skills that update themselves" requirement. Treat skill edits like any other
