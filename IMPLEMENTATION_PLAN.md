@@ -20,12 +20,15 @@ Cheap to correct if wrong — say so and this doc updates.
    late August, week 1 the Thursday after Labor Day) purely to sequence work by dependency, not
    by hard date. **Swap in real dates as soon as the commissioner sets them** — that's what
    actually determines how much slack Phases E/F/G below have.
-2. **Keeper cost rule is unknown and isn't in Sleeper's API.** The league setting only exposes
-   `max_keepers: 2`; *how much a keeper costs* (a lost draft pick? straight keep, no cost?
-   auction value carryover?) is a league house rule Sleeper doesn't model. `draft keepers`
-   (Phase E) can rank keeper candidates by value/VORP without this, but can't compute true
-   cost/benefit until Brad supplies the actual rule text. **Action needed from Brad before Phase
-   E is finished, not before it starts.**
+2. ~~Keeper cost rule is unknown~~ **Resolved.** Confirmed with Brad and verified against the
+   real 2025 draft data: a kept player costs `last_round - 1` (the round they were last drafted
+   or kept at, minus one); if that would drop below round 1 the player isn't keeper-eligible at
+   all; a player can be kept for at most 2 consecutive seasons before returning to the open pool.
+   Also corrected while checking this: the draft itself is a **full 15-round snake draft**, not
+   the 3-round supplemental draft assumed in the first pass of `PROJECT_PLAN.md` — confirmed from
+   the real 2025 draft object (`type: snake`, `rounds: 15`, 180 picks, 17 of them flagged
+   `is_keeper: true` at their computed round). See `PROJECT_PLAN.md` §3 for the full writeup.
+   Phase E below reflects this correction.
 3. **Full automated test coverage**, including fixture-recorded Sleeper/nflverse responses, not
    just tests for pure computation. Rationale: this codebase is explicitly meant to be edited by
    the LLM all season (`PROJECT_PLAN.md` §4); tests are what make that safe to do without a human
@@ -269,29 +272,54 @@ roster composition and surfaces at least one plausible positional need or surplu
 
 ## 6. Phase E — Keepers & draft
 
-Implements `PROJECT_PLAN.md` §6.5, plus `draft.md` skill. **Blocked on Brad supplying the real
-keeper-cost rule (see §0.2) before this phase can be called done**, though the value-ranking
-half doesn't need to wait on that.
+Implements `PROJECT_PLAN.md` §6.5, plus `draft.md` skill. The keeper-cost rule is resolved (see
+§0.2) — this phase is no longer blocked on outside input, just on building the (nontrivial)
+multi-season history walk the cost formula needs.
+
+### Keeper eligibility & cost algorithm
+
+For each player on the roster in question:
+
+1. Find their most recent draft pick record. This requires walking the league's season chain
+   backward via `previous_league_id` (already synced per-season under `data/sleeper/drafts/`)
+   until the player's most recent `draft_id`/`round`/`is_keeper` is found — a player who's been
+   on the roster multiple years may not have been drafted *this* franchise's most recent draft at
+   all if they were kept every year since acquisition, so this needs to walk back far enough to
+   find the actual most recent pick record, not just check last season.
+2. Count consecutive prior seasons where that same player was kept (`is_keeper: true`) for this
+   roster, walking back until either a non-keeper (live) pick is hit or the chain ends.
+3. Apply the rule:
+   - If already kept for **2 consecutive seasons**, not eligible — returns to the open pool.
+   - Else, `cost = last_round - 1`. If `cost < 1`, not eligible.
+   - Else, eligible to keep at `cost`.
+
+This is genuinely the most involved piece of data-plumbing in Phase 1 (multi-season joins across
+what Sleeper treats as entirely separate league objects) and deserves its own well-tested module
+(`sleeper_client/draft.py` gains a `keeper_history(player_id, roster_id, as_of_season)` function)
+rather than being inlined into the `draft keepers` command.
 
 | Command | Behavior |
 |---|---|
-| `draft keepers [--roster-id N \| --me]` | Lists the roster's players ranked by value/VORP as keeper candidates. Cost/benefit modeling is a stub until the real keeper-cost rule is known (§0.2) — ship the ranking now, add cost math as a small follow-up once Brad provides the rule, don't block the whole command on it. |
-| `draft board [--league-id ID] [--rounds N] [--watch]` | On-demand best-available-by-value view: cross-references `data/vorp` + `value rank` against already-drafted/kept players (via the draft's public picks endpoint, no auth needed, same approach as `bspaulding/nfl-vorp`'s `vorp-draft-cli.ts`). `--watch` polls every ~30s and re-renders, and (if run as part of a Routine rather than interactively) writes/updates a running `decisions/.../<date>-draft-live.md` entry each time the board changes meaningfully — this is what makes both draft-day operating modes (interactive or semi-autonomous, see §0.4) work off the same command. |
+| `draft keepers [--roster-id N \| --me]` | For the given roster, lists each player with: keeper-eligible (y/n), cost if eligible, and value/VORP — so the recommendation is "keep these 2 (or fewer) at this cost" ranked by value-per-cost, not just raw value. Ineligible players are shown too (so it's visible *why* a good player isn't a keeper option) but excluded from the ranking. |
+| `draft board [--league-id ID] [--rounds N] [--watch]` | On-demand best-available-by-value view across the full 15-round draft: cross-references `data/vorp` + `value rank` against already-drafted/kept players (via the draft's public picks endpoint, no auth needed, same approach as `bspaulding/nfl-vorp`'s `vorp-draft-cli.ts`), correctly treating pre-filled `is_keeper: true` picks as off the board from the start rather than waiting to see them "picked." `--watch` polls every ~30s and re-renders, and (if run as part of a Routine rather than interactively) writes/updates a running `decisions/.../<date>-draft-live.md` entry each time the board changes meaningfully — this is what makes both draft-day operating modes (interactive or semi-autonomous, see §0.4) work off the same command. |
 
-**Tests:** `draft board` filtering-out-drafted-players logic tested against a fixture draft with
-a partial set of picks made; keeper ranking tested against a fixture roster with known relative
-values.
+**Tests:** `keeper_history` tested against a synthetic multi-season fixture chain covering all
+three outcomes (never kept before, kept 1 consecutive year, kept 2 consecutive years already,
+and a round-1-cost-floor case); `draft board` filtering-out-drafted-and-kept-players logic tested
+against a fixture draft with a partial set of live picks plus pre-filled keeper picks.
 
-**Skill: `.claude/skills/draft.md`** — outline: positional strategy for a 3-round supplemental
-draft on top of a mostly-fixed keeper roster (this is not a full startup draft — most value
-decisions already happened via keepers); how to weigh keeper candidates once cost math exists;
-what "good value" means with only 3 rounds to work with (likely: fill the thinnest starting
-position and/or best-player-available for a bench flier, not deep positional runs).
+**Skill: `.claude/skills/draft.md`** — outline: how to choose which ≤2 keepers to lock in
+(value-per-cost, not just raw value — a cheap round-9 keeper can beat an expensive round-2 one);
+full-roster snake-draft strategy for the ~13 live-drafted spots once keepers are set (this *is*
+close to a full startup draft each year, unlike the smaller supplemental-round assumption from
+the first pass of this plan); how to handle a player who just became keeper-ineligible (2-year
+cap hit) that Brad may still want to redraft normally.
 
 **Definition of done:** `draft board` correctly tracks a real completed draft when pointed at
-the 2025 draft_id as a replay test; keeper ranking runs against yellldarb's real current roster;
-`draft.md` v1 is written; real keeper-cost rule has been obtained from Brad and wired in (or
-this is explicitly and visibly still open going into the actual keeper deadline).
+the 2025 draft_id as a replay test, including correctly excluding all 17 real `is_keeper` picks
+from the "available" list from the start; `keeper_history`/`draft keepers` reproduces the real,
+known 2025 keeper picks (round and eligibility) as a validation check before trusting it for a
+real 2026 decision; `draft.md` v1 is written.
 
 ## 7. Phase F — Waivers & free agents
 
@@ -395,8 +423,8 @@ Pull this list out and literally check it off once Phases A–H are done:
       end-to-end, for real, not just in tests.
 - [ ] All five skills (`draft.md`, `trades.md`, `waivers.md`, `free-agents.md`,
       `news-research.md`) exist in v1 form.
-- [ ] Keeper-cost rule has been obtained from Brad and wired into `draft keepers` (§0.2) — or,
-      failing that, this is a known, visible gap going into the keeper deadline, not a silent one.
+- [ ] `draft keepers` reproduces the real, known 2025 keeper picks (round + eligibility) as a
+      validation check before the keeper-cost algorithm (§6) is trusted for a real 2026 decision.
 - [ ] Weekly stats/VORP Routine and waiver-window Routine are live and have fired successfully
       at least once.
 - [ ] Draft-day Routine is scheduled once the real draft date is known.

@@ -79,8 +79,19 @@ instance of `yellldarb`'s keeper league:
   cycle, weekly waiver day is Tuesday (`waiver_day_of_week: 2`).
 - **Trades**: enabled, trade deadline week 11, 2-day review period, 6 veto votes needed to
   overturn, draft pick trading enabled.
-- **Draft**: only 3 rounds/season (rookie/incoming-pick draft on top of keepers), consistent
-  with a long-running keeper league where most of the roster persists year to year.
+- **Draft**: a full 15-round snake draft every season (confirmed from the actual 2025 draft
+  object: `type: snake`, `rounds: 15`, 180 total picks = 12 teams × 15 rounds — the league
+  setting `draft_rounds: 3` seen in `/league/<id>` does **not** reflect what actually runs and
+  should be ignored/treated as stale). Up to 2 keepers per team are auto-inserted into the draft
+  as picks flagged `is_keeper: true` at a pre-computed round (17 such picks in the 2025 draft);
+  every other roster spot is drafted live in the normal snake order. **Keeper cost rule**
+  (confirmed with Brad, not in Sleeper's API): a kept player costs one round earlier than the
+  round they were last drafted or kept at (`cost = last_round - 1`); if that would go below
+  round 1, the player is **not keeper-eligible** at all (must be drafted normally by whoever
+  wants them, including their current owner); a player can be kept this way for **at most 2
+  consecutive seasons**, after which they lose keeper eligibility and return to the open draft
+  pool. Computing this requires walking the draft history across seasons via `previous_league_id`
+  (see §6.5).
 - **Roster** (15 total): `QB, RB, RB, WR, WR, TE, FLEX, FLEX, DEF, BN×6`. No kicker in the
   starting lineup at all — don't spend analysis effort on kickers.
 - **Scoring**: full PPR (`rec: 1.0`), standard yardage/TD rates (pass 0.04/yd + 4/TD, rush &
@@ -264,8 +275,11 @@ for data models, `pytest` for tests). Proposed command groups:
 
 - Recommendation: adapt `bspaulding/nfl-vorp`'s `vorp-draft-cli.ts` approach (a live draft board
   that polls Sleeper's public draft-picks endpoint — no auth needed — and ranks available
-  players by VORP) into this CLI. Since this league's draft is only 3 rounds on top of keepers,
-  also needs a `draft keepers` view of who's kept vs. who's actually in the pool.
+  players by VORP) into this CLI. It's a full 15-round snake draft (see §3), so the board needs
+  to track a whole roster build, not a short supplemental round.
+- Also needs a `draft keepers` view: compute each rostered player's keeper eligibility and cost
+  per the rule in §3 (`last_round - 1`, ineligible below round 1, max 2 consecutive kept
+  seasons), which requires walking draft history across seasons via `previous_league_id`.
 
 ### 6.6 `waiver` and `freeagent` — in-season roster management
 
@@ -300,14 +314,15 @@ shows what's needed):
 - Waiver-window reminder run (before Tuesday waiver processing) — produce FAAB recommendations.
 - Trade-deadline-aware trade scouting — more frequent as week 11 approaches, per league's actual
   deadline.
-- Draft-day live session for the annual 3-round draft.
+- Draft-day live session for the annual 15-round snake draft.
 
 ## 9. Skills
 
 `.claude/skills/` holds the playbooks that inform judgment calls the CLI can't make by itself:
 
-- `draft.md` — how to value picks vs. keepers, positional strategy for a 3-round supplemental
-  draft in a keeper league.
+- `draft.md` — how to decide which 2 players to keep (and at what cost) vs. let go back into the
+  pool, and full-roster snake-draft strategy for a keeper league where ~2 of 15 spots are
+  pre-filled.
 - `trades.md` — when to propose, how to evaluate incoming offers, how much to weight VORP vs.
   team-building narrative/roster fit.
 - `waivers.md` — FAAB bidding strategy (budget pacing across the season, not just per-bid value).
