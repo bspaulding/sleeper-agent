@@ -19,7 +19,13 @@ def build_parser() -> argparse.ArgumentParser:
         prog="sleeper-agent",
         description="LLM-driven Sleeper fantasy football team management CLI.",
     )
-    parser.add_subparsers(dest="command")
+    subparsers = parser.add_subparsers(dest="command")
+
+    from sleeper_agent.commands import sleeper_cmd, stats_cmd
+
+    sleeper_cmd.add_subcommands(subparsers)
+    stats_cmd.add_subcommands(subparsers)
+
     return parser
 
 
@@ -30,9 +36,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if handler is None:
         parser.print_help()
         return 0
-    return handler(
-        args
-    )  # pragma: no cover - unreachable until a command group registers a handler
+    return handler(args)
 
 
 def run() -> None:  # pragma: no cover - thin entrypoint wrapper
