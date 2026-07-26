@@ -17,6 +17,7 @@ from sleeper_agent.commands import (
     freeagent_cmd,
     sleeper_cmd,
     stats_cmd,
+    trade_cmd,
     value_cmd,
     waiver_cmd,
     wiki_cmd,
@@ -1410,3 +1411,231 @@ def test_cmd_freeagent_recommend_raises_clear_error_when_vorp_not_computed(
 
     with pytest.raises(freeagent_cmd.VorpNotComputedError):
         freeagent_cmd.cmd_freeagent_recommend(args, repo_root=repo_root)
+
+
+# --- trade ---------------------------------------------------------------
+
+
+def _write_trade_fixtures(repo_root: Path) -> None:
+    from sleeper_agent.models.sleeper import Roster
+    from sleeper_agent.storage.parquet_store import write_table
+
+    sleeper_dir = repo_root / "data" / "sleeper"
+    rosters = [
+        Roster(
+            roster_id=5,
+            owner_id="u1",
+            league_id="lid",
+            player_ids=("1",),
+            starter_ids=(),
+            wins=0,
+            losses=0,
+            ties=0,
+            points_for=0.0,
+            waiver_budget_used=0,
+        ),
+        Roster(
+            roster_id=6,
+            owner_id="u2",
+            league_id="lid",
+            player_ids=("2",),
+            starter_ids=(),
+            wins=0,
+            losses=0,
+            ties=0,
+            points_for=0.0,
+            waiver_budget_used=0,
+        ),
+        Roster(
+            roster_id=7,
+            owner_id="u3",
+            league_id="lid",
+            player_ids=("3",),
+            starter_ids=(),
+            wins=0,
+            losses=0,
+            ties=0,
+            points_for=0.0,
+            waiver_budget_used=0,
+        ),
+    ]
+    write_table(
+        sleeper_sync.rosters_to_dataframe(rosters),
+        sleeper_dir / "rosters" / "2025.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2", "3"],
+            "name": ["Our RB", "Their WR", "Other TE"],
+            "position": ["RB", "WR", "TE"],
+            "games_played": [10, 10, 10],
+            "season_points": [100.0, 105.0, 5.0],
+            "points_per_game": [10.0, 10.5, 0.5],
+            "replacement_points": [50.0, 50.0, 5.0],
+            "vorp_season": [50.0, 51.0, -20.0],
+            "vorp_per_game": [5.0, 5.1, -2.0],
+        }
+    )
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2024.parquet", schema_version=1)
+
+
+def test_cmd_trade_evaluate_prints_value_delta(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_trade_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        give="1", get="2", season="2025", value_season="2024", json=False
+    )
+    exit_code = trade_cmd.cmd_trade_evaluate(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "give value: 50.0" in out
+    assert "get value:  51.0" in out
+    assert "value delta (get - give): +1.0" in out
+
+
+def test_cmd_trade_evaluate_json_output(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_trade_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        give="1", get="2", season="2025", value_season="2024", json=True
+    )
+    exit_code = trade_cmd.cmd_trade_evaluate(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(out)
+    assert parsed["value_delta"] == 1.0
+
+
+def test_cmd_trade_evaluate_raises_clear_error_when_vorp_not_computed(
+    tmp_path: Path,
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    args = argparse.Namespace(
+        give="1", get="2", season="2099", value_season=None, json=False
+    )
+
+    with pytest.raises(trade_cmd.VorpNotComputedError):
+        trade_cmd.cmd_trade_evaluate(args, repo_root=repo_root)
+
+
+def test_cmd_trade_propose_against_one_target(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_trade_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season="2024",
+        roster_id=None,
+        me=True,
+        target_roster_id=6,
+        all=False,
+        top=5,
+    )
+    exit_code = trade_cmd.cmd_trade_propose(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "vs roster_id=6" in out
+    assert "Our RB" in out
+    assert "Their WR" in out
+
+
+def test_cmd_trade_propose_all_scans_every_other_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_trade_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season="2024",
+        roster_id=None,
+        me=True,
+        target_roster_id=None,
+        all=True,
+        top=5,
+    )
+    exit_code = trade_cmd.cmd_trade_propose(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "vs roster_id=6" in out
+    assert (
+        "vs roster_id=7" not in out
+    )  # roster 7's only player (TE, -20 vorp) is outside tolerance
+
+
+def test_cmd_trade_propose_reports_missing_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_trade_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season="2024",
+        roster_id=999,
+        me=False,
+        target_roster_id=6,
+        all=False,
+        top=5,
+    )
+    exit_code = trade_cmd.cmd_trade_propose(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no roster found" in capsys.readouterr().out
+
+
+def test_cmd_trade_propose_reports_missing_target_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_trade_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season="2024",
+        roster_id=None,
+        me=True,
+        target_roster_id=999,
+        all=False,
+        top=5,
+    )
+    exit_code = trade_cmd.cmd_trade_propose(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no roster found" in capsys.readouterr().out
+
+
+def test_cmd_trade_propose_reports_no_candidates_found(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_trade_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season="2024",
+        roster_id=None,
+        me=True,
+        target_roster_id=7,
+        all=False,
+        top=5,
+    )
+    exit_code = trade_cmd.cmd_trade_propose(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "no candidate trades found" in out

@@ -27,6 +27,7 @@ def build_parser() -> argparse.ArgumentParser:
         freeagent_cmd,
         sleeper_cmd,
         stats_cmd,
+        trade_cmd,
         value_cmd,
         waiver_cmd,
         wiki_cmd,
@@ -40,6 +41,7 @@ def build_parser() -> argparse.ArgumentParser:
     draft_cmd.add_subcommands(subparsers)
     waiver_cmd.add_subcommands(subparsers)
     freeagent_cmd.add_subcommands(subparsers)
+    trade_cmd.add_subcommands(subparsers)
 
     return parser
 
