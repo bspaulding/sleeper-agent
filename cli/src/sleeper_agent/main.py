@@ -21,12 +21,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command")
 
-    from sleeper_agent.commands import decisions_cmd, sleeper_cmd, stats_cmd, wiki_cmd
+    from sleeper_agent.commands import (
+        decisions_cmd,
+        sleeper_cmd,
+        stats_cmd,
+        value_cmd,
+        wiki_cmd,
+    )
 
     sleeper_cmd.add_subcommands(subparsers)
     stats_cmd.add_subcommands(subparsers)
     wiki_cmd.add_subcommands(subparsers)
     decisions_cmd.add_subcommands(subparsers)
+    value_cmd.add_subcommands(subparsers)
 
     return parser
 

@@ -7,9 +7,16 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import polars as pl
 import pytest
 
-from sleeper_agent.commands import decisions_cmd, sleeper_cmd, stats_cmd, wiki_cmd
+from sleeper_agent.commands import (
+    decisions_cmd,
+    sleeper_cmd,
+    stats_cmd,
+    value_cmd,
+    wiki_cmd,
+)
 from sleeper_agent.main import main
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.storage.parquet_store import read_table
@@ -608,3 +615,228 @@ def test_cmd_decisions_new_and_index(
     assert exit_code == 0
     assert "wrote" in capsys.readouterr().out
     assert (repo_root / "wiki" / "decisions.md").exists()
+
+
+# --- value ---------------------------------------------------------------
+
+
+def _write_value_fixtures(repo_root: Path, season: str) -> None:
+    from sleeper_agent.models.sleeper import Roster
+    from sleeper_agent.storage.parquet_store import write_table
+
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["101", "102"],
+            "name": ["Runner A", "Runner B"],
+            "position": ["RB", "RB"],
+            "games_played": [2, 2],
+            "season_points": [32.0, 10.0],
+            "points_per_game": [16.0, 5.0],
+            "replacement_points": [10.0, 10.0],
+            "vorp_season": [22.0, 0.0],
+            "vorp_per_game": [11.0, 0.0],
+        }
+    )
+    write_table(
+        vorp_df, repo_root / "data" / "vorp" / f"{season}.parquet", schema_version=1
+    )
+
+    stats_dir = repo_root / "data" / "stats"
+    ids_df = pl.DataFrame({"sleeper_id": [101.0, 102.0], "gsis_id": ["00-A", "00-B"]})
+    write_table(ids_df, stats_dir / "ids.parquet", schema_version=1)
+
+    weekly_df = pl.DataFrame(
+        {
+            "player_id": ["00-A", "00-A"],
+            "week": [1, 2],
+            "carries": [10.0, 12.0],
+        }
+    )
+    write_table(weekly_df, stats_dir / "weekly" / f"{season}.parquet", schema_version=1)
+
+    injuries_df = pl.DataFrame(
+        {
+            "gsis_id": ["00-A"],
+            "week": [2],
+            "report_status": ["Questionable"],
+            "report_primary_injury": ["Ankle"],
+        }
+    )
+    write_table(
+        injuries_df, stats_dir / "injuries" / f"{season}.parquet", schema_version=1
+    )
+
+    wiki_players_dir = repo_root / "wiki" / "players"
+    wiki_players_dir.mkdir(parents=True)
+    (wiki_players_dir / "101-runner-a.md").write_text(
+        "---\n\n---\n## News\n\n- runner A update\n"
+    )
+
+    roster = Roster(
+        roster_id=5,
+        owner_id="u1",
+        league_id="lid",
+        player_ids=("101", "102", "BUF"),
+        starter_ids=(),
+        wins=0,
+        losses=0,
+        ties=0,
+        points_for=0.0,
+        waiver_budget_used=0,
+    )
+    write_table(
+        sleeper_sync.rosters_to_dataframe([roster]),
+        repo_root / "data" / "sleeper" / "rosters" / f"{season}.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+
+def test_cmd_value_player_prints_full_valuation(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(sleeper_id="101", season="2025")
+    exit_code = value_cmd.cmd_value_player(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runner A (RB)" in out
+    assert "VORP: season=22.0" in out
+    assert "Trend (carries)" in out
+    assert "Injury: Questionable (Ankle) as of week 2" in out
+    assert "runner A update" in out
+
+
+def test_cmd_value_player_reports_missing_player(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(sleeper_id="999", season="2025")
+    exit_code = value_cmd.cmd_value_player(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no VORP data" in capsys.readouterr().out
+
+
+def test_cmd_value_player_handles_player_with_no_injury_or_news(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(sleeper_id="102", season="2025")
+    exit_code = value_cmd.cmd_value_player(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Injury: none on record" in out
+    assert "Recent news: none filed" in out
+    assert "Trend: not available" in out
+
+
+def test_cmd_value_rank_filters_by_position_and_limits_top_n(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(season="2025", position="RB", top=1)
+    exit_code = value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runner A" in out
+    assert "Runner B" not in out
+
+
+def test_cmd_value_rank_without_position_filter_includes_all_positions(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(season="2025", position=None, top=20)
+    exit_code = value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runner A" in out
+    assert "Runner B" in out
+
+
+def test_cmd_value_roster_prints_positional_breakdown(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(season="2025", roster_id=None, me=True)
+    exit_code = value_cmd.cmd_value_roster(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "roster_id=5" in out
+    assert "RB  n=2 total_vorp=" in out
+    assert "no VORP data for: BUF" in out
+
+
+def test_cmd_value_roster_omits_unranked_note_when_fully_covered(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.models.sleeper import Roster
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+    # Overwrite the roster fixture so every player_id is one with VORP data.
+    roster = Roster(
+        roster_id=5,
+        owner_id="u1",
+        league_id="lid",
+        player_ids=("101", "102"),
+        starter_ids=(),
+        wins=0,
+        losses=0,
+        ties=0,
+        points_for=0.0,
+        waiver_budget_used=0,
+    )
+    write_table(
+        sleeper_sync.rosters_to_dataframe([roster]),
+        repo_root / "data" / "sleeper" / "rosters" / "2025.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season="2025", roster_id=None, me=True)
+    exit_code = value_cmd.cmd_value_roster(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "no VORP data for" not in out
+
+
+def test_cmd_value_roster_reports_missing_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(season="2025", roster_id=999, me=False)
+    exit_code = value_cmd.cmd_value_roster(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no roster found" in capsys.readouterr().out
+
+
+def test_cmd_value_rank_raises_clear_error_when_vorp_not_computed(
+    tmp_path: Path,
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    args = argparse.Namespace(season="2099", position=None, top=20)
+
+    with pytest.raises(value_cmd.VorpNotComputedError):
+        value_cmd.cmd_value_rank(args, repo_root=repo_root)
