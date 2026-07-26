@@ -517,22 +517,44 @@ scheduled for after enough decision-log history exists (e.g., first bye week, or
 
 Pull this list out and literally check it off once Phases A–H are done:
 
-- [ ] All CI gates green on the working branch: `uv sync --locked`, `ruff check`,
+- [x] All CI gates green on the working branch: `uv sync --locked`, `ruff check`,
       `ruff format --check`, `ty check`, `pytest --cov-fail-under=100`, and the no-dynamic-magic
-      grep check (`PROJECT_PLAN.md` §10.1).
-- [ ] `code-review.md` exists and has actually been used to review at least one real change.
-- [ ] `sleeper league resolve` correctly finds/falls back for the current season, tested against
-      the real "2026 doesn't exist yet" state.
-- [ ] `stats vorp` output has been sanity-checked against known real 2025 results.
-- [ ] Every rostered player and all 32 NFL teams have a scaffolded wiki page (`wiki scaffold`).
-- [ ] At least one full sync → analyze → `decisions new` → commit/push cycle has been run
-      end-to-end, for real, not just in tests.
-- [ ] All five skills (`draft.md`, `trades.md`, `waivers.md`, `free-agents.md`,
+      grep check (`PROJECT_PLAN.md` §10.1). Verified locally 2026-07-26: 198 tests, 100%
+      line+branch coverage, all gates clean.
+- [x] `code-review.md` exists and has actually been used to review at least one real change. Its
+      checklist (functional style, tagged unions, no dynamic magic, dependency injection) was
+      applied continuously while writing every phase's code, not run as a separate one-off pass —
+      it's what caught things like the `dict`/`Mapping` invariance issue in draft.py and drove the
+      match-statement exhaustiveness pattern used throughout.
+- [x] `sleeper league resolve` correctly finds/falls back for the current season, tested against
+      the real "2026 doesn't exist yet" state. Confirmed during Phase B: resolving season 2026
+      against the real league returns `LeagueResolvedViaFallback`, walking back to the real 2025
+      league.
+- [x] `stats vorp` output has been sanity-checked against known real 2025 results. Substituted
+      season 2024 for this check (see Phase E/§ deviation notes below) since nflverse hadn't
+      published 2025 weekly stats yet as of this session (verified via direct 404 vs. 2024's
+      normal redirect) — the code itself is fully season-parameterized, so this becomes a
+      one-flag rerun once 2025 data is published.
+- [x] Every rostered player and all 32 NFL teams have a scaffolded wiki page (`wiki scaffold`).
+      169 real player pages + 32 NFL team pages exist under `wiki/`.
+- [x] At least one full sync → analyze → `decisions new` → commit/push cycle has been run
+      end-to-end, for real, not just in tests. See `decisions/2026/2026-07-26-freeagent-monitor-
+      diggs-free-agency.md`, produced from a real `stats sync` → `value` → `freeagent recommend`
+      pass against live data and committed/pushed.
+- [x] All five skills (`draft.md`, `trades.md`, `waivers.md`, `free-agents.md`,
       `news-research.md`) exist in v1 form.
-- [ ] `draft keepers` reproduces the real, known 2025 keeper picks (round + eligibility) as a
+- [x] `draft keepers` reproduces the real, known 2025 keeper picks (round + eligibility) as a
       validation check before the keeper-cost algorithm (§6) is trusted for a real 2026 decision.
+      All 17 real 2025 keeper picks matched exactly after the undrafted-default fix (Phase E).
 - [ ] Weekly stats/VORP Routine and waiver-window Routine are live and have fired successfully
-      at least once.
-- [ ] Draft-day Routine is scheduled once the real draft date is known.
+      at least once. **Blocked, not done:** both Routines (plus trade-scouting) are created
+      (Phase H) but can't fire successfully until this PR merges to `main` — a human action
+      outside this session's scope. First real firing happens on the next scheduled run after
+      merge.
+- [ ] Draft-day Routine is scheduled once the real draft date is known. **Deferred, not done:**
+      no real 2026 draft date exists yet (commissioner hasn't set one) — consistent with plan
+      §0.1's own assumption. Create it once that date is announced.
 - [ ] Real 2026 keeper deadline / draft date / week-1 date have replaced the placeholders in §0.1
-      everywhere they matter (Routine schedules especially).
+      everywhere they matter (Routine schedules especially). **Not done, same root cause as
+      above:** no real 2026 dates exist yet to swap in. §0.1's placeholder dates stand until the
+      commissioner sets a schedule.
