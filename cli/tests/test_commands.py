@@ -14,9 +14,11 @@ import pytest
 from sleeper_agent.commands import (
     decisions_cmd,
     draft_cmd,
+    freeagent_cmd,
     sleeper_cmd,
     stats_cmd,
     value_cmd,
+    waiver_cmd,
     wiki_cmd,
 )
 from sleeper_agent.main import main
@@ -1144,3 +1146,267 @@ def test_cmd_draft_board_watch_writes_decision_log(
     assert exit_code == 0
     log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
     assert log_path.exists()
+
+
+# --- waiver / freeagent ------------------------------------------------
+
+
+def _write_waiver_freeagent_fixtures(repo_root: Path) -> None:
+    from sleeper_agent.models.sleeper import League, LeagueSettings, Roster
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    sleeper_dir = repo_root / "data" / "sleeper"
+
+    rosters = [
+        Roster(
+            roster_id=5,
+            owner_id="u1",
+            league_id="lid",
+            player_ids=("1",),
+            starter_ids=(),
+            wins=0,
+            losses=0,
+            ties=0,
+            points_for=0.0,
+            waiver_budget_used=30,
+        ),
+        Roster(
+            roster_id=6,
+            owner_id="u2",
+            league_id="lid",
+            player_ids=("2",),
+            starter_ids=(),
+            wins=0,
+            losses=0,
+            ties=0,
+            points_for=0.0,
+            waiver_budget_used=0,
+        ),
+    ]
+    write_table(
+        sleeper_sync.rosters_to_dataframe(rosters),
+        sleeper_dir / "rosters" / "2025.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+    league = League(
+        league_id="lid",
+        name="Test League",
+        season="2025",
+        status="in_season",
+        previous_league_id=None,
+        draft_id="did",
+        scoring_settings={},
+        roster_positions=("QB", "RB", "WR", "TE", "FLEX", "DEF"),
+        settings=LeagueSettings(
+            waiver_budget=100,
+            trade_deadline=11,
+            max_keepers=2,
+            playoff_week_start=14,
+            num_teams=12,
+            waiver_type=2,
+            best_ball=True,
+        ),
+    )
+    write_table(
+        sleeper_sync.league_to_dataframe(league),
+        sleeper_dir / "league" / "2025.parquet",
+        schema_version=sleeper_sync.LEAGUE_SCHEMA_VERSION,
+    )
+
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2", "3"],
+            "name": ["Weak RB", "Good WR", "Free RB"],
+            "position": ["RB", "WR", "RB"],
+            "games_played": [10, 10, 10],
+            "season_points": [10.0, 100.0, 40.0],
+            "points_per_game": [1.0, 10.0, 4.0],
+            "replacement_points": [20.0, 50.0, 20.0],
+            "vorp_season": [-10.0, 50.0, 20.0],
+            "vorp_per_game": [-1.0, 5.0, 2.0],
+        }
+    )
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2024.parquet", schema_version=1)
+
+    players_df = pl.DataFrame(
+        {
+            "player_id": ["1", "2", "3"],
+            "name": ["Weak RB", "Good WR", "Free RB"],
+            "position": ["RB", "WR", "RB"],
+            "team": ["BUF", "KC", "MIA"],
+            "status": ["Active", "Active", "Active"],
+            "injury_status": ["", "", ""],
+            "fantasy_positions": [["RB"], ["WR"], ["RB"]],
+            "years_exp": [1, 2, 3],
+        }
+    )
+    write_table(
+        players_df,
+        sleeper_dir / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+
+def test_cmd_waiver_recommend_prints_ranked_targets(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        assert "trending/add" in request.path
+        return json_response([{"player_id": "3", "count": 40}])
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season=None,
+        roster_id=None,
+        me=True,
+        budget_remaining=None,
+        weeks_remaining=10,
+        hours=24,
+        top=10,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = waiver_cmd.cmd_waiver_recommend(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "FAAB budget remaining: 70" in out  # 100 - 30
+    assert "Free RB" in out
+
+
+def test_cmd_waiver_recommend_reports_missing_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        raise AssertionError("should not fetch trending when roster is missing")
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season=None,
+        roster_id=999,
+        me=False,
+        budget_remaining=None,
+        weeks_remaining=10,
+        hours=24,
+        top=10,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = waiver_cmd.cmd_waiver_recommend(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    assert exit_code == 1
+    assert "no roster found" in capsys.readouterr().out
+
+
+def test_cmd_waiver_recommend_uses_explicit_budget_override(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        return json_response([])
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season="2024",
+        roster_id=None,
+        me=True,
+        budget_remaining=42,
+        weeks_remaining=10,
+        hours=24,
+        top=10,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = waiver_cmd.cmd_waiver_recommend(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "FAAB budget remaining: 42" in out
+
+
+def test_cmd_waiver_recommend_works_without_value_season_vorp_data(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        return json_response([{"player_id": "3", "count": 40}])
+
+    args = argparse.Namespace(
+        season="2025",
+        value_season="2099",
+        roster_id=None,
+        me=True,
+        budget_remaining=None,
+        weeks_remaining=10,
+        hours=24,
+        top=10,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = waiver_cmd.cmd_waiver_recommend(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "vorp=   n/a" in out
+
+
+def test_cmd_freeagent_recommend_prints_upgrades(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025", value_season="2024", roster_id=None, me=True, top=10
+    )
+    exit_code = freeagent_cmd.cmd_freeagent_recommend(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Free RB" in out
+    assert "Weak RB" in out
+
+
+def test_cmd_freeagent_recommend_reports_missing_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025", value_season="2024", roster_id=999, me=False, top=10
+    )
+    exit_code = freeagent_cmd.cmd_freeagent_recommend(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no roster found" in capsys.readouterr().out
+
+
+def test_cmd_freeagent_recommend_raises_clear_error_when_vorp_not_computed(
+    tmp_path: Path,
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2025", value_season="2099", roster_id=None, me=True, top=10
+    )
+
+    with pytest.raises(freeagent_cmd.VorpNotComputedError):
+        freeagent_cmd.cmd_freeagent_recommend(args, repo_root=repo_root)
