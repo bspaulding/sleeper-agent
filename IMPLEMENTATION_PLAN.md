@@ -467,6 +467,35 @@ created and have fired at least once successfully before week 1; the trade-scout
 created (can start at low frequency, doesn't need to have fired yet); the draft-day Routine is
 scheduled once the real draft date is known.
 
+**Status (2026-07-26) — deviation note:** All three cadence Routines were created via
+`create_trigger` with `create_new_session_on_fire=true`, each with a self-contained prompt that
+pulls `main`, no-ops gracefully if the CLI isn't merged yet, and runs the relevant command
+sequence:
+
+1. `sleeper-agent: weekly stats/VORP sync` — Tuesdays 13:00 UTC — `stats sync` → `stats vorp` →
+   `wiki stale` → light opportunistic news pass.
+2. `sleeper-agent: waiver window reminder` — Mondays 13:00 UTC — `waiver recommend` →
+   judgment-gated `decisions new --kind waiver`.
+3. `sleeper-agent: trade scouting` — Wednesdays 13:00 UTC — `trade propose --all` →
+   judgment-gated `decisions new --kind trade`; starts at weekly/low frequency per the plan,
+   with the prompt itself instructing the fired session to ramp urgency as the real
+   `trade_deadline` week approaches rather than hardcoding a second higher-frequency schedule.
+
+Deviation from the DoD as written: **none of the three have fired successfully yet**, and can't
+until this branch's work is merged to `main` — `create_new_session_on_fire=true` sessions check
+out `main` fresh on each firing, which doesn't yet contain any of this implementation (it's all
+on `claude/implementation-plan-execution-r9vrb1`, unmerged). Each Routine's prompt defensively
+checks for the CLI's presence and no-ops with a clear message if it's missing, so firing before
+merge is safe (no crash, no bad state) but not a genuine successful run. This DoD item is
+explicitly a follow-up blocked on a human merging the PR this session opens — outside this
+session's authorized scope (only "open a PR," never merge). Once merged, the next scheduled
+firing of each Routine (or a manual `fire_trigger` for immediate verification) will be the real
+first successful run.
+
+The draft-day one-shot Routine remains **deferred** as the plan's own §0.1 anticipates — no real
+2026 draft date has been announced by the commissioner yet. Create it (via `create_trigger` with
+`run_once_at` set to the draft window) once that date is known.
+
 ## 10. Phase I — Skill self-revision (groundwork only)
 
 Per `PROJECT_PLAN.md` §9's meta-loop. This phase's deliverable before the season is **process,
