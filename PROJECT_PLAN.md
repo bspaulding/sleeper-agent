@@ -366,10 +366,14 @@ what's mechanically enforced (§10.1, CI fails the build) and what needs judgmen
   what we get. CI fails on any violation.
 - **Formatting: `ruff format --check`, default settings, unmodified.** CI fails if any file
   isn't already formatted — formatting is never a manual step or a matter of taste here.
-- **Coverage: `pytest` + `pytest-cov`, 100% line coverage, enforced in CI**
-  (`--cov-fail-under=100`). This is a hard gate, not a target. `# pragma: no cover` is reserved
-  for the rare case of genuinely unreachable code (e.g. a `match` arm the type system proves
-  exhaustive but Python can't express without one) — never used to skip testing real logic.
+- **Coverage: `pytest` + `pytest-cov`, 100% coverage enforced in CI** — lines, branches, and
+  functions (`[tool.coverage.run] branch = true` in `pyproject.toml`, `--cov-fail-under=100`).
+  This is a hard gate, not a target. There are legitimate cases that can't or shouldn't be
+  covered by the automated suite (a third-party call with no test seam, like the `nfl_data_py`
+  line in §10.4's closing note; a `match` arm the type system proves exhaustive but Python can't
+  express without one; a CLI entrypoint's `if __name__ == "__main__":` guard) — those are handled
+  with a specific `# pragma: no cover` **at that exact call site**, never at file/module scope,
+  and never as a way to skip testing logic that could reasonably be tested.
 - **No monkeypatching/dynamic magic — backstopped by a CI grep-check, not just policy.** A
   small CI step scans `cli/` for `unittest.mock`, `monkeypatch`, `setattr(`, `getattr(` (beyond
   trivial safe uses), `exec(`, and `eval(`, and fails the build if any appear outside an
@@ -393,25 +397,34 @@ keeps them real instead of aspirational.
   immutable-by-default fits this style) is the standard way to define a data shape, and that's
   an explicit exception to "avoid classes" — `@dataclass` and `Enum` are the two class forms this
   project uses on purpose, everywhere else defaults to a plain function.
-- **Avoid decorators — including in the CLI framework and data-validation choice.** This ruled
-  out two defaults from an earlier pass of this plan: `typer` (decorator-registered commands,
-  signature introspection to build the CLI) and `pydantic` (decorator/metaclass-driven
-  validation). Replaced with:
-  - **CLI framework: stdlib `argparse`.** More boilerplate than `typer`, explicit rather than
-    inferred from function signatures — that's the point.
+- **Avoid decorators — including in the CLI framework, data-validation choice, and tests.**
+  **The only two decorators this project uses are `@dataclass` and `@contextmanager`** (stdlib
+  `contextlib` — turns a generator into a context manager without a hand-written class; see
+  §10.4's `mock_http_server` for the canonical example). Everything else, including two defaults
+  from an earlier pass of this plan, was ruled out and replaced:
+  - **CLI framework: stdlib `argparse`, not `typer`.** `typer` registers commands via decorators
+    and infers the CLI from function-signature introspection; `argparse` is more boilerplate but
+    fully explicit.
   - **Data models: stdlib `dataclasses` for domain types, `TypedDict` for raw external JSON
-    shapes, and a hand-written `parse_*` function per external shape that converts one to the
-    other.** This is where "validate at the boundary" still happens (Sleeper/nflverse responses
-    are the untrusted input) — it just happens as ordinary, readable, testable Python instead of
-    a validation library's runtime magic. It's more code than a `pydantic.BaseModel` would need;
-    that's the accepted tradeoff (see "thread parameters..." below).
+    shapes, and a hand-written `parse_*` function per external shape, not `pydantic`.** This is
+    where "validate at the boundary" still happens (Sleeper/nflverse responses are the untrusted
+    input) — it just happens as ordinary, readable, testable Python instead of a decorator/
+    metaclass-driven validation library. More code than a `pydantic.BaseModel` would need; that's
+    the accepted tradeoff (see "thread parameters..." below).
+  - **Tests: plain `pytest` functions, no `@pytest.fixture`, no `@pytest.mark.parametrize`.**
+    Shared setup is a plain helper function called explicitly at the top of each test (e.g.
+    `make_league(**overrides) -> League`, called as `league = make_league(num_teams=10)`), not a
+    fixture pytest injects by matching an argument name — that name-matching *is* the kind of
+    dynamic magic this project avoids, not an exception to it. Repeated-case testing is a loop
+    over cases inside one test function (calling a shared plain assertion-helper), or multiple
+    explicitly-named `test_*` functions — not a `parametrize` decorator generating cases. (Note:
+    "fixture" elsewhere in these docs — `tests/fixtures/`, "a fixture DataFrame" — means a static
+    recorded test-data file/value, an unrelated, unproblematic use of the word; it's specifically
+    pytest's `@fixture` *mechanism* that's avoided.)
   - Standard-library classes used *as libraries* (`argparse.ArgumentParser`, `polars.DataFrame`,
-    `pathlib.Path`) are fine to use — the constraint is on classes/inheritance/decorators we
-    write ourselves, not on every class-shaped thing in the stdlib.
-  - Pragmatic exception: `pytest` fixtures/parametrize decorators are the standard, expected way
-    to write tests in this ecosystem and there's no good decorator-free alternative that isn't a
-    worse fit (`unittest`'s class+inheritance style would be a worse violation of these same
-    principles) — this is a deliberate, narrow carve-out, not a loophole.
+    `pathlib.Path`, and — per §10.4 — `http.server.BaseHTTPRequestHandler`/`HTTPServer`,
+    `threading.Thread`) are fine to use — the constraint is on classes/inheritance/decorators we
+    write ourselves, not on every class-shaped thing in the stdlib or a library we depend on.
 - **Composition over inheritance.** No base classes, no mixins, no ABCs. If two things share
   behavior, extract a function both call, not a shared superclass.
 - **Make impossible states impossible.** Prefer `Enum` and tagged unions (a `Union`/`|` of
@@ -454,8 +467,10 @@ keeps them real instead of aspirational.
 - CLI framework: `argparse` (stdlib)
 - Data models: `dataclasses` + `TypedDict` + hand-written boundary parsers (no `pydantic`)
 - Tabular data: `polars` + Parquet
-- Testing: `pytest` + `pytest-cov` (100% enforced), a local mock HTTP server for external-API
-  tests (§10.4) — no mocking libraries, no faked-out request functions
+- Testing: `pytest` + `pytest-cov` (100% line+branch, enforced), plain `test_*` functions with
+  no `@pytest.fixture`/`@pytest.mark.parametrize` (plain helper functions instead), a local mock
+  HTTP server for external-API tests (§10.4) — no mocking libraries, no faked-out request
+  functions
 - Type checking: `ty`
 - Linting: `ruff check` (default rules)
 - Formatting: `ruff format` (default settings)
@@ -566,8 +581,8 @@ Notes on why this is still consistent with §10.2 despite using classes and a de
   function-shaped one.
 - `@contextmanager` (stdlib `contextlib`) turns a generator function into a context manager
   without writing a class with `__enter__`/`__exit__` — it's the *more* functional-style option
-  here, not a violation, and is an explicit exception alongside `@dataclass` and `pytest`'s
-  decorators (§10.2).
+  here, not a violation, and is one of the two decorators this project uses on purpose (§10.2,
+  alongside `@dataclass`).
 
 Usage from a `sleeper_client` test:
 

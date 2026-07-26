@@ -49,13 +49,18 @@ Cheap to correct if wrong — say so and this doc updates.
    will be the first time credential handling is a real concern.
 7. **Code quality standards adopted wholesale, not an assumption:** `uv`, `ty` (type checking),
    `ruff check` + `ruff format --check` (both default rule sets, unmodified) all enforced in CI;
-   100% test coverage enforced in CI; functional style (plain functions + `@dataclass`/`Enum`,
-   no other custom classes, no inheritance); tagged unions + `match` for state modeling instead
-   of optional-field bags; no decorators beyond `@dataclass` and `pytest`'s; no monkeypatching or
-   other dynamic magic anywhere, dependency injection instead. Full detail in `PROJECT_PLAN.md`
-   §10. This changed two defaults from the first pass of this plan: `typer` → stdlib `argparse`
-   (decorator/introspection-based CLI registration is exactly the magic being avoided), and
-   `pydantic` → `dataclasses` + `TypedDict` + hand-written boundary parsers (same reasoning).
+   100% test coverage (lines + branches) enforced in CI, narrow `# pragma: no cover` at specific
+   call sites for the legitimate can't/shouldn't-cover cases; functional style (plain functions +
+   `@dataclass`/`Enum`, no other custom classes, no inheritance); tagged unions + `match` for
+   state modeling instead of optional-field bags; **the only two decorators used anywhere in this
+   codebase are `@dataclass` and `@contextmanager`** — notably no `@pytest.fixture`/
+   `@pytest.mark.parametrize`, tests are plain functions with plain helper functions for shared
+   setup; no monkeypatching or other dynamic magic anywhere — a real local mock HTTP server
+   (§10.4) instead of a faked-out transport for HTTP tests, dependency injection (explicit
+   parameters) elsewhere. Full detail in `PROJECT_PLAN.md` §10. This changed two defaults from
+   the first pass of this plan: `typer` → stdlib `argparse` (decorator/introspection-based CLI
+   registration is exactly the magic being avoided), and `pydantic` → `dataclasses` + `TypedDict`
+   + hand-written boundary parsers (same reasoning).
    Every phase below (repo layout, command tables, module names) has been updated to match —
    noting it here once instead of re-deriving the rationale in each phase.
 
@@ -178,7 +183,10 @@ every later phase depends on.
   2. `ruff check` (default rules, unmodified).
   3. `ruff format --check` (default settings, unmodified).
   4. `ty check` (zero errors).
-  5. `pytest --cov=sleeper_agent --cov-report=term-missing --cov-fail-under=100`.
+  5. `pytest --cov=sleeper_agent --cov-report=term-missing --cov-fail-under=100`, with
+     `[tool.coverage.run] branch = true` set in `pyproject.toml` so the 100% threshold covers
+     branches (and, implicitly, functions — an uncalled function's lines show as uncovered) as
+     well as lines, per `PROJECT_PLAN.md` §10.1.
   6. A small custom script (e.g. `scripts/check_no_magic.py`, plain Python, no new dependency)
      that greps `cli/src` and `cli/tests` for `unittest.mock`, `monkeypatch`, `setattr(`,
      `getattr(` (beyond a short allow-list of genuinely safe uses, e.g. `getattr(x, name,
