@@ -23,6 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     from sleeper_agent.commands import (
         decisions_cmd,
+        draft_cmd,
         sleeper_cmd,
         stats_cmd,
         value_cmd,
@@ -34,6 +35,7 @@ def build_parser() -> argparse.ArgumentParser:
     wiki_cmd.add_subcommands(subparsers)
     decisions_cmd.add_subcommands(subparsers)
     value_cmd.add_subcommands(subparsers)
+    draft_cmd.add_subcommands(subparsers)
 
     return parser
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,7 @@ import pytest
 
 from sleeper_agent.commands import (
     decisions_cmd,
+    draft_cmd,
     sleeper_cmd,
     stats_cmd,
     value_cmd,
@@ -840,3 +842,305 @@ def test_cmd_value_rank_raises_clear_error_when_vorp_not_computed(
 
     with pytest.raises(value_cmd.VorpNotComputedError):
         value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+
+# --- draft -----------------------------------------------------------------
+
+
+def _write_draft_keeper_fixtures(repo_root: Path) -> None:
+    from sleeper_agent.models.sleeper import DraftPick, Roster
+    from sleeper_agent.storage.parquet_store import write_table
+
+    roster = Roster(
+        roster_id=5,
+        owner_id="u1",
+        league_id="lid",
+        player_ids=("101", "102", "103", "104"),
+        starter_ids=(),
+        wins=0,
+        losses=0,
+        ties=0,
+        points_for=0.0,
+        waiver_budget_used=0,
+    )
+    write_table(
+        sleeper_sync.rosters_to_dataframe([roster]),
+        repo_root / "data" / "sleeper" / "rosters" / "2025.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+    picks_2025 = [
+        DraftPick(
+            draft_id="did",
+            round=4,
+            pick_no=40,
+            draft_slot=1,
+            roster_id=5,
+            player_id="101",
+            is_keeper=False,
+            picked_by="u1",
+            player_name="Runner A",
+            player_position="RB",
+        ),
+        DraftPick(
+            draft_id="did",
+            round=1,
+            pick_no=1,
+            draft_slot=1,
+            roster_id=5,
+            player_id="102",
+            is_keeper=False,
+            picked_by="u1",
+            player_name="Runner B",
+            player_position="RB",
+        ),
+        DraftPick(
+            draft_id="did",
+            round=2,
+            pick_no=20,
+            draft_slot=1,
+            roster_id=5,
+            player_id="103",
+            is_keeper=True,
+            picked_by="u1",
+            player_name="Runner C",
+            player_position="RB",
+        ),
+    ]
+    write_table(
+        sleeper_sync.draft_picks_to_dataframe(picks_2025),
+        repo_root / "data" / "sleeper" / "drafts" / "2025.parquet",
+        schema_version=sleeper_sync.DRAFTS_SCHEMA_VERSION,
+    )
+    picks_2024 = [
+        DraftPick(
+            draft_id="did24",
+            round=3,
+            pick_no=30,
+            draft_slot=1,
+            roster_id=5,
+            player_id="103",
+            is_keeper=True,
+            picked_by="u1",
+            player_name="Runner C",
+            player_position="RB",
+        ),
+    ]
+    write_table(
+        sleeper_sync.draft_picks_to_dataframe(picks_2024),
+        repo_root / "data" / "sleeper" / "drafts" / "2024.parquet",
+        schema_version=sleeper_sync.DRAFTS_SCHEMA_VERSION,
+    )
+    # 104 has no draft history at all on record (e.g. picked up as a
+    # rookie free agent) — exercises KeeperEligibleUndraftedDefault.
+
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["101", "102"],
+            "name": ["Runner A", "Runner B"],
+            "position": ["RB", "RB"],
+            "games_played": [10, 10],
+            "season_points": [100.0, 50.0],
+            "points_per_game": [10.0, 5.0],
+            "replacement_points": [10.0, 10.0],
+            "vorp_season": [90.0, 40.0],
+            "vorp_per_game": [9.0, 4.0],
+        }
+    )
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+
+
+def test_cmd_draft_keepers_prints_eligible_and_ineligible(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_draft_keeper_fixtures(repo_root)
+
+    args = argparse.Namespace(season="2026", roster_id=None, me=True, value_season=None)
+    exit_code = draft_cmd.cmd_draft_keepers(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "ELIGIBLE  Runner A" in out
+    assert "cost=R3" in out
+    assert "ineligible Runner B" in out  # round 1 -> cost would be R0
+    assert "kept 2 consecutive seasons already" in out  # Runner C
+    assert "defaulted to last round" in out  # 104, cost=R15
+    assert out.index("Runner A") < out.index("Runner B")  # eligible ranked first
+
+
+def test_cmd_draft_keepers_shows_n_a_value_when_value_season_has_no_vorp_data(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_draft_keeper_fixtures(repo_root)
+
+    args = argparse.Namespace(
+        season="2026", roster_id=None, me=True, value_season="2099"
+    )
+    exit_code = draft_cmd.cmd_draft_keepers(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "vorp=n/a" in out
+
+
+def test_cmd_draft_keepers_reports_missing_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_draft_keeper_fixtures(repo_root)
+
+    args = argparse.Namespace(season="2026", roster_id=999, me=False, value_season=None)
+    exit_code = draft_cmd.cmd_draft_keepers(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no roster found" in capsys.readouterr().out
+
+
+def _league_payload(draft_id: str | None = "did1") -> dict[str, object]:
+    return {
+        "league_id": "lid1",
+        "name": "Test League",
+        "season": "2025",
+        "status": "in_season",
+        "previous_league_id": None,
+        "draft_id": draft_id,
+        "scoring_settings": {},
+        "roster_positions": ["QB", "RB", "WR", "TE", "FLEX", "FLEX", "DEF", "BN"],
+        "settings": {"num_teams": 12},
+    }
+
+
+def test_cmd_draft_board_prints_available_players(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A", "B"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1", rounds=15, watch=False, value_season=None
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Best available by value:" in out
+    assert "A" in out
+
+
+def test_cmd_draft_board_reports_missing_vorp(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    def handler(request: Request) -> Response:
+        return json_response(_league_payload())
+
+    args = argparse.Namespace(
+        league_id="lid1", rounds=15, watch=False, value_season=None
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    assert exit_code == 1
+    assert "no VORP data" in capsys.readouterr().out
+
+
+def test_cmd_draft_board_reports_missing_draft_id(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["1"],
+                "name": ["A"],
+                "position": ["RB"],
+                "vorp_season": [1.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+
+    def handler(request: Request) -> Response:
+        return json_response(_league_payload(draft_id=None))
+
+    args = argparse.Namespace(
+        league_id="lid1", rounds=15, watch=False, value_season=None
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    assert exit_code == 1
+    assert "has no draft_id" in capsys.readouterr().out
+
+
+def test_cmd_draft_board_watch_writes_decision_log(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["1"],
+                "name": ["A"],
+                "position": ["RB"],
+                "vorp_season": [1.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1", rounds=15, watch=True, value_season=None
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args,
+            repo_root=repo_root,
+            base_url=base_url,
+            today=lambda: date(2026, 7, 26),
+            max_watch_iterations=1,
+        )
+
+    assert exit_code == 0
+    log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
+    assert log_path.exists()
