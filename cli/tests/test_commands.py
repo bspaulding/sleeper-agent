@@ -9,7 +9,7 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from sleeper_agent.commands import sleeper_cmd, stats_cmd
+from sleeper_agent.commands import decisions_cmd, sleeper_cmd, stats_cmd, wiki_cmd
 from sleeper_agent.main import main
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.storage.parquet_store import read_table
@@ -398,3 +398,213 @@ def test_main_dispatches_registered_handler(tmp_path: Path) -> None:
     repo_root = make_repo_root(tmp_path)
     with contextlib.chdir(repo_root), pytest.raises(stats_cmd.LeagueNotSyncedError):
         main(["stats", "vorp", "--season", "2099"])
+
+
+# --- wiki --------------------------------------------------------------
+
+
+def _write_players_parquet(sleeper_dir: Path) -> None:
+    import polars as pl
+
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    df = pl.DataFrame(
+        {
+            "player_id": ["1", "2"],
+            "name": ["Player One", "Player Two"],
+            "position": ["WR", "RB"],
+            "team": ["BUF", "KC"],
+            "status": ["Active", "Active"],
+            "injury_status": ["", ""],
+            "fantasy_positions": [["WR"], ["RB"]],
+            "years_exp": [3, 5],
+        }
+    )
+    write_table(
+        df, sleeper_dir / "players.parquet", schema_version=PLAYERS_SCHEMA_VERSION
+    )
+
+
+def test_cmd_wiki_scaffold_players_for_one_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.models.sleeper import Roster
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    _write_players_parquet(sleeper_dir)
+    roster = Roster(
+        roster_id=5,
+        owner_id="u1",
+        league_id="lid",
+        player_ids=("1",),
+        starter_ids=(),
+        wins=0,
+        losses=0,
+        ties=0,
+        points_for=0.0,
+        waiver_budget_used=0,
+    )
+    write_table(
+        sleeper_sync.rosters_to_dataframe([roster]),
+        sleeper_dir / "rosters" / "2025.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season="2025", roster_id=5, all_rostered=False)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_players(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "created 1 player page(s)" in capsys.readouterr().out
+    assert (repo_root / "wiki" / "players" / "1-player-one.md").exists()
+    assert not (repo_root / "wiki" / "players" / "2-player-two.md").exists()
+
+
+def test_cmd_wiki_scaffold_players_all_rostered_dedupes_shared_players(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.models.sleeper import Roster
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    _write_players_parquet(sleeper_dir)
+    rosters = [
+        Roster(
+            roster_id=1,
+            owner_id="u1",
+            league_id="lid",
+            player_ids=("1", "2"),
+            starter_ids=(),
+            wins=0,
+            losses=0,
+            ties=0,
+            points_for=0.0,
+            waiver_budget_used=0,
+        ),
+        Roster(
+            roster_id=2,
+            owner_id="u2",
+            league_id="lid",
+            player_ids=("2",),
+            starter_ids=(),
+            wins=0,
+            losses=0,
+            ties=0,
+            points_for=0.0,
+            waiver_budget_used=0,
+        ),
+    ]
+    write_table(
+        sleeper_sync.rosters_to_dataframe(rosters),
+        sleeper_dir / "rosters" / "2025.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season="2025", roster_id=None, all_rostered=True)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_players(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "created 2 player page(s)" in capsys.readouterr().out
+    assert (repo_root / "wiki" / "players" / "1-player-one.md").exists()
+    assert (repo_root / "wiki" / "players" / "2-player-two.md").exists()
+
+
+def test_cmd_wiki_scaffold_teams(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    args = argparse.Namespace()
+
+    exit_code = wiki_cmd.cmd_wiki_scaffold_teams(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "created 32 team page(s)" in capsys.readouterr().out
+
+
+def test_cmd_wiki_stale_scoped_to_roster(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.models.sleeper import Roster
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    wiki_dir_path = repo_root / "wiki"
+    (wiki_dir_path / "players").mkdir(parents=True)
+    (wiki_dir_path / "players" / "1-a.md").write_text(
+        "---\nlast_researched: null\n---\n"
+    )
+    (wiki_dir_path / "players" / "2-b.md").write_text(
+        "---\nlast_researched: null\n---\n"
+    )
+    (wiki_dir_path / "nfl-teams").mkdir()
+    (wiki_dir_path / "nfl-teams" / "BUF.md").write_text(
+        "---\nlast_researched: null\n---\n"
+    )
+
+    sleeper_dir = repo_root / "data" / "sleeper"
+    roster = Roster(
+        roster_id=5,
+        owner_id="u1",
+        league_id="lid",
+        player_ids=("1",),
+        starter_ids=(),
+        wins=0,
+        losses=0,
+        ties=0,
+        points_for=0.0,
+        waiver_budget_used=0,
+    )
+    write_table(
+        sleeper_sync.rosters_to_dataframe([roster]),
+        sleeper_dir / "rosters" / "2025.parquet",
+        schema_version=sleeper_sync.ROSTERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(days=7, roster_id=None, me=True, season="2025")
+    exit_code = wiki_cmd.cmd_wiki_stale(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "1-a.md" in out
+    assert "2-b.md" not in out
+    assert "BUF.md" in out
+
+
+def test_cmd_wiki_stale_unscoped(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    (repo_root / "wiki" / "players").mkdir(parents=True)
+    (repo_root / "wiki" / "players" / "1-a.md").write_text(
+        "---\nlast_researched: null\n---\n"
+    )
+
+    args = argparse.Namespace(days=7, roster_id=None, me=False, season=None)
+    exit_code = wiki_cmd.cmd_wiki_stale(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "1-a.md" in capsys.readouterr().out
+
+
+# --- decisions -----------------------------------------------------------
+
+
+def test_cmd_decisions_new_and_index(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    new_args = argparse.Namespace(kind="waiver", slug="test-slug", season="2026")
+    exit_code = decisions_cmd.cmd_decisions_new(new_args, repo_root=repo_root)
+    assert exit_code == 0
+    created_line = capsys.readouterr().out
+    assert "created" in created_line
+
+    index_args = argparse.Namespace()
+    exit_code = decisions_cmd.cmd_decisions_index(index_args, repo_root=repo_root)
+    assert exit_code == 0
+    assert "wrote" in capsys.readouterr().out
+    assert (repo_root / "wiki" / "decisions.md").exists()
