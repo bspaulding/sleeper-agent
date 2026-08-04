@@ -1039,7 +1039,12 @@ def test_cmd_draft_board_prints_available_players(
         raise AssertionError(f"unexpected path {request.path}")
 
     args = argparse.Namespace(
-        league_id="lid1", rounds=15, watch=False, value_season=None
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1061,7 +1066,12 @@ def test_cmd_draft_board_reports_missing_vorp(
         return json_response(_league_payload())
 
     args = argparse.Namespace(
-        league_id="lid1", rounds=15, watch=False, value_season=None
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1095,7 +1105,12 @@ def test_cmd_draft_board_reports_missing_draft_id(
         return json_response(_league_payload(draft_id=None))
 
     args = argparse.Namespace(
-        league_id="lid1", rounds=15, watch=False, value_season=None
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1133,7 +1148,12 @@ def test_cmd_draft_board_watch_writes_decision_log(
         raise AssertionError(f"unexpected path {request.path}")
 
     args = argparse.Namespace(
-        league_id="lid1", rounds=15, watch=True, value_season=None
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=True,
+        value_season=None,
+        num_teams=12,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1147,6 +1167,66 @@ def test_cmd_draft_board_watch_writes_decision_log(
     assert exit_code == 0
     log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
     assert log_path.exists()
+
+
+def test_cmd_draft_board_with_draft_id_skips_league_lookup(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A Sleeper mock draft has no league to resolve — --draft-id points at it directly."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A", "B"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/mockdid1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="mockdid1",
+        rounds=15,
+        watch=False,
+        value_season="2026",
+        num_teams=12,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Best available by value:" in out
+    assert "A" in out
+
+
+def test_cmd_draft_board_with_draft_id_requires_value_season(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="mockdid1",
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+    )
+    exit_code = draft_cmd.cmd_draft_board(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "--value-season is required with --draft-id" in capsys.readouterr().out
 
 
 # --- waiver / freeagent ------------------------------------------------

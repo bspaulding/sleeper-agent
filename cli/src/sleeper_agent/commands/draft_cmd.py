@@ -52,10 +52,24 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     board_parser = draft_subparsers.add_parser(
         "board", help="Live best-available-by-value board"
     )
-    board_parser.add_argument("--league-id", required=True)
+    board_source = board_parser.add_mutually_exclusive_group(required=True)
+    board_source.add_argument("--league-id")
+    board_source.add_argument(
+        "--draft-id",
+        help=(
+            "Draft ID directly, bypassing league lookup — needed for a Sleeper mock "
+            "draft, which has no league of its own. Requires --value-season."
+        ),
+    )
     board_parser.add_argument("--rounds", type=int, default=15)
     board_parser.add_argument("--watch", action="store_true")
     board_parser.add_argument("--value-season", default=None)
+    board_parser.add_argument(
+        "--num-teams",
+        type=int,
+        default=12,
+        help="Only used with --draft-id, where there's no league.settings to read it from.",
+    )
     board_parser.set_defaults(func=cmd_draft_board)
 
 
@@ -164,26 +178,41 @@ def cmd_draft_board(
     max_watch_iterations: int | None = None,
 ) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
-    league = fetch_league(args.league_id, base_url=base_url)
-    value_season = args.value_season or league.season
+
+    if args.draft_id is not None:
+        if args.value_season is None:
+            print(
+                "--value-season is required with --draft-id (e.g. for a Sleeper mock "
+                "draft, there's no league to infer a season from)"
+            )
+            return 1
+        draft_id = args.draft_id
+        value_season = args.value_season
+        num_teams = args.num_teams
+    else:
+        league = fetch_league(args.league_id, base_url=base_url)
+        if league.draft_id is None:
+            print(f"league {args.league_id} has no draft_id")
+            return 1
+        draft_id = league.draft_id
+        value_season = args.value_season or league.season
+        num_teams = max(league.settings.num_teams, 1)
+
     vorp_df = _read_vorp(root, value_season)
     if vorp_df is None:
         print(
             f"no VORP data for season {value_season} — run `stats vorp --season {value_season}` first"
         )
         return 1
-    if league.draft_id is None:
-        print(f"league {args.league_id} has no draft_id")
-        return 1
 
-    top_n = args.rounds * max(league.settings.num_teams, 1)
+    top_n = args.rounds * num_teams
 
     if args.watch:
         log_path = (
             decisions_dir(root) / value_season / f"{today().isoformat()}-draft-live.md"
         )
         watch_board(
-            league.draft_id,
+            draft_id,
             vorp_df,
             base_url=base_url,
             log_path=log_path,
@@ -191,7 +220,7 @@ def cmd_draft_board(
         )
         return 0
 
-    picks = fetch_draft_picks(league.draft_id, base_url=base_url)
+    picks = fetch_draft_picks(draft_id, base_url=base_url)
     board = board_view(vorp_df, picks, top_n=top_n)
     print(render_board(board))
     return 0

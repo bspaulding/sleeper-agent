@@ -40,6 +40,14 @@ supplemental round — treat it that way:
    semi-attended session — it polls and re-renders on every change, and mirrors the board to a
    decision-log entry (`decisions/<season>/<date>-draft-live.md`) so there's a record even if
    nobody's watching every pick.
+   - For a **mock draft** (practice run before the real draft — no league object exists for it),
+     use `draft board --draft-id <mock-draft-id> --value-season <year> [--num-teams <n>] [--watch]`
+     instead: it points straight at the draft's public picks endpoint, skipping the league lookup
+     `--league-id` needs. `--value-season` is required in this mode (there's no league to infer it
+     from); `--num-teams` defaults to 12 (this league's size) and only matters for `--rounds`
+     sizing. Do a mock draft or two in the run-up to the real one — it's cheap rehearsal for tier
+     breaks and pacing, and a chance to sanity-check the value rankings against how a real room
+     actually drafts.
 3. Draft-day judgment the tool can't automate:
    - Positional runs: if a position is being drafted heavily by other teams, weigh reaching for
      the position against best-player-available — `draft board`'s ranking is value-only, it
