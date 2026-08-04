@@ -10,6 +10,8 @@ without any network access or monkeypatching.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 
 from sleeper_agent.config import data_dir, find_repo_root
@@ -122,13 +124,14 @@ def cmd_players_sync(
     *,
     repo_root: Path | None = None,
     base_url: str = SLEEPER_BASE_URL,
+    now: Callable[[], datetime] = datetime.now,
 ) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
     sleeper_dir = data_dir(root) / "sleeper"
     players_path = sleeper_dir / "players.parquet"
     meta_path = sleeper_dir / "players.meta.json"
     result = players_client.sync_players(
-        players_path, meta_path, base_url=base_url, force=args.force
+        players_path, meta_path, base_url=base_url, force=args.force, now=now
     )
     match result:
         case players_client.PlayersSyncSkipped(fetched_at=fetched_at):

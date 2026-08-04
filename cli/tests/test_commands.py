@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -173,9 +173,10 @@ def test_cmd_players_sync_prints_skipped_summary(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     repo_root = make_repo_root(tmp_path)
+    fetched_at = datetime(2026, 7, 26, 0, 0, 0, tzinfo=UTC)
     meta_path = repo_root / "data" / "sleeper" / "players.meta.json"
     meta_path.parent.mkdir(parents=True)
-    meta_path.write_text(json.dumps({"fetched_at": "2026-07-26T00:00:00"}))
+    meta_path.write_text(json.dumps({"fetched_at": fetched_at.isoformat()}))
 
     def failing_handler(request: Request) -> Response:
         raise AssertionError("should not fetch")
@@ -183,7 +184,10 @@ def test_cmd_players_sync_prints_skipped_summary(
     args = argparse.Namespace(force=False)
     with mock_http_server(failing_handler) as base_url:
         exit_code = sleeper_cmd.cmd_players_sync(
-            args, repo_root=repo_root, base_url=base_url
+            args,
+            repo_root=repo_root,
+            base_url=base_url,
+            now=lambda: fetched_at + timedelta(hours=12),
         )
 
     assert exit_code == 0
