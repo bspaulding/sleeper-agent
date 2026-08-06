@@ -14,12 +14,18 @@ which structurally can't run until there's a season of decision-log history to l
 These weren't re-confirmed with Brad before writing; flagged here instead of blocking on them.
 Cheap to correct if wrong — say so and this doc updates.
 
-1. **Dates are placeholders.** No real 2026 dates for keeper deadline / draft / week 1 are
-   known yet (see `PROJECT_PLAN.md` §3 — the 2026 league doesn't even exist yet). This plan
-   uses a generic NFL calendar shape (keeper deadline a couple weeks before the draft, draft in
-   late August, week 1 the Thursday after Labor Day) purely to sequence work by dependency, not
-   by hard date. **Swap in real dates as soon as the commissioner sets them** — that's what
-   actually determines how much slack Phases E/F/G below have.
+1. ~~Dates are placeholders.~~ **Resolved.** The commissioner's 2026 league-launch email
+   (2026-08-04) set the real dates: NFL week 1 opens **Wednesday, Sept 9** (first Wednesday
+   opener since 2012), so the draft moved to Labor Day weekend — proposed **Saturday, Sept 5**
+   (afternoon, time TBD), backup **Monday, Sept 7** if enough owners object to Saturday. Keeper
+   deadline is the night before the draft, **Friday, Sept 4**, Sleeper-enforced. Keeper rules are
+   unchanged from prior seasons (matches the already-implemented `last_round - 1` cost rule, max
+   2 consecutive kept seasons, round-0 cost ineligible — see `PROJECT_PLAN.md` §3), and there are
+   no other rule/league changes for 2026. Draft order is Sleeper-randomized in-app. See
+   `decisions/2026/2026-08-04-draft-2026-league-launch-dates.md` for the full write-up and
+   `wiki/league/season-2026.md` for the quick-reference version. This gives Phases E/F below a firm
+   window: mock-draft/research prep has roughly four weeks (now → Sept 4-5), and the live-draft
+   Routine (Phase H) needs to be ready for a Saturday-afternoon session, not a weekday one.
 2. ~~Keeper cost rule is unknown~~ **Resolved.** Confirmed with Brad and verified against the
    real 2025 draft data: a kept player costs `last_round - 1` (the round they were last drafted
    or kept at, minus one). Round 1 is a valid keeper cost; only a computed cost of round 0 is
@@ -551,10 +557,16 @@ Pull this list out and literally check it off once Phases A–H are done:
       (Phase H) but can't fire successfully until this PR merges to `main` — a human action
       outside this session's scope. First real firing happens on the next scheduled run after
       merge.
-- [ ] Draft-day Routine is scheduled once the real draft date is known. **Deferred, not done:**
-      no real 2026 draft date exists yet (commissioner hasn't set one) — consistent with plan
-      §0.1's own assumption. Create it once that date is announced.
-- [ ] Real 2026 keeper deadline / draft date / week-1 date have replaced the placeholders in §0.1
-      everywhere they matter (Routine schedules especially). **Not done, same root cause as
-      above:** no real 2026 dates exist yet to swap in. §0.1's placeholder dates stand until the
-      commissioner sets a schedule.
+- [x] Draft-day Routine is scheduled once the real draft date is known. **Done 2026-08-04:** the
+      commissioner's league-launch email set Saturday, Sept 5 (afternoon, time TBD) as the draft,
+      backup Monday, Sept 7. One-shot Routine `sleeper-agent: draft day` created for Saturday
+      Sept 5, 17:00 UTC (~1pm ET) as a placeholder time — **needs `update_trigger`'d to the real
+      start time once Aaron confirms it** — running `draft board --watch` against the real
+      league's draft. A second one-shot Routine, `sleeper-agent: pre-draft prep`, was also
+      created for Wednesday Sept 2 to do a deeper research pass and refresh the value/tier list
+      ahead of the keeper deadline.
+- [x] Real 2026 keeper deadline / draft date / week-1 date have replaced the placeholders in §0.1
+      everywhere they matter (Routine schedules especially). **Done 2026-08-04**, from the same
+      email: keeper deadline Fri Sept 4, draft Sat Sept 5 (backup Mon Sept 7), week 1 opener Wed
+      Sept 9. See `decisions/2026/2026-08-04-draft-2026-league-launch-dates.md` and
+      `wiki/league/season-2026.md`.
