@@ -26,6 +26,10 @@ Cheap to correct if wrong — say so and this doc updates.
    `wiki/league/season-2026.md` for the quick-reference version. This gives Phases E/F below a firm
    window: mock-draft/research prep has roughly four weeks (now → Sept 4-5), and the live-draft
    Routine (Phase H) needs to be ready for a Saturday-afternoon session, not a weekday one.
+   **Update 2026-08-08:** the whole schedule moved up one week — draft is now **Saturday, Aug 29**
+   (backup Monday, Aug 31), keeper deadline **Friday, Aug 28**. Week 1 opener (Sept 9) is
+   unchanged. See `decisions/2026/2026-08-08-draft-draft-2026-schedule-moved-up-week.md` and the
+   refreshed `wiki/league/season-2026.md`.
 2. ~~Keeper cost rule is unknown~~ **Resolved.** Confirmed with Brad and verified against the
    real 2025 draft data: a kept player costs `last_round - 1` (the round they were last drafted
    or kept at, minus one). Round 1 is a valid keeper cost; only a computed cost of round 0 is
@@ -564,9 +568,14 @@ Pull this list out and literally check it off once Phases A–H are done:
       start time once Aaron confirms it** — running `draft board --watch` against the real
       league's draft. A second one-shot Routine, `sleeper-agent: pre-draft prep`, was also
       created for Wednesday Sept 2 to do a deeper research pass and refresh the value/tier list
-      ahead of the keeper deadline.
+      ahead of the keeper deadline. **Updated 2026-08-08:** schedule moved up a week — both
+      Routines re-scheduled (`draft day` → Saturday Aug 29, 17:00 UTC placeholder;
+      `pre-draft prep` → Wednesday Aug 26, 13:00 UTC) via `update_trigger`. Start time is still
+      TBD, so both fire times remain placeholders pending confirmation.
 - [x] Real 2026 keeper deadline / draft date / week-1 date have replaced the placeholders in §0.1
       everywhere they matter (Routine schedules especially). **Done 2026-08-04**, from the same
       email: keeper deadline Fri Sept 4, draft Sat Sept 5 (backup Mon Sept 7), week 1 opener Wed
       Sept 9. See `decisions/2026/2026-08-04-draft-2026-league-launch-dates.md` and
-      `wiki/league/season-2026.md`.
+      `wiki/league/season-2026.md`. **Updated 2026-08-08:** schedule moved up one week — keeper
+      deadline Fri Aug 28, draft Sat Aug 29 (backup Mon Aug 31), week 1 opener unchanged (Wed
+      Sept 9). See `decisions/2026/2026-08-08-draft-draft-2026-schedule-moved-up-week.md`.
