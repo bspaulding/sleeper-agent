@@ -32,13 +32,27 @@ from slot 8, using `sleeper-agent draft board --draft-id 1392286240727908352 --v
 2024 [--watch]`.
 
 **Data-currency caveat, applies to every pick below:** `--value-season 2024` was used throughout
-because `nfl_data_py`/nflverse has not yet published `player_stats_2025.parquet` (confirmed via a
-direct 404 on the GitHub release asset and a check of the `player_stats` release's asset list —
-only years through 2024 exist). Every VORP number and every "best available" ranking in this
-draft is therefore priced off **2024 season performance**, not 2025. This has two concrete
-consequences documented below and analyzed further in `wiki/team/roster-philosophy.md`:
-2025-rookie players are entirely invisible to the tool (zero rows in `data/vorp/2024.parquet`),
-and players who changed/lost NFL roster status after the 2024 season aren't flagged.
+because `stats sync --season 2025` fails. **Correction to what was believed at draft time:** this
+was first diagnosed in-session as nflverse simply not having published 2025 data yet (based on a
+404 against `player_stats_2025.parquet`). That diagnosis was wrong, caught while preparing to push
+this entry by cross-referencing two automated maintenance commits already on `origin/main`
+(`fd2e5ed`, 2026-08-10) that had independently found the real cause: nflverse renamed its release
+from `player_stats` to `stats_player` months ago, and `stats_player_week_2025.parquet` exists and
+is fetchable right now — confirmed directly against the GitHub API while fixing this doc. The
+installed `nfl_data_py` (0.3.3) simply hardcodes the old, now-abandoned release name in
+`fetch_weekly_stats`/`import_weekly_data`, so the sync fails even though the data is available.
+This is a pipeline bug, not a data-publishing lag, and it's fixable (bump `nfl_data_py` or patch
+the URL) rather than something to wait out. (A *third*, different explanation — "session-level
+GitHub network restriction" — appears in a separate automated commit, `0d4af83`, 2026-08-11; that
+doesn't match this session's own experience of unrestricted GitHub/API access, so it's likely
+specific to that other session's sandbox rather than a general cause. Worth reconciling directly
+in the CLI issue tracker rather than trusting any one drive-by diagnosis.)
+
+Regardless of cause, every VORP number and "best available" ranking in this draft was priced off
+**2024 season performance**, not 2025. This has two concrete consequences documented below and
+analyzed further in `wiki/team/roster-philosophy.md`: 2025-rookie players are entirely invisible
+to the tool (zero rows in `data/vorp/2024.parquet`), and players who changed/lost NFL roster
+status after the 2024 season aren't flagged.
 
 Final roster (slot 8, all 15 rounds, confirmed against the draft's public picks endpoint):
 
@@ -168,5 +182,6 @@ covering: (1) the two silently-skipped rounds and the stale-refresh incident, (2
 RB-heavy/WR-light/no-DEF positional imbalance and why the pure-VORP `draft board` policy produces
 it, (3) the 2024-vs-2025 data-currency gap and the team-status blind spot, and (4) whether/when to
 draft DEF and what "roster construction" should mean under this league's `best_ball: true`
-scoring. Do a second mock draft against 2025 VORP (once nflverse publishes it) applying whatever
-positional-balance rule comes out of that doc, before the real draft on Aug 29.
+scoring. Fix the `nfl_data_py`/`stats sync` release-name bug (see caveat above) so `stats vorp
+--season 2025` can actually run, then do a second mock draft against real 2025 VORP applying
+whatever positional-balance rule comes out of that doc, before the real draft on Aug 29.

@@ -24,9 +24,13 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
    Cross-check `data/sleeper/players.parquet`'s `team` field (not `status`) before or during a real
    draft if it's been more than a couple weeks since `sleeper players sync`. See §3.
 6. **Re-run VORP against the most recent completed season before trusting rankings for a real
-   draft.** This retro's source draft ran on 2024 VORP because 2025 wasn't published upstream yet
-   as of 2026-08-09 — check `data/vorp/` for a fresher file before the real draft on Aug 29 and
-   re-sync if one's available by then.
+   draft.** This retro's source draft ran on 2024 VORP because `stats sync --season 2025` fails —
+   not because the data doesn't exist. nflverse renamed its release from `player_stats` to
+   `stats_player` (`stats_player_week_2025.parquet` exists and is fetchable now); the installed
+   `nfl_data_py` (0.3.3) still hardcodes the old release name. Fix the sync path (bump
+   `nfl_data_py` or repoint the URL in `stats/nflverse.py`), re-sync, and recompute 2025 VORP
+   before the real draft on Aug 29 — this is a fixable bug on a deadline, not a "wait for the data"
+   situation.
 
 ## Roster grid (this league, 2026)
 

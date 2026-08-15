@@ -18,10 +18,12 @@ rest once the background watcher was killed by request.
 10. Kareem Hunt (RB)
 11. Jerry Jeudy (WR)
 
-Note: value-season is 2024, not 2025 — nflverse hasn't published `player_stats_2025.parquet` yet
-(confirmed 404 on the release asset), so this rehearsal ran on last-known-good VORP rather than
-current-season data. Re-run against 2025 VORP once nflverse publishes it, before trusting rankings
-for the real draft.
+Note: value-season is 2024, not 2025 — `stats sync --season 2025` fails because the installed
+`nfl_data_py` (0.3.3) hardcodes the old `player_stats` nflverse release, which nflverse renamed to
+`stats_player` months ago (`stats_player_week_2025.parquet` exists there right now). This is a
+library/pipeline bug, not a real data-publishing lag — 2025 data is available. This rehearsal ran
+on last-known-good 2024 VORP rather than current-season data as a result. Re-run against real 2025
+VORP once the sync path is fixed, before trusting rankings for the real draft.
 
 ## Final best-available board (end of draft)
 
