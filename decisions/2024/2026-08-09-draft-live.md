@@ -1,0 +1,38 @@
+# Mock draft — 1392286240727908352 (--value-season 2024)
+
+Rehearsal mock draft ahead of the real 2026 draft (Sept 5). Ran `draft board --draft-id
+1392286240727908352 --value-season 2024` for a `--watch` stretch, then manual refreshes for the
+rest once the background watcher was killed by request.
+
+## My picks (in order taken)
+
+1. Lamar Jackson (QB)
+2. Joe Mixon (RB)
+3. Alvin Kamara (RB)
+4. James Conner (RB)
+5. Aaron Jones (RB)
+6. Baker Mayfield (QB)
+7. Najee Harris (RB)
+8. Jonnu Smith (TE)
+9. Zach Ertz (TE)
+10. Kareem Hunt (RB)
+11. Jerry Jeudy (WR)
+
+Note: value-season is 2024, not 2025 — nflverse hasn't published `player_stats_2025.parquet` yet
+(confirmed 404 on the release asset), so this rehearsal ran on last-known-good VORP rather than
+current-season data. Re-run against 2025 VORP once nflverse publishes it, before trusting rankings
+for the real draft.
+
+## Final best-available board (end of draft)
+
+Best available by value:
+ 1. Sam Darnold               QB  vorp=   37.6
+ 2. Pat Freiermuth            TE  vorp=   28.0
+ 3. Austin Ekeler             RB  vorp=   26.6
+ 4. Tyreek Hill               WR  vorp=   25.0
+ 5. Justice Hill              RB  vorp=   13.3
+ 6. Rashod Bateman            WR  vorp=    8.4
+ 7. Calvin Ridley             WR  vorp=    7.0
+ 8. Alexander Mattison        RB  vorp=    4.4
+ 9. David Njoku               TE  vorp=    1.7
+10. Jerome Ford               RB  vorp=    0.0
