@@ -63,25 +63,52 @@ notes") picks it up transitively without needing its own edit beyond what's in �
 
 `DraftPick` (`cli/src/sleeper_agent/models/sleeper.py`) already carries both `roster_id` and
 `draft_slot`, consistently 1:1 mapped per team across all rounds of a draft (confirmed against
-`cli/tests/fixtures/sleeper/draft_picks.json`). Add two new mutually-relevant CLI args to
-`draft board` in `cli/src/sleeper_agent/commands/draft_cmd.py`:
+`cli/tests/fixtures/sleeper/draft_picks.json`). Confirmed against
+`cli/tests/fixtures/sleeper/draft.json` (a real Sleeper API response), the draft object itself
+— fetchable via the existing `fetch_draft(draft_id)` — also carries `slot_to_roster_id` (a
+slot→roster_id map, present **before any picks are made**) and per-position slot counts under
+`settings` (`slots_qb`, `slots_rb`, `slots_wr`, `slots_te`, `slots_flex`, `slots_def`,
+`slots_bn`). This is a better source than `League.roster_positions` for the roster-requirement
+math in §2b, and it's available in **both** league and mock-draft mode (a mock draft has no
+`League` object, but it does have a `Draft` object) — so `cmd_draft_board` can call
+`fetch_draft(draft_id)` unconditionally right after resolving `draft_id`, in both branches,
+rather than needing a mock-only fallback.
 
-- `--my-roster-id` (int, optional) — for `--league-id` mode. Defaults to the existing
-  `ME_ROSTER_ID = 5` convention already duplicated across every other command module
-  (`value_cmd.py`, `waiver_cmd.py`, `trade_cmd.py`, etc.) — reuse that same constant/value here,
-  don't invent a new one.
-- `--my-draft-slot` (int, optional) — for `--draft-id` (mock) mode, since a mock draft has no
-  real roster IDs. This is the slot number chosen when starting the mock (matches what
-  `draft.md` already tells you to note, e.g. "drafting from slot 8").
+Extend the models in `cli/src/sleeper_agent/models/sleeper.py`:
+- `DraftSettingsRaw`: add `slots_qb: int`, `slots_rb: int`, `slots_wr: int`, `slots_te: int`,
+  `slots_flex: int`, `slots_def: int` (all `total=False`, matching the existing TypedDict style).
+- `DraftRaw`: add `slot_to_roster_id: dict[str, int]` (Sleeper sends slot numbers as string
+  keys, per the fixture).
+- `Draft`: add matching flat fields `slots_qb: int`, `slots_rb: int`, `slots_wr: int`,
+  `slots_te: int`, `slots_flex: int`, `slots_def: int`, `slot_to_roster_id: dict[int, int]` (int
+  keys — convert from the raw string keys in `parse_draft`, matching how other parsers coerce
+  raw JSON shapes at the boundary).
+- `parse_draft`: read the new settings fields (default 0, same pattern as `rounds`/`teams`
+  today) and build `slot_to_roster_id` via `{int(k): v for k, v in (raw.get("slot_to_roster_id")
+  or {}).items()}`.
 
-If neither is given, the board renders exactly as it does today (no annotation) — this keeps
-the change backward compatible and the annotation opt-in rather than mandatory, since not every
-`draft board` call is a live-draft turn (e.g. ad-hoc value checks).
+Add two new CLI args to `draft board` in `cli/src/sleeper_agent/commands/draft_cmd.py`:
 
-Resolve "my roster_id" once per call: in league mode it's `--my-roster-id` directly; in
-draft-id mode, find any pick with `draft_slot == args.my_draft_slot` and take its `roster_id`
-(falls back to "no picks yet for that slot" → treat as 0 drafted so far, not an error, since the
-board is legitimately usable before your first pick).
+- `--my-roster-id` (int, optional) — defaults to the existing `ME_ROSTER_ID = 5` convention
+  already duplicated across every other command module (`value_cmd.py`, `waiver_cmd.py`,
+  `trade_cmd.py`, etc.) — reuse that same value, don't invent a new one. Natural fit for league
+  mode, where the roster_id is stable across seasons.
+- `--my-draft-slot` (int, optional) — the slot number chosen when starting a mock (matches what
+  `draft.md` already tells you to note, e.g. "drafting from slot 8"). Works in either mode,
+  since `slot_to_roster_id` is now fetched unconditionally.
+
+Resolution order in `cmd_draft_board`: if `--my-draft-slot` is given, resolve it via the fetched
+`Draft.slot_to_roster_id[args.my_draft_slot]`; otherwise fall back to `--my-roster-id` (which
+itself defaults to `ME_ROSTER_ID`). **If the user explicitly wants no annotation at all**, that
+isn't reachable through these two args alone since `--my-roster-id` always has a default — add a
+third flag, `--no-annotate`, to suppress annotation entirely for ad-hoc value-check calls that
+aren't a live-draft turn. If neither `--my-draft-slot` nor `--my-roster-id` is passed, and
+`--no-annotate` is not passed, the default (`ME_ROSTER_ID`) still applies — i.e. **annotation is
+on by default**, matching that `draft board` is overwhelmingly used during an actual draft
+(`.claude/skills/draft.md` step 2). This is a deliberate change from the earlier "opt-in"
+framing: since `--my-roster-id` already has a working default for the common (league) case,
+requiring an extra flag to get annotation would make the more useful behavior the harder path to
+reach.
 
 ### 2b. Position-count annotation
 
@@ -90,17 +117,14 @@ dict[str, int]` — count drafted-by-me picks by `player_position` (already on `
 VORP lookup needed so it works even for players with no VORP row, e.g. off-roster or
 future-season rookies).
 
-Parse `roster_positions` (already modeled as `League.roster_positions` in league mode; a mock
-draft has no `League` object at all, so mock mode needs its own source — accept an explicit
-`--roster-positions` override, defaulting to this league's known grid
-(`QB,RB,RB,WR,WR,TE,FLEX,FLEX,DEF,BN×6`) when omitted, matching `--num-teams`'s existing
-default-for-mock-mode pattern) into:
+Build the roster requirement directly from the fetched `Draft`'s slot counts (§2a) rather than
+parsing `roster_positions` strings:
 
-- hard minimums per position: `QB≥1, RB≥2, WR≥2, TE≥1, DEF≥1` (derived by counting literal
-  position tokens in `roster_positions`, same source `roster-philosophy.md` hand-derived this
-  from)
-- shared FLEX capacity: count of `FLEX` tokens (2 in this league), poolable across
-  RB/WR/TE
+- hard minimums per position: `{"QB": draft.slots_qb, "RB": draft.slots_rb, "WR":
+  draft.slots_wr, "TE": draft.slots_te, "DEF": draft.slots_def}` — for this league, `QB≥1,
+  RB≥2, WR≥2, TE≥1, DEF≥1`, matching what `roster-philosophy.md` hand-derived from
+  `roster_positions` today.
+- shared FLEX capacity: `draft.slots_flex` (2 in this league), poolable across RB/WR/TE.
 
 Render a one-line summary above the board:
 
@@ -162,10 +186,12 @@ reconstructed by hand (as the mock-draft-1 retrospective had to do after the fac
 ## 3. Wiring into skills/wiki
 
 - **`.claude/skills/draft.md`**: step 2 (`draft board --league-id <id> --rounds 15 [--watch]`)
-  gets `--my-roster-id`/`--my-draft-slot` added to both the league and mock-draft invocation
-  examples. Step 3's "Draft-day judgment the tool can't automate" bullet on positional runs gets
-  reworded: the position-count and tier-break facts are now shown by the tool; weighing them
-  (reach vs. wait, which position to prioritize) is still the judgment call.
+  gets a note that annotation is on by default (via `ME_ROSTER_ID`) and `--my-draft-slot` is
+  needed for a mock draft (where the default roster_id is meaningless); `--no-annotate` is
+  available for ad-hoc non-draft-turn value checks. Step 3's "Draft-day judgment the tool can't
+  automate" bullet on positional runs gets reworded: the position-count and tier-break facts are
+  now shown by the tool; weighing them (reach vs. wait, which position to prioritize) is still
+  the judgment call.
 - **`wiki/team/roster-philosophy.md`**: standing rule 1 ("check `value roster --me`... before
   taking the board's #1 suggestion") gets corrected — `value roster` reads
   `data/sleeper/rosters/{season}.parquet`, which doesn't exist until *after* a draft completes,
@@ -179,8 +205,15 @@ reconstructed by hand (as the mock-draft-1 retrospective had to do after the fac
 network calls):
 
 - `my_roster_positions`: counts picks correctly filtered to one `roster_id`, ignoring others.
-- Roster-grid parsing: hard-min + FLEX-capacity computed correctly from a known
-  `roster_positions` list, including this league's actual grid as one fixture case.
+- `cli/tests/test_sleeper_client.py::test_fetch_draft_parses_real_fixture` (existing test,
+  already loads `draft.json`): extend its assertions to cover the new fields —
+  `draft.slots_qb == 1`, `draft.slots_rb == 2`, `draft.slots_wr == 2`, `draft.slots_te == 1`,
+  `draft.slots_flex == 2`, `draft.slots_def == 1`, and `draft.slot_to_roster_id == {1: 3, 2: 8,
+  3: 1, 4: 4, 5: 12, 6: 6, 7: 10, 8: 7, 9: 2, 10: 9, 11: 5, 12: 11}` (int-keyed, matching the
+  fixture's `slot_to_roster_id` block read literally).
+- Roster-requirement construction: hard-min + FLEX-capacity computed correctly from a `Draft`
+  fixture's slot counts, including this league's actual grid (`slots_qb=1, slots_rb=2,
+  slots_wr=2, slots_te=1, slots_flex=2, slots_def=1`) as one fixture case.
 - Tag thresholds: a position exactly at hard-min tags `FLEX` not `NEED`; exactly at
   hard-min+FLEX-capacity tags `SURPLUS` not `FLEX` (boundary cases, off-by-one is the likely bug
   class here).
