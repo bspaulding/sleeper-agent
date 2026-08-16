@@ -12,13 +12,48 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 
 import polars as pl
 
-from sleeper_agent.models.sleeper import DraftPick
+from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client.draft import fetch_draft_picks
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
+
+
+FLEX_ELIGIBLE_POSITIONS = frozenset({"RB", "WR", "TE"})
+
+
+@dataclass(frozen=True)
+class RosterRequirement:
+    hard_min: dict[str, int]
+    flex_capacity: int
+
+
+def roster_requirement_from_draft(draft: Draft) -> RosterRequirement:
+    return RosterRequirement(
+        hard_min={
+            "QB": draft.slots_qb,
+            "RB": draft.slots_rb,
+            "WR": draft.slots_wr,
+            "TE": draft.slots_te,
+            "DEF": draft.slots_def,
+        },
+        flex_capacity=draft.slots_flex,
+    )
+
+
+def position_tag(position: str, count: int, requirement: RosterRequirement) -> str:
+    hard_min = requirement.hard_min.get(position, 0)
+    if count < hard_min:
+        return "NEED"
+    flex_ceiling = hard_min + (
+        requirement.flex_capacity if position in FLEX_ELIGIBLE_POSITIONS else 0
+    )
+    if count < flex_ceiling:
+        return "FLEX"
+    return "SURPLUS"
 
 
 def board_view(

@@ -4,7 +4,14 @@ from pathlib import Path
 
 import polars as pl
 
-from sleeper_agent.draft_tools.board import board_view, render_board, watch_board
+from sleeper_agent.draft_tools.board import (
+    RosterRequirement,
+    board_view,
+    position_tag,
+    render_board,
+    roster_requirement_from_draft,
+    watch_board,
+)
 from sleeper_agent.draft_tools.keepers import (
     KeeperCandidate,
     build_season_chain,
@@ -12,7 +19,7 @@ from sleeper_agent.draft_tools.keepers import (
     rank_keeper_candidates,
     value_per_cost,
 )
-from sleeper_agent.models.sleeper import DraftPick
+from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
     KeeperEligible,
@@ -384,3 +391,57 @@ def test_watch_board_works_without_a_log_path() -> None:
     )
 
     assert len(rendered_calls) == 1
+
+
+def make_draft(**overrides: object) -> Draft:
+    defaults: dict[str, object] = dict(
+        draft_id="did",
+        league_id="lid",
+        season="2026",
+        status="drafting",
+        draft_type="snake",
+        rounds=15,
+        num_teams=12,
+        start_time_ms=None,
+        slots_qb=1,
+        slots_rb=2,
+        slots_wr=2,
+        slots_te=1,
+        slots_flex=2,
+        slots_def=1,
+        slot_to_roster_id={1: 5},
+    )
+    defaults.update(overrides)
+    return Draft(**defaults)  # type: ignore[arg-type]
+
+
+def test_roster_requirement_from_draft_reads_slot_counts() -> None:
+    requirement = roster_requirement_from_draft(make_draft())
+
+    assert requirement.hard_min == {"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}
+    assert requirement.flex_capacity == 2
+
+
+def test_position_tag_below_hard_min_is_need() -> None:
+    requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
+
+    assert position_tag("RB", 1, requirement) == "NEED"
+
+
+def test_position_tag_exactly_at_hard_min_is_flex_not_need() -> None:
+    requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
+
+    assert position_tag("RB", 2, requirement) == "FLEX"
+
+
+def test_position_tag_exactly_at_hard_min_plus_flex_is_surplus_not_flex() -> None:
+    requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
+
+    assert position_tag("RB", 4, requirement) == "SURPLUS"
+
+
+def test_position_tag_non_flex_eligible_position_skips_flex_tier() -> None:
+    # QB isn't FLEX-eligible in this league, so hitting hard_min goes straight to SURPLUS.
+    requirement = RosterRequirement(hard_min={"QB": 1}, flex_capacity=2)
+
+    assert position_tag("QB", 1, requirement) == "SURPLUS"
