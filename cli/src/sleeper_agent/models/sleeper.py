@@ -67,6 +67,12 @@ class UserRaw(TypedDict, total=False):
 class DraftSettingsRaw(TypedDict, total=False):
     rounds: int
     teams: int
+    slots_qb: int
+    slots_rb: int
+    slots_wr: int
+    slots_te: int
+    slots_flex: int
+    slots_def: int
 
 
 class DraftRaw(TypedDict, total=False):
@@ -77,6 +83,7 @@ class DraftRaw(TypedDict, total=False):
     type: str
     start_time: int | None
     settings: DraftSettingsRaw
+    slot_to_roster_id: dict[str, int]
 
 
 class DraftPickMetadataRaw(TypedDict, total=False):
@@ -178,6 +185,13 @@ class Draft:
     rounds: int
     num_teams: int
     start_time_ms: int | None
+    slots_qb: int
+    slots_rb: int
+    slots_wr: int
+    slots_te: int
+    slots_flex: int
+    slots_def: int
+    slot_to_roster_id: dict[int, int]
 
 
 @dataclass(frozen=True)
@@ -279,6 +293,16 @@ def parse_draft(raw: DraftRaw) -> Draft:
         rounds=settings_raw.get("rounds", 0),
         num_teams=settings_raw.get("teams", 0),
         start_time_ms=raw.get("start_time"),
+        slots_qb=settings_raw.get("slots_qb", 0),
+        slots_rb=settings_raw.get("slots_rb", 0),
+        slots_wr=settings_raw.get("slots_wr", 0),
+        slots_te=settings_raw.get("slots_te", 0),
+        slots_flex=settings_raw.get("slots_flex", 0),
+        slots_def=settings_raw.get("slots_def", 0),
+        slot_to_roster_id={
+            int(slot): roster_id
+            for slot, roster_id in (raw.get("slot_to_roster_id") or {}).items()
+        },
     )
 
 

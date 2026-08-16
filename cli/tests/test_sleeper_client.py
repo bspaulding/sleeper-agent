@@ -281,6 +281,26 @@ def test_fetch_draft_parses_real_fixture() -> None:
     assert draft.draft_type == "snake"
     assert draft.rounds == 15
     assert draft.num_teams == 12
+    assert draft.slots_qb == 1
+    assert draft.slots_rb == 2
+    assert draft.slots_wr == 2
+    assert draft.slots_te == 1
+    assert draft.slots_flex == 2
+    assert draft.slots_def == 1
+    assert draft.slot_to_roster_id == {
+        1: 3,
+        2: 8,
+        3: 1,
+        4: 4,
+        5: 12,
+        6: 6,
+        7: 10,
+        8: 7,
+        9: 2,
+        10: 9,
+        11: 5,
+        12: 11,
+    }
 
 
 def test_fetch_draft_picks_parses_real_fixture_including_keepers() -> None:
