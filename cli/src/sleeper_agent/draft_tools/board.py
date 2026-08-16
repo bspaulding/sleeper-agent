@@ -43,7 +43,10 @@ def watch_board(
     vorp_df: pl.DataFrame,
     *,
     base_url: str = SLEEPER_BASE_URL,
-    poll_seconds: float = 30.0,
+    # Sleeper's documented limit is ~1000 req/min before risking an IP block; one GET per
+    # poll at 5s is ~12 req/min (~1% of budget), so there's no rate-limit reason to poll
+    # slower — see .claude/skills/draft.md's "During the draft" section.
+    poll_seconds: float = 5.0,
     sleep: Callable[[float], None] = time.sleep,
     max_iterations: int | None = None,
     render: Callable[[str], None] = print,

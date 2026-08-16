@@ -362,7 +362,7 @@ def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> N
     )
 
     assert len(rendered_calls) == 2
-    assert sleeps == [30.0, 30.0]
+    assert sleeps == [5.0, 5.0]
     assert log_path.exists()
     assert "Player Two" in log_path.read_text()
 

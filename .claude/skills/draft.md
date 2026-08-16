@@ -48,6 +48,22 @@ supplemental round — treat it that way:
      sizing. Do a mock draft or two in the run-up to the real one — it's cheap rehearsal for tier
      breaks and pacing, and a chance to sanity-check the value rankings against how a real room
      actually drafts.
+   - **Never recommend a pick off stale data.** Fetch a fresh `draft board` immediately before
+     every recommendation — even one from moments ago is not good enough, since picks can happen
+     faster than the conversation moves (bot-heavy mock/live drafts especially). This applies
+     whether you're driving `--watch` or manually re-running `draft board` once per "it's my turn"
+     prompt: always issue a new fetch, never answer from a previous call's output. The first 2026
+     mock draft (`decisions/2026/2026-08-09-draft-mock-draft-1-turn-by-turn.md`) lost two entire
+     rounds to exactly this — the board wasn't re-fetched often/promptly enough and the picks
+     happened underneath it.
+   - `--watch` polls every **5 seconds** by default (`poll_seconds` in
+     `draft_tools/board.py:watch_board`) — chosen from Sleeper's own documented rate limit ("stay
+     under 1000 API calls per minute, otherwise you risk being IP-blocked," per
+     `docs.sleeper.com`): one picks-endpoint GET per poll at 5s means ~12 requests/minute, about
+     1% of that budget, so there's no reason to poll any slower. If a draft is moving unusually
+     fast (e.g. an all-bot rapid mock), it's safe to poll even faster — 1-second polling is still
+     only 60 req/min, 6% of the limit — there's no rate-limit reason to ever default back toward
+     the old 30s cadence that caused the missed-rounds problem above.
 3. Draft-day judgment the tool can't automate:
    - Positional runs: if a position is being drafted heavily by other teams, weigh reaching for
      the position against best-player-available — `draft board`'s ranking is value-only, it
