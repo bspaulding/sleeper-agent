@@ -114,9 +114,16 @@ purely informational tags, no reordering or filtering of the existing VORP-sorte
 
 ### 2c. Tier-break annotation
 
+`render_board` is a single flat list sorted by VORP across *all* positions (the existing
+cross-position "best available" view) — positions are interleaved by rank, not grouped. A
+full-width separator line between two adjacent-by-rank-but-different-position rows wouldn't mean
+anything, so tiers are computed **within each position independently** but rendered as an
+**inline per-row tag**, not a separator, so the flat cross-position ranking stays intact:
+
 Within each position (grouping the *available* board rows, not the full VORP table, by
-`position`), sort by `vorp_season` descending and insert a separator where the drop to the next
-player is large relative to the higher-ranked player:
+`position`), sort by `vorp_season` descending and assign a `tier` number starting at 1,
+incrementing every time the drop to the next player is large relative to the higher-ranked
+player:
 
 ```
 tier_break = (prev.vorp_season - next.vorp_season) / prev.vorp_season >= 0.20
@@ -124,11 +131,25 @@ tier_break = (prev.vorp_season - next.vorp_season) / prev.vorp_season >= 0.20
 
 (20% threshold — simple, deterministic, and directly testable against fixture VORP values;
 tune later if a real draft shows it's too sensitive/insensitive, per the `.claude/skills/`
-self-revision process). Render as a `---- tier break ----` line in `render_board`'s output
-between the two affected rows. Guard against division weirdness for `vorp_season <= 0` (already
+self-revision process). Guard against division weirdness for `vorp_season <= 0` (already
 possible per the existing percentile table showing negative VORP at deep ranks) — treat a
 negative-to-negative or zero-crossing transition as always a tier break rather than computing a
 percentage.
+
+Render each row with its position-local tier number appended, e.g.:
+
+```
+ 1. Saquon Barkley       RB  vorp=322.7  tier=1
+ 2. Jahmyr Gibbs         RB  vorp=257.4  tier=1
+ 3. Ja'Marr Chase        WR  vorp=245.0  tier=1
+ 4. Bijan Robinson       RB  vorp=210.3  tier=2
+ 5. Josh Jacobs          RB  vorp=195.1  tier=2
+ 6. Justin Jefferson     WR  vorp=180.0  tier=1
+```
+
+Scanning down, a jump in a *given position's* tier number (RB 1→2 between rows 2 and 4, despite
+row 3 being a different position in between) signals a real cliff for that position, without
+requiring the board to be grouped/re-sorted by position.
 
 ### 2d. What does *not* change
 
@@ -163,10 +184,11 @@ network calls):
 - Tag thresholds: a position exactly at hard-min tags `FLEX` not `NEED`; exactly at
   hard-min+FLEX-capacity tags `SURPLUS` not `FLEX` (boundary cases, off-by-one is the likely bug
   class here).
-- Tier-break: a fixture VORP list with one deliberate ≥20% gap and one <20% gap, asserting the
-  separator appears only at the real gap; a zero/negative-VORP boundary case.
-- `render_board` output format: summary line + tags + separator all present in one rendered
-  string for a small fixture board.
+- Tier-break: a fixture VORP list (grouped by position) with one deliberate ≥20% gap and one
+  <20% gap, asserting the tier number increments only at the real gap; a zero/negative-VORP
+  boundary case.
+- `render_board` output format: summary line + position tags + per-row tier numbers all present
+  in one rendered string for a small fixture board with interleaved positions.
 
 ## 5. Rollout
 
