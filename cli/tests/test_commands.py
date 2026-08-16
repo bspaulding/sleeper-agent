@@ -7,7 +7,6 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
 import polars as pl
 import pytest
 
@@ -361,7 +360,7 @@ def test_cmd_stats_vorp_writes_table_and_prints_top_players(
         schema_version=sleeper_sync.LEAGUE_SCHEMA_VERSION,
     )
 
-    weekly = pd.DataFrame(
+    weekly = pl.DataFrame(
         [
             {
                 "player_id": "00-A",
@@ -381,19 +380,17 @@ def test_cmd_stats_vorp_writes_table_and_prints_top_players(
             },
         ]
     )
-    ids = pd.DataFrame({"gsis_id": ["00-A", "00-B"], "sleeper_id": ["101", "102"]})
-
-    import polars as pl
+    ids = pl.DataFrame({"gsis_id": ["00-A", "00-B"], "sleeper_id": ["101", "102"]})
 
     from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 
     write_table(
-        pl.from_pandas(weekly),
+        weekly,
         stats_dir / "weekly" / "2025.parquet",
         schema_version=WEEKLY_SCHEMA_VERSION,
     )
     write_table(
-        pl.from_pandas(ids),
+        ids,
         stats_dir / "ids.parquet",
         schema_version=IDS_SCHEMA_VERSION,
     )

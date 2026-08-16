@@ -14,7 +14,7 @@ from (see IMPLEMENTATION_PLAN.md §3):
 Known v1 scope gap (see IMPLEMENTATION_PLAN.md deviation note): this covers
 QB/RB/WR/TE only. Team defense (`DEF`) fantasy scoring depends on team-level
 stats (points allowed, team sacks/INTs/fumble recoveries) that
-`nfl_data_py`'s per-player weekly stats don't carry — that needs a separate
+`nflreadpy`'s per-player weekly stats don't carry — that needs a separate
 team-defense stats source and is deferred, not silently wrong: `compute_vorp`
 only ever returns rows for `CORE_POSITIONS`.
 """

@@ -1,8 +1,8 @@
 """Orchestrates a full nflverse stats sync for a season.
 
-The `nfl_data_py` calls themselves are injected (defaulting to the thin
+The `nflreadpy` calls themselves are injected (defaulting to the thin
 wrappers in `stats/nflverse.py`) so this module is testable against fixture
-pandas DataFrames without touching the network — see `stats/nflverse.py`'s
+polars DataFrames without touching the network — see `stats/nflverse.py`'s
 docstring for why that's the seam here instead of `mock_http_server`.
 """
 
@@ -12,7 +12,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-import pandas as pd
 import polars as pl
 
 from sleeper_agent.stats import nflverse
@@ -40,18 +39,18 @@ def sync_stats(
     stats_dir: Path,
     *,
     fetch_weekly_stats: Callable[
-        [list[int]], pd.DataFrame
+        [list[int]], pl.DataFrame
     ] = nflverse.fetch_weekly_stats,
-    fetch_snap_counts: Callable[[list[int]], pd.DataFrame] = nflverse.fetch_snap_counts,
-    fetch_schedules: Callable[[list[int]], pd.DataFrame] = nflverse.fetch_schedules,
-    fetch_injuries: Callable[[list[int]], pd.DataFrame] = nflverse.fetch_injuries,
-    fetch_id_crosswalk: Callable[[], pd.DataFrame] = nflverse.fetch_id_crosswalk,
+    fetch_snap_counts: Callable[[list[int]], pl.DataFrame] = nflverse.fetch_snap_counts,
+    fetch_schedules: Callable[[list[int]], pl.DataFrame] = nflverse.fetch_schedules,
+    fetch_injuries: Callable[[list[int]], pl.DataFrame] = nflverse.fetch_injuries,
+    fetch_id_crosswalk: Callable[[], pl.DataFrame] = nflverse.fetch_id_crosswalk,
 ) -> StatsSyncResult:
-    weekly_df = pl.from_pandas(fetch_weekly_stats([season]))
-    snaps_df = pl.from_pandas(fetch_snap_counts([season]))
-    schedules_df = pl.from_pandas(fetch_schedules([season]))
-    injuries_df = pl.from_pandas(fetch_injuries([season]))
-    ids_df = pl.from_pandas(fetch_id_crosswalk())
+    weekly_df = fetch_weekly_stats([season])
+    snaps_df = fetch_snap_counts([season])
+    schedules_df = fetch_schedules([season])
+    injuries_df = fetch_injuries([season])
+    ids_df = fetch_id_crosswalk()
 
     write_table(
         weekly_df,

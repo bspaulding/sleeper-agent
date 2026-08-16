@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pandas as pd
+import polars as pl
 
 from sleeper_agent.stats.sync import sync_stats
 from sleeper_agent.storage.parquet_store import read_table
 
 
-def make_df(rows: list[dict[str, object]]) -> pd.DataFrame:
-    return pd.DataFrame(rows)
+def make_df(rows: list[dict[str, object]]) -> pl.DataFrame:
+    return pl.DataFrame(rows)
 
 
 def test_sync_stats_writes_every_table(tmp_path: Path) -> None:
