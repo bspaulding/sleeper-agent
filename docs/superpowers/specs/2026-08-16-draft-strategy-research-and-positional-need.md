@@ -87,28 +87,26 @@ Extend the models in `cli/src/sleeper_agent/models/sleeper.py`:
   today) and build `slot_to_roster_id` via `{int(k): v for k, v in (raw.get("slot_to_roster_id")
   or {}).items()}`.
 
-Add two new CLI args to `draft board` in `cli/src/sleeper_agent/commands/draft_cmd.py`:
+Add CLI args to `draft board` in `cli/src/sleeper_agent/commands/draft_cmd.py` matching the
+`--me`/`--roster-id` pair every other command module already uses (`value_cmd.py`'s `value
+roster`, `waiver_cmd.py`, `trade_cmd.py`, `wiki_cmd.py`, `sleeper_cmd.py`) — `draft board`
+currently has neither, so this is new to this command but not a new pattern in the codebase:
 
-- `--my-roster-id` (int, optional) — defaults to the existing `ME_ROSTER_ID = 5` convention
-  already duplicated across every other command module (`value_cmd.py`, `waiver_cmd.py`,
-  `trade_cmd.py`, etc.) — reuse that same value, don't invent a new one. Natural fit for league
-  mode, where the roster_id is stable across seasons.
-- `--my-draft-slot` (int, optional) — the slot number chosen when starting a mock (matches what
-  `draft.md` already tells you to note, e.g. "drafting from slot 8"). Works in either mode,
-  since `slot_to_roster_id` is now fetched unconditionally.
+- `--me` (`action="store_true"`) — resolves to the existing `ME_ROSTER_ID = 5` module-level
+  constant, same as everywhere else.
+- `--roster-id` (int, default `None`) — explicit roster_id override.
+- `--draft-slot` (int, default `None`) — new, specific to this command: the slot number chosen
+  when starting a mock draft (matches what `draft.md` already tells you to note, e.g. "drafting
+  from slot 8"), resolved via the fetched `Draft.slot_to_roster_id[args.draft_slot]`. Works in
+  either league or mock mode, since `slot_to_roster_id` is now fetched unconditionally (§2a
+  intro).
 
-Resolution order in `cmd_draft_board`: if `--my-draft-slot` is given, resolve it via the fetched
-`Draft.slot_to_roster_id[args.my_draft_slot]`; otherwise fall back to `--my-roster-id` (which
-itself defaults to `ME_ROSTER_ID`). **If the user explicitly wants no annotation at all**, that
-isn't reachable through these two args alone since `--my-roster-id` always has a default — add a
-third flag, `--no-annotate`, to suppress annotation entirely for ad-hoc value-check calls that
-aren't a live-draft turn. If neither `--my-draft-slot` nor `--my-roster-id` is passed, and
-`--no-annotate` is not passed, the default (`ME_ROSTER_ID`) still applies — i.e. **annotation is
-on by default**, matching that `draft board` is overwhelmingly used during an actual draft
-(`.claude/skills/draft.md` step 2). This is a deliberate change from the earlier "opt-in"
-framing: since `--my-roster-id` already has a working default for the common (league) case,
-requiring an extra flag to get annotation would make the more useful behavior the harder path to
-reach.
+Resolution order in `cmd_draft_board`, checked in this order, first match wins: `--draft-slot` →
+`--me` → `--roster-id`. If **none** of the three are passed, `my_roster_id` is `None` and the
+board renders exactly as it does today — no summary line, no tags, no tier numbers. This matches
+the rest of the CLI's convention exactly (every other command requires an explicit `--me` or
+`--roster-id` too; there's no silent default), so no extra `--no-annotate` flag is needed —
+annotation is opt-in by the mere absence of these args, same as everywhere else.
 
 ### 2b. Position-count annotation
 
@@ -186,12 +184,12 @@ reconstructed by hand (as the mock-draft-1 retrospective had to do after the fac
 ## 3. Wiring into skills/wiki
 
 - **`.claude/skills/draft.md`**: step 2 (`draft board --league-id <id> --rounds 15 [--watch]`)
-  gets a note that annotation is on by default (via `ME_ROSTER_ID`) and `--my-draft-slot` is
-  needed for a mock draft (where the default roster_id is meaningless); `--no-annotate` is
-  available for ad-hoc non-draft-turn value checks. Step 3's "Draft-day judgment the tool can't
+  gets `--me` added to the league-mode example and `--draft-slot <n>` added to the mock-draft
+  example, both required in practice to get the new annotation (matching the `--me`/`--roster-id`
+  convention already used by every other command). Step 3's "Draft-day judgment the tool can't
   automate" bullet on positional runs gets reworded: the position-count and tier-break facts are
-  now shown by the tool; weighing them (reach vs. wait, which position to prioritize) is still
-  the judgment call.
+  now shown by the tool when `--me`/`--draft-slot` is passed; weighing them (reach vs. wait,
+  which position to prioritize) is still the judgment call.
 - **`wiki/team/roster-philosophy.md`**: standing rule 1 ("check `value roster --me`... before
   taking the board's #1 suggestion") gets corrected — `value roster` reads
   `data/sleeper/rosters/{season}.parquet`, which doesn't exist until *after* a draft completes,
