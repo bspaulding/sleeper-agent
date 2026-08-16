@@ -226,9 +226,14 @@ by a **skill** (`.claude/skills/news-research.md`, see §9), not code, covering 
   takeaway;
 - a check-before-you-write step — skim the page's existing News section (including already-
   linked article URLs) first so repeat runs don't re-research or duplicate what's already there;
-- when to bother at all — e.g. always for rostered/targeted players and their teams ahead of a
-  lineup-affecting decision, opportunistically for others, rather than trying to cover the whole
-  league every run.
+- when to bother at all — two modes: a **targeted lookup** always for rostered/targeted players
+  and their teams ahead of a lineup-affecting decision, and a **full sweep** (periodic, or on
+  request) that is scoped by *time* rather than by player — tracked via a `last_swept` checkpoint
+  in `wiki/news-sources.md` — so it catches news about anyone newsworthy since the last scan, not
+  just players who already have a wiki page. (Changed 2026-08-15: full sweeps were originally
+  meant to iterate `wiki stale`-flagged pages, i.e. player-scoped; that missed anyone without an
+  existing page, so the checkpoint moved to source/time instead. See
+  `.claude/skills/news-research.md` §1 for the mechanics.)
 
 ## 6. Analysis & CLI capabilities
 

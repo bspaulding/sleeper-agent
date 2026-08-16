@@ -11,16 +11,33 @@ producing inconsistent, duplicated, or stale coverage.
 
 ## 1. Trigger conditions
 
-Research when:
+There are two distinct modes — don't conflate them:
 
-- **Always**: a rostered or trade/waiver/draft-targeted player, or their NFL team, ahead of a
-  decision that could change based on new information (injury, depth chart, suspension, coaching
-  change, etc.).
-- **Opportunistically**: any page `wiki stale --days N` flags, worked through during a normal
-  weekly pass rather than trying to cover the whole league at once.
+- **Targeted lookup** (always): a rostered or trade/waiver/draft-targeted player, or their NFL
+  team, ahead of a decision that could change based on new information (injury, depth chart,
+  suspension, coaching change, etc.). Scoped to that specific player/team only.
+- **Full sweep** (periodic, e.g. weekly, or whenever asked to "do a news research sweep"): scoped
+  by **time, not by player**. Don't pre-filter to rostered/stale-flagged players — that misses
+  news about anyone not currently on our roster (waiver targets, trade targets, players about to
+  become relevant). Instead:
+  1. Read `wiki/news-sources.md`'s `last_swept` frontmatter field (create the file with
+     `last_swept: null` if it doesn't exist yet — treat `null` as "look back ~7 days" for the
+     first sweep).
+  2. Search broadly across the league — general NFL news/injury/transaction feeds, not
+     player-by-player queries — for anything published **after** `last_swept`. The goal is
+     comprehensive coverage of what's new since the last scan, not a fixed player list.
+  3. For every relevant story found, file it on whatever page(s) it concerns — an existing
+     `wiki/players/*.md` page, or a **new one** via `sleeper-agent wiki scaffold` if the player
+     doesn't have a page yet (e.g. a waiver-relevant player who was never rostered), plus the
+     relevant `wiki/nfl-teams/*.md` page for team-level news.
+  4. When the sweep finishes, update `wiki/news-sources.md`'s `last_swept` to the current
+     date/time — this is the checkpoint the *next* full sweep reads, independent of any
+     individual page's own `last_researched` date.
 
-Don't research every rostered player every run — that's wasted effort for players whose situation
-hasn't changed. Use `wiki stale` to find out who actually needs a look, per item 4.
+`wiki stale --days N` (item 4 below) is still useful, but only as a secondary sanity check for the
+targeted-lookup mode (e.g. "has this specific rostered player been looked at recently") — it is
+not how a full sweep decides scope, since a player with no wiki page at all wouldn't show up in
+`wiki stale` regardless.
 
 ## 2. Source prioritization
 
