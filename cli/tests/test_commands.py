@@ -774,6 +774,31 @@ def test_cmd_value_rank_without_position_filter_includes_all_positions(
     assert "Runner B" in out
 
 
+def test_cmd_value_rank_excludes_players_with_no_nfl_team(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+    write_table(
+        pl.DataFrame(
+            {"player_id": ["101", "102"], "team": ["KC", None]},
+        ),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season="2025", position=None, top=20)
+    exit_code = value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Runner A" in out
+    assert "Runner B" not in out
+
+
 def test_cmd_value_roster_prints_positional_breakdown(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -1056,6 +1081,54 @@ def test_cmd_draft_board_prints_available_players(
     assert exit_code == 0
     assert "Best available by value:" in out
     assert "A" in out
+
+
+def test_cmd_draft_board_excludes_players_with_no_nfl_team(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["Rostered Guy", "Teamless Guy"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(
+        pl.DataFrame({"player_id": ["1", "2"], "team": ["KC", ""]}),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Rostered Guy" in out
+    assert "Teamless Guy" not in out
 
 
 def test_cmd_draft_board_reports_missing_vorp(

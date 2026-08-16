@@ -96,6 +96,25 @@ def compute_injury(injuries: pl.DataFrame, gsis_id: str) -> InjuryInfo:
     )
 
 
+def filter_rostered(vorp_df: pl.DataFrame, players_df: pl.DataFrame) -> pl.DataFrame:
+    """Drop VORP rows for players with no current NFL team on record.
+
+    Sleeper's own `status` field (e.g. `"Active"`) doesn't mean "currently on
+    an NFL roster" — `team` is the actual signal, and VORP data alone never
+    carries it (see `wiki/team/roster-philosophy.md` §3, filed after the
+    first 2026 mock draft recommended five players with no NFL team). A
+    player missing from `players_df` entirely (a sync gap, not evidence of
+    anything) is kept rather than dropped — we only exclude players we have
+    positive evidence are off a roster.
+    """
+    off_roster_ids = set(
+        players_df.filter(pl.col("team").is_null() | (pl.col("team") == ""))[
+            "player_id"
+        ].to_list()
+    )
+    return vorp_df.filter(~pl.col("sleeper_id").is_in(list(off_roster_ids)))
+
+
 def gsis_id_for_sleeper_id(ids: pl.DataFrame, sleeper_id: str) -> str | None:
     """Reverse-lookup a gsis_id from a sleeper_id via the nflverse id crosswalk.
 

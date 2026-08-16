@@ -9,12 +9,14 @@ import polars as pl
 
 from sleeper_agent.config import data_dir, find_repo_root, wiki_dir
 from sleeper_agent.sleeper_client import sync as sleeper_sync
+from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
 from sleeper_agent.value.scoring import (
     InjuryReported,
     compute_injury,
     compute_trend,
+    filter_rostered,
     gsis_id_for_sleeper_id,
     recent_news_excerpt,
 )
@@ -62,6 +64,13 @@ def _read_vorp(root: Path, season: str) -> pl.DataFrame:
     if not path.exists():
         raise VorpNotComputedError(season)
     return read_table(path, expected_schema_version=VORP_SCHEMA_VERSION)
+
+
+def _read_players(root: Path) -> pl.DataFrame | None:
+    path = data_dir(root) / "sleeper" / "players.parquet"
+    if not path.exists():
+        return None
+    return read_table(path, expected_schema_version=PLAYERS_SCHEMA_VERSION)
 
 
 def cmd_value_player(args: argparse.Namespace, *, repo_root: Path | None = None) -> int:
@@ -131,6 +140,9 @@ def cmd_value_player(args: argparse.Namespace, *, repo_root: Path | None = None)
 def cmd_value_rank(args: argparse.Namespace, *, repo_root: Path | None = None) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
     vorp_df = _read_vorp(root, args.season)
+    players_df = _read_players(root)
+    if players_df is not None:
+        vorp_df = filter_rostered(vorp_df, players_df)
     if args.position:
         vorp_df = vorp_df.filter(pl.col("position") == args.position)
     ranked = vorp_df.sort("vorp_season", descending=True).head(args.top)

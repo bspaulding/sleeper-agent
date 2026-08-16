@@ -28,7 +28,9 @@ from sleeper_agent.sleeper_client.draft import (
 )
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
 from sleeper_agent.sleeper_client.league import fetch_league
+from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
+from sleeper_agent.value.scoring import filter_rostered
 
 ME_ROSTER_ID = 5
 VORP_SCHEMA_VERSION = 1
@@ -78,6 +80,13 @@ def _read_vorp(root: Path, season: str) -> pl.DataFrame | None:
     if not path.exists():
         return None
     return read_table(path, expected_schema_version=VORP_SCHEMA_VERSION)
+
+
+def _read_players(root: Path) -> pl.DataFrame | None:
+    path = data_dir(root) / "sleeper" / "players.parquet"
+    if not path.exists():
+        return None
+    return read_table(path, expected_schema_version=PLAYERS_SCHEMA_VERSION)
 
 
 def cmd_draft_keepers(
@@ -204,6 +213,10 @@ def cmd_draft_board(
             f"no VORP data for season {value_season} — run `stats vorp --season {value_season}` first"
         )
         return 1
+
+    players_df = _read_players(root)
+    if players_df is not None:
+        vorp_df = filter_rostered(vorp_df, players_df)
 
     top_n = args.rounds * num_teams
 

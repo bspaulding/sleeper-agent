@@ -9,6 +9,7 @@ from sleeper_agent.value.scoring import (
     NoInjuryOnRecord,
     compute_injury,
     compute_trend,
+    filter_rostered,
     find_player_wiki_page,
     gsis_id_for_sleeper_id,
     recent_news_excerpt,
@@ -144,3 +145,40 @@ def test_recent_news_excerpt_returns_up_to_limit_bulleted_lines(tmp_path: Path) 
 
 def test_recent_news_excerpt_returns_empty_when_page_missing(tmp_path: Path) -> None:
     assert recent_news_excerpt(tmp_path, "999") == []
+
+
+def test_filter_rostered_drops_players_with_null_or_empty_team() -> None:
+    vorp = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2", "3", "4"],
+            "name": ["Rostered", "Null Team", "Empty Team", "Unknown To Players"],
+            "position": ["RB", "RB", "RB", "RB"],
+            "vorp_season": [10.0, 20.0, 30.0, 40.0],
+        }
+    )
+    players = pl.DataFrame(
+        {
+            "player_id": ["1", "2", "3"],
+            "team": ["KC", None, ""],
+        }
+    )
+
+    result = filter_rostered(vorp, players)
+
+    assert set(result["sleeper_id"].to_list()) == {"1", "4"}
+
+
+def test_filter_rostered_keeps_everyone_when_no_players_are_off_roster() -> None:
+    vorp = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A", "B"],
+            "position": ["RB", "WR"],
+            "vorp_season": [10.0, 20.0],
+        }
+    )
+    players = pl.DataFrame({"player_id": ["1", "2"], "team": ["KC", "BUF"]})
+
+    result = filter_rostered(vorp, players)
+
+    assert set(result["sleeper_id"].to_list()) == {"1", "2"}
