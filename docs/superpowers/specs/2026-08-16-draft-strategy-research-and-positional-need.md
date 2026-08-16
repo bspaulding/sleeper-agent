@@ -190,11 +190,14 @@ reconstructed by hand (as the mock-draft-1 retrospective had to do after the fac
   automate" bullet on positional runs gets reworded: the position-count and tier-break facts are
   now shown by the tool when `--me`/`--draft-slot` is passed; weighing them (reach vs. wait,
   which position to prioritize) is still the judgment call.
-- **`wiki/team/roster-philosophy.md`**: standing rule 1 ("check `value roster --me`... before
-  taking the board's #1 suggestion") gets corrected — `value roster` reads
+- **`wiki/team/roster-philosophy.md`**: standing rule 1 ("Check positional need against the
+  roster grid (below) before taking the board's #1 suggestion") currently doesn't name a
+  mechanism for that check — make it concrete by pointing at `draft board --me`'s new
+  live-annotation output as exactly that mechanism (worth being explicit that this is *new*: the
+  only other roster-positional-breakdown tool, `value roster --me`, reads
   `data/sleeper/rosters/{season}.parquet`, which doesn't exist until *after* a draft completes,
-  so it was never actually usable mid-draft. Point instead at `draft board`'s new annotation as
-  the live source of truth for "my roster so far." Add the new standing-rules pointer to
+  so it was never actually usable mid-draft — `draft board`'s annotation is the first tool
+  support for this rule that works live). Add a new standing-rules line pointing at
   `wiki/team/draft-strategy.md` from §1 above.
 
 ## 4. Tests
