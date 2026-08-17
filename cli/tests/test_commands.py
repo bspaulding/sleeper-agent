@@ -1505,6 +1505,52 @@ def test_cmd_draft_board_annotates_with_draft_slot_in_mock_mode(
     assert "RB 0/2" in out
 
 
+def test_cmd_draft_board_reports_unresolvable_draft_slot(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/mockdid1":
+            # only slot 8 is mapped for this mock; slot 3 is not present
+            return json_response(
+                _draft_object_payload(draft_id="mockdid1", slot_to_roster_id={"8": 42})
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="mockdid1",
+        rounds=15,
+        watch=False,
+        value_season="2026",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=3,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "--draft-slot 3" in out
+    assert "[8]" in out
+
+
 def test_cmd_draft_board_with_draft_id_requires_value_season(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

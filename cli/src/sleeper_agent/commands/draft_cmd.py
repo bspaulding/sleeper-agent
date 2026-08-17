@@ -238,6 +238,12 @@ def cmd_draft_board(
     my_roster_id: int | None = None
     if args.draft_slot is not None:
         my_roster_id = draft.slot_to_roster_id.get(args.draft_slot)
+        if my_roster_id is None:
+            print(
+                f"--draft-slot {args.draft_slot} is not in this draft's "
+                f"slot_to_roster_id (valid slots: {sorted(draft.slot_to_roster_id)})"
+            )
+            return 1
     elif args.me:
         my_roster_id = ME_ROSTER_ID
     elif args.roster_id is not None:

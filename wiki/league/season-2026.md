@@ -38,9 +38,11 @@ for the rules themselves.
 - Run `draft keepers --me --season 2026` well before Aug 28 to settle the 2 keeper picks (see
   `.claude/skills/draft.md`).
 - Do at least one or two Sleeper mock drafts before Aug 28-29 to rehearse tiers/pacing — run
-  `draft board --draft-id <mock-draft-id> --value-season 2026 --watch` alongside a mock draft
-  room for a live best-available-by-value view (mock drafts have no league to resolve
-  `--league-id` against, hence the direct `--draft-id` path).
+  `draft board --draft-id <mock-draft-id> --value-season 2026 --draft-slot <n> --watch` alongside
+  a mock draft room for a live best-available-by-value view (mock drafts have no league to
+  resolve `--league-id` against, hence the direct `--draft-id` path). `--draft-slot <n>` is the
+  slot number chosen when starting the mock — required for roster-need annotation there, since a
+  mock draft has no stable roster_id and `--me` won't resolve to anything meaningful.
 - Keep news-research passes (`.claude/skills/news-research.md`) going on rostered/likely-keeper
   players in the run-up, since keeper value calls should reflect current camp/depth-chart news,
   not just last season's VORP.

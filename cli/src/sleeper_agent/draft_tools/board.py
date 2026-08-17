@@ -105,15 +105,21 @@ ROSTER_SUMMARY_POSITIONS = ("QB", "RB", "WR", "TE", "DEF")
 def render_roster_summary(
     counts: dict[str, int], requirement: RosterRequirement
 ) -> str:
-    parts = []
-    for position in ROSTER_SUMMARY_POSITIONS:
-        hard_min = requirement.hard_min.get(position, 0)
-        count = counts.get(position, 0)
-        part = f"{position} {count}/{hard_min}"
-        if position in FLEX_ELIGIBLE_POSITIONS and requirement.flex_capacity:
-            part += f" (+{requirement.flex_capacity} FLEX)"
-        parts.append(part)
-    return "My roster so far: " + "  ".join(parts)
+    parts = [
+        f"{position} {counts.get(position, 0)}/{requirement.hard_min.get(position, 0)}"
+        for position in ROSTER_SUMMARY_POSITIONS
+    ]
+    summary = "My roster so far: " + "  ".join(parts)
+    if requirement.flex_capacity:
+        flex_positions = "/".join(
+            position
+            for position in ROSTER_SUMMARY_POSITIONS
+            if position in FLEX_ELIGIBLE_POSITIONS
+        )
+        summary += (
+            f"  ({requirement.flex_capacity} FLEX slots shared across {flex_positions})"
+        )
+    return summary
 
 
 def render_board(

@@ -11,6 +11,7 @@ from sleeper_agent.draft_tools.board import (
     my_roster_positions,
     position_tag,
     render_board,
+    render_roster_summary,
     roster_requirement_from_draft,
     watch_board,
 )
@@ -368,12 +369,21 @@ def test_render_board_with_annotation_adds_summary_tags_and_tiers() -> None:
 
     assert "My roster so far:" in rendered
     assert "RB 5/2" in rendered
-    assert "(+2 FLEX)" in rendered
     assert "WR 1/2" in rendered
+    assert "(2 FLEX slots shared across RB/WR/TE)" in rendered
     # RB is drafted well past hard_min + flex_capacity (5 >= 2 + 2) -> SURPLUS
     assert "RB  vorp=   50.0 tier=1 [SURPLUS]" in rendered
     # WR is below hard_min (1 < 2) -> NEED
     assert "WR  vorp=   30.0 tier=1 [NEED]" in rendered
+
+
+def test_render_roster_summary_omits_flex_note_when_no_flex_capacity() -> None:
+    requirement = RosterRequirement(hard_min={"QB": 1, "DEF": 1}, flex_capacity=0)
+
+    summary = render_roster_summary({"QB": 1}, requirement)
+
+    assert summary == "My roster so far: QB 1/1  RB 0/0  WR 0/0  TE 0/0  DEF 0/1"
+    assert "FLEX" not in summary
 
 
 def test_render_board_annotation_requires_both_counts_and_requirement() -> None:

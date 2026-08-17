@@ -83,6 +83,11 @@ which implies a much tighter allocation: `QB≥1, RB≥2, WR≥2, TE≥1, DEF≥
 with the 2 FLEX + 6 bench spots as the only real room for leaning into whichever position is
 paying off that draft. The 8 RB mock-draft-1 result used up nearly all of that flexible room on
 one position, at the direct cost of a completely unfillable DEF slot and zero WR bench cushion.
+Note that `draft board`'s per-row NEED/FLEX/SURPLUS tags check each of RB/WR/TE against the
+*full* FLEX capacity independently (e.g. "would a 3rd RB still be FLEX-eligible" ignores how many
+FLEX spots WR and TE have already claimed) — a deliberate approximation, not true joint
+allocation across the shared pool, so don't read three FLEX-tagged rows across different
+positions as three additional slots.
 
 ## Sources
 
