@@ -439,6 +439,48 @@ def test_watch_board_works_without_a_log_path() -> None:
     assert len(rendered_calls) == 1
 
 
+def test_watch_board_annotates_when_my_roster_id_given(tmp_path: Path) -> None:
+    vorp_df = make_vorp_df()
+    requirement = RosterRequirement(
+        hard_min={"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}, flex_capacity=2
+    )
+    rendered_calls: list[str] = []
+
+    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
+        return [make_pick(1, player_id="99", roster_id=5, player_name="Mine")]
+
+    watch_board(
+        "did",
+        vorp_df,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=rendered_calls.append,
+        fetch_picks=fake_fetch,
+        my_roster_id=5,
+        requirement=requirement,
+    )
+
+    assert len(rendered_calls) == 1
+    assert "My roster so far:" in rendered_calls[0]
+    assert "RB 1/2" in rendered_calls[0]
+
+
+def test_watch_board_without_my_roster_id_is_unannotated(tmp_path: Path) -> None:
+    vorp_df = make_vorp_df()
+    rendered_calls: list[str] = []
+
+    watch_board(
+        "did",
+        vorp_df,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=rendered_calls.append,
+        fetch_picks=lambda draft_id, *, base_url: [],
+    )
+
+    assert "My roster so far" not in rendered_calls[0]
+
+
 def make_draft(
     draft_id: str = "did",
     league_id: str = "lid",

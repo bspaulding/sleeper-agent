@@ -162,6 +162,8 @@ def watch_board(
     render: Callable[[str], None] = print,
     fetch_picks: Callable[..., list[DraftPick]] = fetch_draft_picks,
     log_path: Path | None = None,
+    my_roster_id: int | None = None,
+    requirement: RosterRequirement | None = None,
 ) -> None:
     previous_drafted_ids: frozenset[str] | None = None
     iteration = 0
@@ -170,7 +172,16 @@ def watch_board(
         drafted_ids = frozenset(pick.player_id for pick in picks)
         if drafted_ids != previous_drafted_ids:
             board = board_view(vorp_df, picks)
-            rendered = render_board(board)
+            my_counts = (
+                my_roster_positions(picks, my_roster_id)
+                if my_roster_id is not None
+                else None
+            )
+            rendered = render_board(
+                board,
+                my_counts=my_counts,
+                requirement=requirement if my_roster_id is not None else None,
+            )
             render(rendered)
             if log_path is not None:
                 log_path.parent.mkdir(parents=True, exist_ok=True)
