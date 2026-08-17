@@ -33,21 +33,28 @@ This is close to a full startup draft each year (§0 of `IMPLEMENTATION_PLAN.md`
 supplemental round — treat it that way:
 
 1. Before the draft: review `value rank --top 50` (and by position) to build a mental tier list.
-   Check `wiki/team/roster-philosophy.md` and `wiki/team/keeper-strategy.md` if they exist for
-   standing strategy notes from prior seasons.
-2. During the draft: `draft board --league-id <id> --rounds 15 [--watch]` shows best-available by
-   value, already excluding every drafted and kept player. Use `--watch` for an unattended or
+   Check `wiki/team/roster-philosophy.md`, `wiki/team/draft-strategy.md`, and
+   `wiki/team/keeper-strategy.md` if they exist for standing strategy notes from prior seasons
+   and general drafting theory.
+2. During the draft: `draft board --league-id <id> --rounds 15 --me [--watch]` shows
+   best-available by value, already excluding every drafted and kept player. **Always pass
+   `--me`** (or `--roster-id <id>` if not drafting from this team's usual roster_id) — without
+   it, the board has no roster-need annotation at all (no "My roster so far" summary, no
+   NEED/FLEX/SURPLUS tags, no per-position `tier=N` numbers), which is exactly the gap that let
+   the first 2026 mock draft go 8 RB/2 WR/0 DEF unnoticed. Use `--watch` for an unattended or
    semi-attended session — it polls and re-renders on every change, and mirrors the board to a
    decision-log entry (`decisions/<season>/<date>-draft-live.md`) so there's a record even if
    nobody's watching every pick.
    - For a **mock draft** (practice run before the real draft — no league object exists for it),
-     use `draft board --draft-id <mock-draft-id> --value-season <year> [--num-teams <n>] [--watch]`
-     instead: it points straight at the draft's public picks endpoint, skipping the league lookup
-     `--league-id` needs. `--value-season` is required in this mode (there's no league to infer it
-     from); `--num-teams` defaults to 12 (this league's size) and only matters for `--rounds`
-     sizing. Do a mock draft or two in the run-up to the real one — it's cheap rehearsal for tier
-     breaks and pacing, and a chance to sanity-check the value rankings against how a real room
-     actually drafts.
+     use `draft board --draft-id <mock-draft-id> --value-season <year> --draft-slot <n>
+     [--num-teams <n>] [--watch]` instead: it points straight at the draft's public picks
+     endpoint, skipping the league lookup `--league-id` needs. `--value-season` is required in
+     this mode (there's no league to infer it from); `--draft-slot` is the slot number chosen
+     when starting the mock (needed for annotation, since a mock draft has no stable roster_id —
+     `--me` won't resolve to anything meaningful there); `--num-teams` defaults to 12 (this
+     league's size) and only matters for `--rounds` sizing. Do a mock draft or two in the run-up
+     to the real one — it's cheap rehearsal for tier breaks and pacing, and a chance to
+     sanity-check the value rankings against how a real room actually drafts.
    - **Never recommend a pick off stale data.** Fetch a fresh `draft board` immediately before
      every recommendation — even one from moments ago is not good enough, since picks can happen
      faster than the conversation moves (bot-heavy mock/live drafts especially). This applies
@@ -66,8 +73,12 @@ supplemental round — treat it that way:
      the old 30s cadence that caused the missed-rounds problem above.
 3. Draft-day judgment the tool can't automate:
    - Positional runs: if a position is being drafted heavily by other teams, weigh reaching for
-     the position against best-player-available — `draft board`'s ranking is value-only, it
-     doesn't model positional scarcity dynamics mid-draft.
+     the position against best-player-available. `draft board --me` now shows the facts this
+     judgment call needs — my-roster position counts vs. the roster grid, and a per-row `tier=N`
+     number that jumps when a real value cliff hits a position — but weighing reach-vs-wait
+     against those facts is still a judgment call the tool doesn't make for you. See
+     `wiki/team/draft-strategy.md` for the general reasoning (tiered drafting, RB strategy
+     spectrum).
    - Bye-week and roster-construction balance (`PROJECT_PLAN.md`'s best-ball note means no
      start/sit optimization is needed — but roster *construction* balance, e.g. not stacking too
      many players from the same bye week at a thin position, still matters).

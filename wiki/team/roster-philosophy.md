@@ -13,7 +13,11 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
 1. **Never take pure best-player-available (highest VORP) blind.** RB carries roughly 2x WR's
    value-over-replacement at every depth down to about rank 24 (see below) — a pure-VORP policy
    will over-draft RB by construction, not by chance. Check positional need against the roster
-   grid (below) before taking the board's #1 suggestion.
+   grid (below) before taking the board's #1 suggestion — `draft board --me` (or `--draft-slot`
+   for a mock) now shows this live: a "My roster so far" summary plus a NEED/FLEX/SURPLUS tag on
+   every row, so this check no longer has to be done by hand. See also
+   `wiki/team/draft-strategy.md` for the general theory behind this (VBD baselines, tiered
+   drafting, RB strategy spectrum).
 2. **Draft exactly one DEF, rounds 10–15.** Required starting slot, no bench value in a second
    one, no positional runs on it worth reaching into early for — see §4.
 3. **Never spend a pick on a kicker.** No K slot exists in this league.
@@ -31,6 +35,11 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
    `nfl_data_py` or repoint the URL in `stats/nflverse.py`), re-sync, and recompute 2025 VORP
    before the real draft on Aug 29 — this is a fixable bug on a deadline, not a "wait for the data"
    situation.
+7. **Read `wiki/team/draft-strategy.md` before a draft, not just this file.** It holds the
+   general drafting-strategy research (VBD baselines, RB strategy spectrum, tiered drafting,
+   best-ball positional-allocation reasoning) that motivated rule 1 and the `draft board`
+   annotation above — this file stays scoped to this team's own retrospectives and specific
+   rules.
 
 ## Roster grid (this league, 2026)
 
