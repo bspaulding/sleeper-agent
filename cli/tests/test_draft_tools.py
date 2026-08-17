@@ -393,26 +393,40 @@ def test_watch_board_works_without_a_log_path() -> None:
     assert len(rendered_calls) == 1
 
 
-def make_draft(**overrides: object) -> Draft:
-    defaults: dict[str, object] = dict(
-        draft_id="did",
-        league_id="lid",
-        season="2026",
-        status="drafting",
-        draft_type="snake",
-        rounds=15,
-        num_teams=12,
-        start_time_ms=None,
-        slots_qb=1,
-        slots_rb=2,
-        slots_wr=2,
-        slots_te=1,
-        slots_flex=2,
-        slots_def=1,
-        slot_to_roster_id={1: 5},
+def make_draft(
+    draft_id: str = "did",
+    league_id: str = "lid",
+    season: str = "2026",
+    status: str = "drafting",
+    draft_type: str = "snake",
+    rounds: int = 15,
+    num_teams: int = 12,
+    start_time_ms: int | None = None,
+    slots_qb: int = 1,
+    slots_rb: int = 2,
+    slots_wr: int = 2,
+    slots_te: int = 1,
+    slots_flex: int = 2,
+    slots_def: int = 1,
+    slot_to_roster_id: dict[int, int] | None = None,
+) -> Draft:
+    return Draft(
+        draft_id=draft_id,
+        league_id=league_id,
+        season=season,
+        status=status,
+        draft_type=draft_type,
+        rounds=rounds,
+        num_teams=num_teams,
+        start_time_ms=start_time_ms,
+        slots_qb=slots_qb,
+        slots_rb=slots_rb,
+        slots_wr=slots_wr,
+        slots_te=slots_te,
+        slots_flex=slots_flex,
+        slots_def=slots_def,
+        slot_to_roster_id=slot_to_roster_id or {1: 5},
     )
-    defaults.update(overrides)
-    return Draft(**defaults)  # type: ignore[arg-type]
 
 
 def test_roster_requirement_from_draft_reads_slot_counts() -> None:

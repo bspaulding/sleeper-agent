@@ -21,7 +21,6 @@ from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client.draft import fetch_draft_picks
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
 
-
 FLEX_ELIGIBLE_POSITIONS = frozenset({"RB", "WR", "TE"})
 
 
