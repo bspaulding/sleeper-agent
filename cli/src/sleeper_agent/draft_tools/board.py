@@ -11,7 +11,7 @@ unattended Routine run leaves a record.
 from __future__ import annotations
 
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -53,6 +53,18 @@ def position_tag(position: str, count: int, requirement: RosterRequirement) -> s
     if count < flex_ceiling:
         return "FLEX"
     return "SURPLUS"
+
+
+def my_roster_positions(
+    picks: Sequence[DraftPick], my_roster_id: int
+) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for pick in picks:
+        if pick.roster_id != my_roster_id:
+            continue
+        position = pick.player_position or "UNK"
+        counts[position] = counts.get(position, 0) + 1
+    return counts
 
 
 def board_view(

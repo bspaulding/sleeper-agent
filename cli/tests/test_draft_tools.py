@@ -7,6 +7,7 @@ import polars as pl
 from sleeper_agent.draft_tools.board import (
     RosterRequirement,
     board_view,
+    my_roster_positions,
     position_tag,
     render_board,
     roster_requirement_from_draft,
@@ -39,6 +40,7 @@ def make_pick(
     is_keeper: bool = False,
     player_id: str = "1",
     roster_id: int = 5,
+    player_name: str = "Test Player",
 ) -> DraftPick:
     return DraftPick(
         draft_id="did",
@@ -49,7 +51,7 @@ def make_pick(
         player_id=player_id,
         is_keeper=is_keeper,
         picked_by="u1",
-        player_name="Test Player",
+        player_name=player_name,
         player_position="RB",
     )
 
@@ -459,3 +461,43 @@ def test_position_tag_non_flex_eligible_position_skips_flex_tier() -> None:
     requirement = RosterRequirement(hard_min={"QB": 1}, flex_capacity=2)
 
     assert position_tag("QB", 1, requirement) == "SURPLUS"
+
+
+# --- my_roster_positions --------------------------------------------------
+
+
+def test_my_roster_positions_counts_only_my_roster_id() -> None:
+    picks = [
+        make_pick(1, player_id="1", roster_id=5, player_name="A"),
+        make_pick(2, player_id="2", roster_id=5, player_name="B"),
+        make_pick(1, player_id="3", roster_id=8, player_name="C"),
+    ]
+
+    counts = my_roster_positions(picks, my_roster_id=5)
+
+    assert counts == {"RB": 2}  # make_pick's default player_position is "RB"
+
+
+def test_my_roster_positions_buckets_missing_position_as_unk() -> None:
+    picks = [
+        DraftPick(
+            draft_id="did",
+            round=1,
+            pick_no=1,
+            draft_slot=1,
+            roster_id=5,
+            player_id="1",
+            is_keeper=False,
+            picked_by="u1",
+            player_name="No Position",
+            player_position=None,
+        )
+    ]
+
+    counts = my_roster_positions(picks, my_roster_id=5)
+
+    assert counts == {"UNK": 1}
+
+
+def test_my_roster_positions_empty_for_no_picks() -> None:
+    assert my_roster_positions([], my_roster_id=5) == {}
