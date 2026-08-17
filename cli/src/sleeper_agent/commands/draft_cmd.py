@@ -10,7 +10,13 @@ from pathlib import Path
 import polars as pl
 
 from sleeper_agent.config import data_dir, decisions_dir, find_repo_root
-from sleeper_agent.draft_tools.board import board_view, render_board, watch_board
+from sleeper_agent.draft_tools.board import (
+    board_view,
+    my_roster_positions,
+    render_board,
+    roster_requirement_from_draft,
+    watch_board,
+)
 from sleeper_agent.draft_tools.keepers import (
     KeeperCandidate,
     build_season_chain,
@@ -23,6 +29,7 @@ from sleeper_agent.sleeper_client.draft import (
     KeeperEligibleUndraftedDefault,
     KeeperIneligibleCostBelowRoundOne,
     KeeperIneligibleMaxYearsReached,
+    fetch_draft,
     fetch_draft_picks,
     keeper_history,
 )
@@ -71,6 +78,18 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         type=int,
         default=12,
         help="Only used with --draft-id, where there's no league.settings to read it from.",
+    )
+    board_parser.add_argument("--me", action="store_true")
+    board_parser.add_argument("--roster-id", type=int, default=None)
+    board_parser.add_argument(
+        "--draft-slot",
+        type=int,
+        default=None,
+        help=(
+            "Resolve my roster_id from this draft's slot_to_roster_id map — needed for "
+            "a mock draft (no stable roster_id across seasons), or as an alternative to "
+            "--me/--roster-id in league mode."
+        ),
     )
     board_parser.set_defaults(func=cmd_draft_board)
 
@@ -214,6 +233,16 @@ def cmd_draft_board(
         )
         return 1
 
+    draft = fetch_draft(draft_id, base_url=base_url)
+    requirement = roster_requirement_from_draft(draft)
+    my_roster_id: int | None = None
+    if args.draft_slot is not None:
+        my_roster_id = draft.slot_to_roster_id.get(args.draft_slot)
+    elif args.me:
+        my_roster_id = ME_ROSTER_ID
+    elif args.roster_id is not None:
+        my_roster_id = args.roster_id
+
     players_df = _read_players(root)
     if players_df is not None:
         vorp_df = filter_rostered(vorp_df, players_df)
@@ -230,10 +259,21 @@ def cmd_draft_board(
             base_url=base_url,
             log_path=log_path,
             max_iterations=max_watch_iterations,
+            my_roster_id=my_roster_id,
+            requirement=requirement if my_roster_id is not None else None,
         )
         return 0
 
     picks = fetch_draft_picks(draft_id, base_url=base_url)
     board = board_view(vorp_df, picks, top_n=top_n)
-    print(render_board(board))
+    my_counts = (
+        my_roster_positions(picks, my_roster_id) if my_roster_id is not None else None
+    )
+    print(
+        render_board(
+            board,
+            my_counts=my_counts,
+            requirement=requirement if my_roster_id is not None else None,
+        )
+    )
     return 0

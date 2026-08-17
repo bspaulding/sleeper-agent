@@ -1041,6 +1041,26 @@ def _league_payload(draft_id: str | None = "did1") -> dict[str, object]:
     }
 
 
+def _draft_object_payload(
+    draft_id: str = "did1", slot_to_roster_id: dict[str, int] | None = None
+) -> dict[str, object]:
+    return {
+        "draft_id": draft_id,
+        "type": "snake",
+        "settings": {
+            "rounds": 15,
+            "teams": 12,
+            "slots_qb": 1,
+            "slots_rb": 2,
+            "slots_wr": 2,
+            "slots_te": 1,
+            "slots_flex": 2,
+            "slots_def": 1,
+        },
+        "slot_to_roster_id": slot_to_roster_id or {"1": 5},
+    }
+
+
 def test_cmd_draft_board_prints_available_players(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -1060,6 +1080,8 @@ def test_cmd_draft_board_prints_available_players(
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
             return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
         if request.path == "/draft/did1/picks":
             return json_response([])
         raise AssertionError(f"unexpected path {request.path}")
@@ -1071,6 +1093,9 @@ def test_cmd_draft_board_prints_available_players(
         watch=False,
         value_season=None,
         num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1081,6 +1106,7 @@ def test_cmd_draft_board_prints_available_players(
     assert exit_code == 0
     assert "Best available by value:" in out
     assert "A" in out
+    assert "My roster so far" not in out  # no --me/--roster-id/--draft-slot given
 
 
 def test_cmd_draft_board_excludes_players_with_no_nfl_team(
@@ -1108,6 +1134,8 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
             return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
         if request.path == "/draft/did1/picks":
             return json_response([])
         raise AssertionError(f"unexpected path {request.path}")
@@ -1119,6 +1147,9 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
         watch=False,
         value_season=None,
         num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1217,6 +1248,8 @@ def test_cmd_draft_board_watch_writes_decision_log(
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
             return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
         if request.path == "/draft/did1/picks":
             return json_response([])
         raise AssertionError(f"unexpected path {request.path}")
@@ -1228,6 +1261,9 @@ def test_cmd_draft_board_watch_writes_decision_log(
         watch=True,
         value_season=None,
         num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1261,6 +1297,8 @@ def test_cmd_draft_board_with_draft_id_skips_league_lookup(
     write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
 
     def handler(request: Request) -> Response:
+        if request.path == "/draft/mockdid1":
+            return json_response(_draft_object_payload(draft_id="mockdid1"))
         if request.path == "/draft/mockdid1/picks":
             return json_response([])
         raise AssertionError(f"unexpected path {request.path}")
@@ -1272,6 +1310,9 @@ def test_cmd_draft_board_with_draft_id_skips_league_lookup(
         watch=False,
         value_season="2026",
         num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
@@ -1282,6 +1323,186 @@ def test_cmd_draft_board_with_draft_id_skips_league_lookup(
     assert exit_code == 0
     assert "Best available by value:" in out
     assert "A" in out
+
+
+def test_cmd_draft_board_annotates_with_me_flag(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A", "B"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            # roster_id 5 matches draft_cmd.ME_ROSTER_ID
+            return json_response(
+                [
+                    {
+                        "draft_id": "did1",
+                        "round": 1,
+                        "pick_no": 1,
+                        "draft_slot": 1,
+                        "roster_id": 5,
+                        "player_id": "3",
+                        "is_keeper": False,
+                        "picked_by": "u1",
+                        "metadata": {
+                            "first_name": "Already",
+                            "last_name": "Drafted",
+                            "position": "RB",
+                        },
+                    }
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=True,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "My roster so far:" in out
+    assert "RB 1/2" in out
+
+
+def test_cmd_draft_board_annotates_with_roster_id_flag(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A", "B"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload(slot_to_roster_id={"1": 7}))
+        if request.path == "/draft/did1/picks":
+            # roster_id 7 matches args.roster_id below (a non-ME_ROSTER_ID value)
+            return json_response(
+                [
+                    {
+                        "draft_id": "did1",
+                        "round": 1,
+                        "pick_no": 1,
+                        "draft_slot": 1,
+                        "roster_id": 7,
+                        "player_id": "3",
+                        "is_keeper": False,
+                        "picked_by": "u1",
+                        "metadata": {
+                            "first_name": "Already",
+                            "last_name": "Drafted",
+                            "position": "RB",
+                        },
+                    }
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=7,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "My roster so far:" in out
+    assert "RB 1/2" in out
+
+
+def test_cmd_draft_board_annotates_with_draft_slot_in_mock_mode(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/mockdid1":
+            # slot 8 -> roster_id 42 for this mock
+            return json_response(
+                _draft_object_payload(draft_id="mockdid1", slot_to_roster_id={"8": 42})
+            )
+        if request.path == "/draft/mockdid1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="mockdid1",
+        rounds=15,
+        watch=False,
+        value_season="2026",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=8,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "My roster so far:" in out
+    assert "RB 0/2" in out
 
 
 def test_cmd_draft_board_with_draft_id_requires_value_season(
