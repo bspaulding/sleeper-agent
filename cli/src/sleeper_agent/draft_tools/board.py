@@ -99,12 +99,52 @@ def _is_tier_break(prev_vorp: float, vorp: float) -> bool:
     return (prev_vorp - vorp) / prev_vorp >= 0.20
 
 
-def render_board(board: pl.DataFrame) -> str:
-    lines = ["Best available by value:"]
+ROSTER_SUMMARY_POSITIONS = ("QB", "RB", "WR", "TE", "DEF")
+
+
+def render_roster_summary(
+    counts: dict[str, int], requirement: RosterRequirement
+) -> str:
+    parts = []
+    for position in ROSTER_SUMMARY_POSITIONS:
+        hard_min = requirement.hard_min.get(position, 0)
+        count = counts.get(position, 0)
+        part = f"{position} {count}/{hard_min}"
+        if position in FLEX_ELIGIBLE_POSITIONS and requirement.flex_capacity:
+            part += f" (+{requirement.flex_capacity} FLEX)"
+        parts.append(part)
+    return "My roster so far: " + "  ".join(parts)
+
+
+def render_board(
+    board: pl.DataFrame,
+    *,
+    my_counts: dict[str, int] | None = None,
+    requirement: RosterRequirement | None = None,
+) -> str:
+    annotation = (
+        (my_counts, requirement)
+        if my_counts is not None and requirement is not None
+        else None
+    )
+    lines = []
+    if annotation is not None:
+        counts, req = annotation
+        lines.append(render_roster_summary(counts, req))
+        lines.append("")
+    lines.append("Best available by value:")
+    tiers = compute_tiers(board) if annotation is not None else {}
     for rank, row in enumerate(board.to_dicts(), start=1):
-        lines.append(
-            f"{rank:2d}. {row['name']:<25} {row['position']:<3} vorp={row['vorp_season']:7.1f}"
+        line = (
+            f"{rank:2d}. {row['name']:<25} {row['position']:<3} "
+            f"vorp={row['vorp_season']:7.1f}"
         )
+        if annotation is not None:
+            counts, req = annotation
+            tier = tiers.get(row["sleeper_id"], 1)
+            tag = position_tag(row["position"], counts.get(row["position"], 0), req)
+            line += f" tier={tier} [{tag}]"
+        lines.append(line)
     return "\n".join(lines)
 
 

@@ -347,6 +347,49 @@ def test_render_board_formats_ranked_lines() -> None:
     assert " 1. Player One" in rendered
 
 
+def test_render_board_without_annotation_is_unchanged() -> None:
+    board = make_vorp_df().head(1)
+
+    rendered = render_board(board)
+
+    assert rendered == (
+        "Best available by value:\n 1. Player One                RB  vorp=   50.0"
+    )
+
+
+def test_render_board_with_annotation_adds_summary_tags_and_tiers() -> None:
+    board = make_vorp_df()  # RB=50.0, WR=30.0, QB=10.0 — one player each
+    requirement = RosterRequirement(
+        hard_min={"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}, flex_capacity=2
+    )
+    my_counts = {"RB": 5, "WR": 1}
+
+    rendered = render_board(board, my_counts=my_counts, requirement=requirement)
+
+    assert "My roster so far:" in rendered
+    assert "RB 5/2" in rendered
+    assert "(+2 FLEX)" in rendered
+    assert "WR 1/2" in rendered
+    # RB is drafted well past hard_min + flex_capacity (5 >= 2 + 2) -> SURPLUS
+    assert "RB  vorp=   50.0 tier=1 [SURPLUS]" in rendered
+    # WR is below hard_min (1 < 2) -> NEED
+    assert "WR  vorp=   30.0 tier=1 [NEED]" in rendered
+
+
+def test_render_board_annotation_requires_both_counts_and_requirement() -> None:
+    board = make_vorp_df().head(1)
+    requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
+
+    # my_counts given without requirement (or vice versa) is treated as "no annotation",
+    # not a partial one -- avoids ever rendering tags with no requirement to check against.
+    rendered = render_board(board, my_counts={"RB": 1}, requirement=None)
+
+    assert "My roster so far" not in rendered
+    assert "tier=" not in rendered
+    rendered_other_way = render_board(board, my_counts=None, requirement=requirement)
+    assert "My roster so far" not in rendered_other_way
+
+
 def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> None:
     vorp_df = make_vorp_df()
     call_log: list[list[DraftPick]] = [
