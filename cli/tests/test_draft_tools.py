@@ -7,6 +7,7 @@ import polars as pl
 from sleeper_agent.draft_tools.board import (
     RosterRequirement,
     board_view,
+    compute_tiers,
     my_roster_positions,
     position_tag,
     render_board,
@@ -501,3 +502,54 @@ def test_my_roster_positions_buckets_missing_position_as_unk() -> None:
 
 def test_my_roster_positions_empty_for_no_picks() -> None:
     assert my_roster_positions([], my_roster_id=5) == {}
+
+
+# --- compute_tiers -------------------------------------------------------
+
+
+def test_compute_tiers_increments_only_past_a_big_gap() -> None:
+    board = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2", "3", "4"],
+            "name": ["A", "B", "C", "D"],
+            "position": ["RB", "RB", "RB", "RB"],
+            # 100 -> 90 is a 10% drop (no break); 90 -> 50 is a ~44% drop (break)
+            "vorp_season": [100.0, 90.0, 50.0, 45.0],
+        }
+    )
+
+    tiers = compute_tiers(board)
+
+    assert tiers == {"1": 1, "2": 1, "3": 2, "4": 2}
+
+
+def test_compute_tiers_is_independent_per_position() -> None:
+    board = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["RB One", "WR One"],
+            "position": ["RB", "WR"],
+            "vorp_season": [100.0, 5.0],
+        }
+    )
+
+    tiers = compute_tiers(board)
+
+    # Each position's own list has only one player, so both are tier 1
+    # regardless of the huge cross-position gap.
+    assert tiers == {"1": 1, "2": 1}
+
+
+def test_compute_tiers_treats_non_positive_vorp_as_always_a_break() -> None:
+    board = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2", "3"],
+            "name": ["A", "B", "C"],
+            "position": ["RB", "RB", "RB"],
+            "vorp_season": [10.0, 0.0, -5.0],
+        }
+    )
+
+    tiers = compute_tiers(board)
+
+    assert tiers == {"1": 1, "2": 2, "3": 3}

@@ -75,6 +75,30 @@ def board_view(
     return available.sort("vorp_season", descending=True).head(top_n)
 
 
+def compute_tiers(board: pl.DataFrame) -> dict[str, int]:
+    tiers: dict[str, int] = {}
+    for position in sorted(set(board["position"].to_list())):
+        rows = (
+            board.filter(pl.col("position") == position)
+            .sort("vorp_season", descending=True)
+            .to_dicts()
+        )
+        tier = 1
+        prev_vorp: float | None = None
+        for row in rows:
+            if prev_vorp is not None and _is_tier_break(prev_vorp, row["vorp_season"]):
+                tier += 1
+            tiers[row["sleeper_id"]] = tier
+            prev_vorp = row["vorp_season"]
+    return tiers
+
+
+def _is_tier_break(prev_vorp: float, vorp: float) -> bool:
+    if prev_vorp <= 0:
+        return True
+    return (prev_vorp - vorp) / prev_vorp >= 0.20
+
+
 def render_board(board: pl.DataFrame) -> str:
     lines = ["Best available by value:"]
     for rank, row in enumerate(board.to_dicts(), start=1):
