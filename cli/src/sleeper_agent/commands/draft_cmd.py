@@ -302,6 +302,7 @@ def cmd_draft_board(
     draft = fetch_draft(draft_id, base_url=base_url)
     requirement = roster_requirement_from_draft(draft)
     my_roster_id: int | None = None
+    my_draft_slot: int | None = None
     if args.draft_slot is not None:
         my_roster_id = draft.slot_to_roster_id.get(args.draft_slot)
         if my_roster_id is None:
@@ -310,6 +311,7 @@ def cmd_draft_board(
                 f"slot_to_roster_id (valid slots: {sorted(draft.slot_to_roster_id)})"
             )
             return 1
+        my_draft_slot = args.draft_slot
     elif args.me:
         my_roster_id = ME_ROSTER_ID
     elif args.roster_id is not None:
@@ -335,6 +337,7 @@ def cmd_draft_board(
             log_path=log_path,
             max_iterations=max_watch_iterations,
             my_roster_id=my_roster_id,
+            my_draft_slot=my_draft_slot,
             requirement=requirement if my_roster_id is not None else None,
             triaged_rookies=triaged_rookies,
             rookie_news_by_sleeper_id=rookie_news,
@@ -345,7 +348,9 @@ def cmd_draft_board(
     picks = fetch_draft_picks(draft_id, base_url=base_url)
     board = board_view(vorp_df, picks, top_n=top_n)
     my_counts = (
-        my_roster_positions(picks, my_roster_id) if my_roster_id is not None else None
+        my_roster_positions(picks, my_roster_id, my_draft_slot=my_draft_slot)
+        if my_roster_id is not None
+        else None
     )
     rookie_watch: list[RookieWatchRow] | None = (
         rookie_watch_rows(triaged_rookies, picks, news_by_sleeper_id=rookie_news)

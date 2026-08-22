@@ -126,6 +126,13 @@ supplemental round — treat it that way:
 
 ## Notes
 
+- If a mock draft's `draft board --me`/`--draft-slot` roster summary ever looks implausible (e.g.
+  stuck at all-zero counts deep into the draft), that was a real bug once — Sleeper returns
+  `roster_id: null` on every pick in a mock draft, and ownership matching used to rely on
+  `roster_id` alone, silently zeroing out the whole annotation. Fixed in `board.py` (matches on
+  `draft_slot` instead when resolved via `--draft-slot`) per
+  `decisions/2026/2026-08-22-draft-mock-draft-2-abandoned-retro.md` — if it recurs, suspect a
+  regression of this exact bug before assuming fresh data lag.
 - `draft keepers`' value uses the most recently completed season's VORP by default
   (`--value-season` overrides this) — sanity-check that this is actually the right season to value
   players against before trusting the ranking blindly, especially early in a new season when a

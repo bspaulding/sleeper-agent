@@ -200,7 +200,11 @@ class DraftPick:
     round: int
     pick_no: int
     draft_slot: int
-    roster_id: int
+    # Sleeper returns `roster_id: null` for every pick in a mock draft (no real
+    # league roster backs it) — always populated in league drafts, always null
+    # in mock ones. `draft_slot` is populated in both, so ownership matching
+    # (`board.my_roster_positions`) prefers it whenever available.
+    roster_id: int | None
     player_id: str
     is_keeper: bool
     picked_by: str | None

@@ -26,6 +26,10 @@ from sleeper_agent.value.team_changes import TeamChange
 FLEX_ELIGIBLE_POSITIONS = frozenset({"RB", "WR", "TE"})
 
 
+def _flush_print(s: str) -> None:
+    print(s, flush=True)
+
+
 @dataclass(frozen=True)
 class RosterRequirement:
     hard_min: dict[str, int]
@@ -65,11 +69,30 @@ def position_tag(position: str, count: int, requirement: RosterRequirement) -> s
 
 
 def my_roster_positions(
-    picks: Sequence[DraftPick], my_roster_id: int
+    picks: Sequence[DraftPick],
+    my_roster_id: int,
+    *,
+    my_draft_slot: int | None = None,
 ) -> dict[str, int]:
+    """Count my drafted players by position.
+
+    Sleeper's picks endpoint returns `roster_id: null` for every pick in a
+    mock draft (there's no real league roster behind it), so matching by
+    `roster_id` alone silently counts zero picks as mine for the entire
+    mock-draft codepath (`--draft-id`/`--draft-slot`). `draft_slot` has no
+    such gap — it's populated on every pick in both mock and league drafts —
+    so when the caller resolved `my_roster_id` from `--draft-slot`, match on
+    `draft_slot` instead; otherwise (the `--me`/`--roster-id` league path)
+    fall back to `roster_id` as before.
+    """
     counts: dict[str, int] = {}
     for pick in picks:
-        if pick.roster_id != my_roster_id:
+        owned = (
+            pick.draft_slot == my_draft_slot
+            if my_draft_slot is not None
+            else pick.roster_id == my_roster_id
+        )
+        if not owned:
             continue
         position = pick.player_position or "UNK"
         counts[position] = counts.get(position, 0) + 1
@@ -222,10 +245,15 @@ def watch_board(
     poll_seconds: float = 5.0,
     sleep: Callable[[float], None] = time.sleep,
     max_iterations: int | None = None,
-    render: Callable[[str], None] = print,
+    # Plain `print` fully block-buffers stdout when it isn't a tty (i.e. whenever
+    # something is capturing/piping this process's output, like a background
+    # watcher) — renders can sit unflushed for multiple picks. `--watch` exists
+    # specifically to be consumed live, so flush every render explicitly.
+    render: Callable[[str], None] = _flush_print,
     fetch_picks: Callable[..., list[DraftPick]] = fetch_draft_picks,
     log_path: Path | None = None,
     my_roster_id: int | None = None,
+    my_draft_slot: int | None = None,
     requirement: RosterRequirement | None = None,
     triaged_rookies: Sequence[TriagedRookie] = (),
     rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
@@ -239,7 +267,9 @@ def watch_board(
         if drafted_ids != previous_drafted_ids:
             board = board_view(vorp_df, picks)
             my_counts = (
-                my_roster_positions(picks, my_roster_id)
+                my_roster_positions(
+                    picks, my_roster_id, my_draft_slot=my_draft_slot
+                )
                 if my_roster_id is not None
                 else None
             )

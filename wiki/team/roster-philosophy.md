@@ -1,6 +1,6 @@
 ---
 last_updated: '2026-08-22'
-source: decisions/2026/2026-08-09-draft-mock-draft-1-turn-by-turn.md
+source: decisions/2026/2026-08-22-draft-mock-draft-2-abandoned-retro.md
 ---
 
 # Team roster philosophy
@@ -28,13 +28,22 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
    Cross-check `data/sleeper/players.parquet`'s `team` field (not `status`) before or during a real
    draft if it's been more than a couple weeks since `sleeper players sync`. See §3.
 6. **Re-run VORP against the most recent completed season before trusting rankings for a real
-   draft.** This retro's source draft ran on 2024 VORP because `stats sync --season 2025` fails —
-   not because the data doesn't exist. nflverse renamed its release from `player_stats` to
-   `stats_player` (`stats_player_week_2025.parquet` exists and is fetchable now); the installed
-   `nfl_data_py` (0.3.3) still hardcodes the old release name. Fix the sync path (bump
-   `nfl_data_py` or repoint the URL in `stats/nflverse.py`), re-sync, and recompute 2025 VORP
-   before the real draft on Aug 29 — this is a fixable bug on a deadline, not a "wait for the data"
-   situation.
+   draft.** *(Resolved as of the #2 mock, 2026-08-22 — `data/vorp/2025.parquet` now exists; use
+   `--value-season 2025`.)* This retro's source draft ran on 2024 VORP because `stats sync --season
+   2025` failed at the time — not because the data doesn't exist. nflverse had renamed its release
+   from `player_stats` to `stats_player`; the installed `nfl_data_py` (0.3.3) hardcoded the old
+   name. Kept here as a reminder to re-check this rule stays true (i.e. `data/vorp/<current
+   season>.parquet` actually exists) before every draft, not just this one.
+9. **`draft board`'s "My roster so far" / NEED-FLEX-SURPLUS annotation only works in a mock draft
+   if `pick.draft_slot` (not `pick.roster_id`) is used for ownership matching.** Sleeper's picks
+   endpoint returns `roster_id: null` for every pick in every mock draft — confirmed directly
+   against the API during the #2 mock (2026-08-22). Before the fix in that retro, this meant the
+   roster summary silently stayed at all-zero for the *entire* draft regardless of `--draft-slot`
+   being passed correctly, producing confidently-wrong NEED tags (e.g. recommending a 4th RB while
+   tagged `[NEED]` when RB was actually full). This is now fixed in `board.py`
+   (`my_roster_positions` matches on `draft_slot` when available) — if a future mock ever shows an
+   implausible all-zero roster count again, suspect a regression of this exact bug, not a fresh
+   data-lag issue.
 7. **Read `wiki/team/draft-strategy.md` before a draft, not just this file.** It holds the
    general drafting-strategy research (VBD baselines, RB strategy spectrum, tiered drafting,
    best-ball positional-allocation reasoning) that motivated rule 1 and the `draft board`
@@ -169,3 +178,31 @@ missing DEF: the roster needs to satisfy `QB≥1, RB≥2, WR≥2, TE≥1, DEF≥
 remaining picks on best-available depth. This mock roster satisfies QB, RB, and TE with room to
 spare, exactly meets WR with zero cushion, and fails DEF outright — that's the concrete shape of
 "not ready to go" here, now captured as standing rule 1–2 above for the next draft.
+
+---
+
+## 2026 mock draft #2 retrospective — 2026-08-22
+
+Source: `decisions/2026/2026-08-22-draft-mock-draft-2-abandoned-retro.md`. Mock draft
+`1396989748353974272`, slot 8, run on `--value-season 2025` (now available — see standing rule 6).
+**Abandoned mid-draft** after the roster-tracking bug below produced a confidently-wrong pick
+recommendation and the user lost patience with repeated slowness. Two real, previously-invisible
+tooling bugs were found and fixed in-session; full root-cause and fix details are in the decision
+entry, standing rule 9 above covers the mock-draft-annotation bug specifically. Summary of the two
+bugs:
+
+1. **Roster-need tracking was silently all-zero for the whole mock**, because Sleeper's picks
+   endpoint returns `roster_id: null` for mock-draft picks and the ownership match compared
+   against `roster_id` instead of the always-populated `draft_slot`. Fixed in `board.py`. This is
+   worse than the #1 mock's "forgot `--me`" gap — here `--draft-slot` *was* passed correctly and
+   the tool was still confidently wrong, not silent-and-obviously-missing.
+2. **`--watch`'s background monitor never fired**, across 5+ live picks, because plain `print()`
+   fully block-buffers when stdout isn't a tty (i.e. exactly when something else is capturing the
+   process's output) — the process was working internally but produced no observable output.
+   Fixed by flushing every render explicitly.
+
+**Standing takeaway for the next draft rehearsal:** both fixes are unverified under real live
+play — this mock never got a clean run after the bugs surfaced. Run one more mock before the real
+draft (Sat Aug 29) specifically to confirm (a) the roster summary tracks real counts throughout,
+not just in a one-off post-fix check, and (b) a `--watch` monitor actually notifies on picks
+end-to-end, not just that the process doesn't error.
