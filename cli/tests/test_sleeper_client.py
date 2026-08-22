@@ -319,6 +319,19 @@ def test_fetch_draft_picks_parses_real_fixture_including_keepers() -> None:
     assert non_keeper_picks
 
 
+def test_fetch_draft_picks_parses_player_team_from_metadata() -> None:
+    payload = json.loads(load_fixture("draft_picks.json"))
+
+    def handler(request: Request) -> Response:
+        return json_response(payload)
+
+    with mock_http_server(handler) as base_url:
+        picks = draft_client.fetch_draft_picks("did", base_url=base_url)
+
+    # First fixture entry is Ja'Marr Chase, metadata.team == "CIN".
+    assert picks[0].player_team == "CIN"
+
+
 # --- trending ----------------------------------------------------------
 
 

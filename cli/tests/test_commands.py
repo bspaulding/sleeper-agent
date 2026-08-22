@@ -1329,6 +1329,7 @@ def _write_draft_keeper_fixtures(repo_root: Path) -> None:
             picked_by="u1",
             player_name="Runner A",
             player_position="RB",
+            player_team="SF",
         ),
         DraftPick(
             draft_id="did",
@@ -1341,6 +1342,7 @@ def _write_draft_keeper_fixtures(repo_root: Path) -> None:
             picked_by="u1",
             player_name="Runner B",
             player_position="RB",
+            player_team="SF",
         ),
         DraftPick(
             draft_id="did",
@@ -1353,6 +1355,7 @@ def _write_draft_keeper_fixtures(repo_root: Path) -> None:
             picked_by="u1",
             player_name="Runner C",
             player_position="RB",
+            player_team="SF",
         ),
     ]
     write_table(
@@ -1372,6 +1375,7 @@ def _write_draft_keeper_fixtures(repo_root: Path) -> None:
             picked_by="u1",
             player_name="Runner C",
             player_position="RB",
+            player_team="SF",
         ),
     ]
     write_table(

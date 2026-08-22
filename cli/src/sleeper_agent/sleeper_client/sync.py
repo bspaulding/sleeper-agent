@@ -37,7 +37,7 @@ LEAGUE_SCHEMA_VERSION = 1
 ROSTERS_SCHEMA_VERSION = 1
 USERS_SCHEMA_VERSION = 1
 TRANSACTIONS_SCHEMA_VERSION = 1
-DRAFTS_SCHEMA_VERSION = 1
+DRAFTS_SCHEMA_VERSION = 2
 
 
 def league_to_dataframe(league: League) -> pl.DataFrame:
@@ -170,6 +170,7 @@ def draft_picks_to_dataframe(picks: list[DraftPick]) -> pl.DataFrame:
             "picked_by": [p.picked_by for p in picks],
             "player_name": [p.player_name for p in picks],
             "player_position": [p.player_position for p in picks],
+            "player_team": [p.player_team for p in picks],
         }
     )
 
@@ -187,6 +188,7 @@ def dataframe_to_draft_picks(df: pl.DataFrame) -> list[DraftPick]:
             picked_by=row["picked_by"],
             player_name=row["player_name"],
             player_position=row["player_position"],
+            player_team=row["player_team"],
         )
         for row in df.to_dicts()
     ]

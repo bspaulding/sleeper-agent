@@ -210,6 +210,7 @@ class DraftPick:
     picked_by: str | None
     player_name: str | None
     player_position: str | None
+    player_team: str | None
 
 
 @dataclass(frozen=True)
@@ -326,6 +327,7 @@ def parse_draft_pick(raw: DraftPickRaw) -> DraftPick:
         picked_by=raw.get("picked_by"),
         player_name=player_name,
         player_position=metadata.get("position"),
+        player_team=metadata.get("team"),
     )
 
 

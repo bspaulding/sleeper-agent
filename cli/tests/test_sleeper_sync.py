@@ -119,6 +119,7 @@ def test_draft_picks_dataframe_round_trips() -> None:
             picked_by="u1",
             player_name="Ja'Marr Chase",
             player_position="WR",
+            player_team="CIN",
         ),
         DraftPick(
             draft_id="did",
@@ -131,6 +132,7 @@ def test_draft_picks_dataframe_round_trips() -> None:
             picked_by="u2",
             player_name="Joe Burrow",
             player_position="QB",
+            player_team="CIN",
         ),
     ]
 

@@ -47,6 +47,7 @@ def make_pick(
     roster_id: int | None = 5,
     draft_slot: int = 1,
     player_name: str = "Test Player",
+    player_team: str = "SF",
 ) -> DraftPick:
     return DraftPick(
         draft_id="did",
@@ -59,6 +60,7 @@ def make_pick(
         picked_by="u1",
         player_name=player_name,
         player_position="RB",
+        player_team=player_team,
     )
 
 
@@ -673,6 +675,7 @@ def test_my_roster_positions_buckets_missing_position_as_unk() -> None:
             picked_by="u1",
             player_name="No Position",
             player_position=None,
+            player_team=None,
         )
     ]
 
