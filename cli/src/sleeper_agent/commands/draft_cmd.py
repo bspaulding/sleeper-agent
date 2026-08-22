@@ -9,11 +9,13 @@ from pathlib import Path
 
 import polars as pl
 
-from sleeper_agent.config import data_dir, decisions_dir, find_repo_root
+from sleeper_agent.config import data_dir, decisions_dir, find_repo_root, wiki_dir
 from sleeper_agent.draft_tools.board import (
+    RookieWatchRow,
     board_view,
     my_roster_positions,
     render_board,
+    rookie_watch_rows,
     roster_requirement_from_draft,
     watch_board,
 )
@@ -23,6 +25,7 @@ from sleeper_agent.draft_tools.keepers import (
     infer_total_rounds,
     rank_keeper_candidates,
 )
+from sleeper_agent.draft_tools.rookies import TriagedRookie, triage_rookies
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
     KeeperEligible,
@@ -36,8 +39,9 @@ from sleeper_agent.sleeper_client.draft import (
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
 from sleeper_agent.sleeper_client.league import fetch_league
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
-from sleeper_agent.value.scoring import filter_rostered
+from sleeper_agent.value.scoring import filter_rostered, recent_news_excerpt
 
 ME_ROSTER_ID = 5
 VORP_SCHEMA_VERSION = 1
@@ -106,6 +110,41 @@ def _read_players(root: Path) -> pl.DataFrame | None:
     if not path.exists():
         return None
     return read_table(path, expected_schema_version=PLAYERS_SCHEMA_VERSION)
+
+
+def _read_draft_picks(root: Path) -> pl.DataFrame | None:
+    path = data_dir(root) / "nfl" / "draft_picks.parquet"
+    if not path.exists():
+        return None
+    return read_table(path, expected_schema_version=DRAFT_PICKS_SCHEMA_VERSION)
+
+
+def _triaged_rookies(
+    root: Path, players_df: pl.DataFrame | None
+) -> list[TriagedRookie]:
+    """Best-effort rookie triage list for `draft board`'s "Rookie watch" section.
+
+    Absent `data/nfl/draft_picks.parquet` (not yet synced via `stats
+    draft-picks sync`) or `data/sleeper/players.parquet`, this is just an
+    empty list — the board renders exactly as it does today, same
+    no-annotation-by-default convention as `--me`/`--roster-id`.
+    """
+    draft_picks_df = _read_draft_picks(root)
+    if draft_picks_df is None or players_df is None:
+        return []
+    return triage_rookies(draft_picks_df, players_df)
+
+
+def _rookie_news_by_sleeper_id(
+    root: Path, rookies: list[TriagedRookie]
+) -> dict[str, list[str]]:
+    wiki_root = wiki_dir(root)
+    return {
+        rookie.player.player_id: recent_news_excerpt(
+            wiki_root, rookie.player.player_id, limit=1
+        )
+        for rookie in rookies
+    }
 
 
 def cmd_draft_keepers(
@@ -250,6 +289,8 @@ def cmd_draft_board(
         my_roster_id = args.roster_id
 
     players_df = _read_players(root)
+    triaged_rookies = _triaged_rookies(root, players_df)
+    rookie_news = _rookie_news_by_sleeper_id(root, triaged_rookies)
     if players_df is not None:
         vorp_df = filter_rostered(vorp_df, players_df)
 
@@ -267,6 +308,8 @@ def cmd_draft_board(
             max_iterations=max_watch_iterations,
             my_roster_id=my_roster_id,
             requirement=requirement if my_roster_id is not None else None,
+            triaged_rookies=triaged_rookies,
+            rookie_news_by_sleeper_id=rookie_news,
         )
         return 0
 
@@ -275,11 +318,17 @@ def cmd_draft_board(
     my_counts = (
         my_roster_positions(picks, my_roster_id) if my_roster_id is not None else None
     )
+    rookie_watch: list[RookieWatchRow] | None = (
+        rookie_watch_rows(triaged_rookies, picks, news_by_sleeper_id=rookie_news)
+        if triaged_rookies
+        else None
+    )
     print(
         render_board(
             board,
             my_counts=my_counts,
             requirement=requirement if my_roster_id is not None else None,
+            rookie_watch=rookie_watch,
         )
     )
     return 0

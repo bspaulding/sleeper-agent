@@ -19,6 +19,13 @@ know about the nflverse rename.
 `load_ff_playerids` reads the same DynastyProcess `db_playerids.csv` this
 previously came from via `nfl_data_py.import_ids`, so it's used directly
 rather than reimplemented.
+
+`fetch_draft_picks`/`fetch_ff_playerids` back the rookie-triage crosswalk
+(`draft_tools/rookies.py`). `fetch_ff_playerids` intentionally returns the
+*full*, unnarrowed `load_ff_playerids()` frame rather than reusing
+`fetch_id_crosswalk`'s narrowed `[name, position, gsis_id, sleeper_id]`
+selection — the rookie crosswalk needs `draft_year` too, which
+`fetch_id_crosswalk` drops.
 """
 
 from __future__ import annotations
@@ -49,3 +56,13 @@ def fetch_injuries(seasons: list[int]) -> pl.DataFrame:
 
 def fetch_id_crosswalk() -> pl.DataFrame:  # pragma: no cover - live nflverse call
     return nfl.load_ff_playerids().select(["name", "position", "gsis_id", "sleeper_id"])
+
+
+def fetch_draft_picks(
+    seasons: list[int],
+) -> pl.DataFrame:  # pragma: no cover - live nflverse call
+    return nfl.load_draft_picks(seasons=seasons)
+
+
+def fetch_ff_playerids() -> pl.DataFrame:  # pragma: no cover - live nflverse call
+    return nfl.load_ff_playerids()

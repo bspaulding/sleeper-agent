@@ -12,6 +12,7 @@ from sleeper_agent.draft_tools.board import (
     position_tag,
     render_board,
     render_roster_summary,
+    rookie_watch_rows,
     roster_requirement_from_draft,
     watch_board,
 )
@@ -22,7 +23,8 @@ from sleeper_agent.draft_tools.keepers import (
     rank_keeper_candidates,
     value_per_cost,
 )
-from sleeper_agent.models.sleeper import Draft, DraftPick
+from sleeper_agent.draft_tools.rookies import TriagedRookie
+from sleeper_agent.models.sleeper import Draft, DraftPick, Player
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
     KeeperEligible,
@@ -491,6 +493,46 @@ def test_watch_board_without_my_roster_id_is_unannotated(tmp_path: Path) -> None
     assert "My roster so far" not in rendered_calls[0]
 
 
+def test_watch_board_threads_rookie_watch_through_and_excludes_drafted_ones() -> None:
+    vorp_df = make_vorp_df()
+    available_rookie = make_rookie(player_id="9001")
+    drafted_rookie = make_rookie(player_id="9002", name="Drafted Rookie")
+    rendered_calls: list[str] = []
+
+    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
+        return [make_pick(1, player_id="9002", player_name="Drafted Rookie")]
+
+    watch_board(
+        "did",
+        vorp_df,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=rendered_calls.append,
+        fetch_picks=fake_fetch,
+        triaged_rookies=[available_rookie, drafted_rookie],
+    )
+
+    assert "Rookie watch" in rendered_calls[0]
+    assert "Rookie One" in rendered_calls[0]
+    assert "Drafted Rookie" not in rendered_calls[0]
+
+
+def test_watch_board_without_triaged_rookies_omits_rookie_watch() -> None:
+    vorp_df = make_vorp_df()
+    rendered_calls: list[str] = []
+
+    watch_board(
+        "did",
+        vorp_df,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=rendered_calls.append,
+        fetch_picks=lambda draft_id, *, base_url: [],
+    )
+
+    assert "Rookie watch" not in rendered_calls[0]
+
+
 def make_draft(
     draft_id: str = "did",
     league_id: str = "lid",
@@ -648,3 +690,98 @@ def test_compute_tiers_treats_non_positive_vorp_as_always_a_break() -> None:
     tiers = compute_tiers(board)
 
     assert tiers == {"1": 1, "2": 2, "3": 3}
+
+
+# --- rookie watch -----------------------------------------------------------
+
+
+def make_rookie(
+    player_id: str = "9001",
+    name: str = "Rookie One",
+    position: str = "WR",
+    draft_round: int = 1,
+) -> TriagedRookie:
+    return TriagedRookie(
+        player=Player(
+            player_id=player_id,
+            name=name,
+            position=position,
+            team="KC",
+            status="Active",
+            injury_status=None,
+            fantasy_positions=(position,),
+            years_exp=0,
+        ),
+        draft_round=draft_round,
+    )
+
+
+def test_rookie_watch_rows_excludes_already_drafted_triaged_rookies() -> None:
+    available = make_rookie(player_id="1")
+    drafted = make_rookie(player_id="2")
+    picks = [make_pick(1, player_id="2", player_name="Drafted Rookie")]
+
+    rows = rookie_watch_rows([available, drafted], picks)
+
+    assert [row.player.player_id for row in rows] == ["1"]
+
+
+def test_rookie_watch_rows_attaches_news_excerpt_by_sleeper_id() -> None:
+    rookie = make_rookie(player_id="1")
+
+    rows = rookie_watch_rows(
+        [rookie], [], news_by_sleeper_id={"1": ["- broke out in camp"]}
+    )
+
+    assert rows[0].news_excerpt == ("- broke out in camp",)
+
+
+def test_rookie_watch_rows_empty_news_when_no_lookup_given() -> None:
+    rookie = make_rookie(player_id="1")
+
+    rows = rookie_watch_rows([rookie], [])
+
+    assert rows[0].news_excerpt == ()
+
+
+def test_render_board_rookie_watch_section_present_only_when_supplied() -> None:
+    board = make_vorp_df().head(1)
+
+    without = render_board(board)
+    assert "Rookie watch" not in without
+
+    rows = rookie_watch_rows([make_rookie()], [])
+    with_watch = render_board(board, rookie_watch=rows)
+    assert "Rookie watch" in with_watch
+    assert "Rookie One" in with_watch
+
+
+def test_render_board_rookie_watch_section_omitted_for_empty_list() -> None:
+    board = make_vorp_df().head(1)
+
+    rendered = render_board(board, rookie_watch=[])
+
+    assert "Rookie watch" not in rendered
+
+
+def test_render_board_rookie_watch_rows_have_no_vorp_or_tier_fields() -> None:
+    board = make_vorp_df().head(1)
+    rows = rookie_watch_rows([make_rookie(draft_round=2)], [])
+
+    rendered = render_board(board, rookie_watch=rows)
+
+    watch_section = rendered.split("Rookie watch")[1]
+    assert "vorp=" not in watch_section
+    assert "tier=" not in watch_section
+    assert "R2" in watch_section
+
+
+def test_render_board_rookie_watch_includes_news_excerpt_when_present() -> None:
+    board = make_vorp_df().head(1)
+    rows = rookie_watch_rows(
+        [make_rookie()], [], news_by_sleeper_id={"9001": ["- fast start in camp"]}
+    )
+
+    rendered = render_board(board, rookie_watch=rows)
+
+    assert "- fast start in camp" in rendered

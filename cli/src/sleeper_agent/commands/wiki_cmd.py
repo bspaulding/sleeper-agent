@@ -6,9 +6,11 @@ import argparse
 from pathlib import Path
 
 from sleeper_agent.config import data_dir, find_repo_root, wiki_dir
+from sleeper_agent.draft_tools.rookies import triage_rookies
 from sleeper_agent.models.sleeper import Player, parse_player
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
 from sleeper_agent.wiki_tools.scaffold import (
     players_for_roster,
@@ -40,6 +42,12 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     scaffold_subparsers.add_parser(
         "teams", help="Scaffold NFL team pages"
     ).set_defaults(func=cmd_wiki_scaffold_teams)
+
+    rookies_parser = scaffold_subparsers.add_parser(
+        "rookies", help="Scaffold pages for this season's triaged rookies"
+    )
+    rookies_parser.add_argument("--season", type=int, required=True)
+    rookies_parser.set_defaults(func=cmd_wiki_scaffold_rookies)
 
     stale_parser = wiki_subparsers.add_parser("stale", help="List stale wiki pages")
     stale_parser.add_argument("--days", type=int, default=7)
@@ -113,6 +121,57 @@ def cmd_wiki_scaffold_teams(
     result = scaffold_teams(wiki_dir(root))
     print(
         f"created {len(result.created)} team page(s), {len(result.already_existed)} already existed"
+    )
+    return 0
+
+
+def cmd_wiki_scaffold_rookies(
+    args: argparse.Namespace, *, repo_root: Path | None = None
+) -> int:
+    """Scaffold `wiki/players/*.md` stubs for this season's triaged rookies.
+
+    Unlike `wiki scaffold players`, this isn't scoped to a fantasy roster
+    (`cmd_wiki_scaffold_players` reads `rosters/{season}.parquet`, which no
+    pre-draft rookie is on) — the triage list from `triage_rookies`
+    (`draft_tools/rookies.py`) is the input instead. Reuses
+    `scaffold_players` unchanged, since it already works off a `Player`
+    list rather than a roster.
+
+    `draft_picks.parquet` is a single overwritten file (`sync_draft_picks`
+    doesn't partition by season), so `--season` is checked against what's
+    actually in it — otherwise a stale or forgotten re-sync would silently
+    scaffold a different season's rookies under the requested label.
+    """
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    nfl_dir = data_dir(root) / "nfl"
+    draft_picks_path = nfl_dir / "draft_picks.parquet"
+    if not draft_picks_path.exists():
+        print(
+            f"no draft-picks data — run `stats draft-picks sync --season {args.season}` first"
+        )
+        return 1
+
+    draft_picks_df = read_table(
+        draft_picks_path, expected_schema_version=DRAFT_PICKS_SCHEMA_VERSION
+    )
+    synced_seasons = set(draft_picks_df["season"].unique().to_list())
+    if synced_seasons != {args.season}:
+        synced = ", ".join(str(season) for season in sorted(synced_seasons))
+        print(
+            f"data/nfl/draft_picks.parquet has season(s) [{synced}], not "
+            f"{args.season} — run `stats draft-picks sync --season {args.season}` first"
+        )
+        return 1
+
+    sleeper_dir = data_dir(root) / "sleeper"
+    players_df = read_table(
+        sleeper_dir / "players.parquet", expected_schema_version=PLAYERS_SCHEMA_VERSION
+    )
+
+    rookies = triage_rookies(draft_picks_df, players_df)
+    result = scaffold_players(wiki_dir(root), [r.player for r in rookies])
+    print(
+        f"created {len(result.created)} player page(s), {len(result.already_existed)} already existed"
     )
     return 0
 

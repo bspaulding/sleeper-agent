@@ -10,6 +10,7 @@ import polars as pl
 
 from sleeper_agent.config import data_dir, find_repo_root
 from sleeper_agent.sleeper_client import sync as sleeper_sync
+from sleeper_agent.stats import draft_picks_sync
 from sleeper_agent.stats import sync as stats_sync
 from sleeper_agent.stats import vorp as vorp_module
 from sleeper_agent.storage.parquet_store import read_table, write_table
@@ -42,6 +43,18 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     vorp_parser.add_argument("--season", type=int, required=True)
     vorp_parser.set_defaults(func=cmd_stats_vorp)
 
+    draft_picks_parser = stats_subparsers.add_parser(
+        "draft-picks", help="NFL draft-capital data (rookie triage)"
+    )
+    draft_picks_subparsers = draft_picks_parser.add_subparsers(
+        dest="draft_picks_command"
+    )
+    draft_picks_sync_parser = draft_picks_subparsers.add_parser(
+        "sync", help="Sync NFL draft picks + Sleeper-id crosswalk for a season"
+    )
+    draft_picks_sync_parser.add_argument("--season", type=int, required=True)
+    draft_picks_sync_parser.set_defaults(func=cmd_stats_draft_picks_sync)
+
 
 def cmd_stats_sync(
     args: argparse.Namespace,
@@ -59,6 +72,21 @@ def cmd_stats_sync(
         f"{result.snap_rows} snap rows, {result.schedule_rows} schedule rows, "
         f"{result.injury_rows} injury rows, {result.id_crosswalk_rows} id-crosswalk rows"
     )
+    return 0
+
+
+def cmd_stats_draft_picks_sync(
+    args: argparse.Namespace,
+    *,
+    repo_root: Path | None = None,
+    sync_draft_picks: Callable[
+        [int, Path], draft_picks_sync.DraftPicksSyncResult
+    ] = draft_picks_sync.sync_draft_picks,
+) -> int:
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    nfl_dir = data_dir(root) / "nfl"
+    result = sync_draft_picks(args.season, nfl_dir)
+    print(f"synced draft picks for {result.season}: {result.draft_pick_rows} row(s)")
     return 0
 
 

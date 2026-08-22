@@ -70,6 +70,26 @@ def test_stats_vorp_subcommand_is_registered() -> None:
     assert args.season == 2025
 
 
+def test_stats_draft_picks_sync_subcommand_is_registered() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(["stats", "draft-picks", "sync", "--season", "2026"])
+
+    assert args.func is stats_cmd.cmd_stats_draft_picks_sync
+    assert args.season == 2026
+
+
+def test_wiki_scaffold_rookies_subcommand_is_registered() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(["wiki", "scaffold", "rookies", "--season", "2026"])
+
+    assert args.func is wiki_cmd.cmd_wiki_scaffold_rookies
+    assert args.season == 2026
+
+
 # --- sleeper league resolve ----------------------------------------------
 
 
@@ -314,6 +334,25 @@ def test_cmd_stats_sync_prints_summary(
     assert "synced stats for 2025" in capsys.readouterr().out
 
 
+def test_cmd_stats_draft_picks_sync_prints_summary(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.stats.draft_picks_sync import DraftPicksSyncResult
+
+    repo_root = make_repo_root(tmp_path)
+
+    def fake_sync_draft_picks(season: int, nfl_dir: Path) -> DraftPicksSyncResult:
+        return DraftPicksSyncResult(season=season, draft_pick_rows=257)
+
+    args = argparse.Namespace(season=2026)
+    exit_code = stats_cmd.cmd_stats_draft_picks_sync(
+        args, repo_root=repo_root, sync_draft_picks=fake_sync_draft_picks
+    )
+
+    assert exit_code == 0
+    assert "synced draft picks for 2026: 257 row(s)" in capsys.readouterr().out
+
+
 def test_cmd_stats_vorp_raises_clear_error_when_league_not_synced(
     tmp_path: Path,
 ) -> None:
@@ -535,6 +574,142 @@ def test_cmd_wiki_scaffold_teams(
 
     assert exit_code == 0
     assert "created 32 team page(s)" in capsys.readouterr().out
+
+
+def _write_draft_picks_parquet(nfl_dir: Path, rows: list[dict[str, object]]) -> None:
+    from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(rows),
+        nfl_dir / "draft_picks.parquet",
+        schema_version=DRAFT_PICKS_SCHEMA_VERSION,
+    )
+
+
+def test_cmd_wiki_scaffold_rookies_creates_pages_for_triaged_rookies(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    nfl_dir = repo_root / "data" / "nfl"
+    _write_players_parquet(sleeper_dir)
+    _write_draft_picks_parquet(
+        nfl_dir,
+        [
+            {
+                "season": 2026,
+                "round": 1,
+                "pick": 1,
+                "position": "WR",
+                "pfr_player_name": "Rookie WR",
+                "gsis_id": "X1",
+                "sleeper_id": "1",  # matches Player One (WR) in players.parquet
+            },
+            {
+                "season": 2026,
+                "round": 5,
+                "pick": 140,
+                "position": "WR",
+                "pfr_player_name": "Day 3 WR",
+                "gsis_id": "X2",
+                "sleeper_id": "2",  # matches Player Two (RB) — round 5 WR, cut anyway
+            },
+        ],
+    )
+
+    args = argparse.Namespace(season=2026)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_rookies(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "created 1 player page(s)" in capsys.readouterr().out
+    assert (repo_root / "wiki" / "players" / "1-player-one.md").exists()
+    assert not (repo_root / "wiki" / "players" / "2-player-two.md").exists()
+
+
+def test_cmd_wiki_scaffold_rookies_reports_missing_draft_picks_data(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    _write_players_parquet(sleeper_dir)
+
+    args = argparse.Namespace(season=2026)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_rookies(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no draft-picks data" in capsys.readouterr().out
+
+
+def test_cmd_wiki_scaffold_rookies_reports_season_mismatch(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`draft_picks.parquet` is a single overwritten file, not season-partitioned —
+    if it holds a different season than requested (e.g. stale from last year, or a
+    forgotten re-sync), fail loudly rather than silently scaffolding the wrong
+    season's rookies under the requested season's label."""
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    nfl_dir = repo_root / "data" / "nfl"
+    _write_players_parquet(sleeper_dir)
+    _write_draft_picks_parquet(
+        nfl_dir,
+        [
+            {
+                "season": 2025,
+                "round": 1,
+                "pick": 1,
+                "position": "WR",
+                "pfr_player_name": "Rookie WR",
+                "gsis_id": "X1",
+                "sleeper_id": "1",
+            }
+        ],
+    )
+
+    args = argparse.Namespace(season=2026)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_rookies(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "2025" in out
+    assert "2026" in out
+    assert not (repo_root / "wiki" / "players" / "1-player-one.md").exists()
+
+
+def test_cmd_wiki_scaffold_rookies_leaves_existing_pages_untouched(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    nfl_dir = repo_root / "data" / "nfl"
+    _write_players_parquet(sleeper_dir)
+    _write_draft_picks_parquet(
+        nfl_dir,
+        [
+            {
+                "season": 2026,
+                "round": 1,
+                "pick": 1,
+                "position": "WR",
+                "pfr_player_name": "Rookie WR",
+                "gsis_id": "X1",
+                "sleeper_id": "1",
+            }
+        ],
+    )
+    page_path = repo_root / "wiki" / "players" / "1-player-one.md"
+    page_path.parent.mkdir(parents=True)
+    page_path.write_text(
+        "---\nsleeper_id: '1'\n---\n\n## News\n\n- already researched\n"
+    )
+
+    args = argparse.Namespace(season=2026)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_rookies(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "created 0 player page(s), 1 already existed" in capsys.readouterr().out
+    assert "already researched" in page_path.read_text()
 
 
 def test_cmd_wiki_stale_scoped_to_roster(
@@ -1162,6 +1337,208 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
     assert "Teamless Guy" not in out
 
 
+def _write_rookie_fixtures(repo_root: Path, *, season: str = "2025") -> None:
+    """A players.parquet + data/nfl/draft_picks.parquet pair with one
+    round-1 WR rookie (triaged in) and one round-5 WR rookie (triaged out)."""
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["101", "102"],
+                "name": ["Rookie Star", "Rookie Deep Bench"],
+                "position": ["WR", "WR"],
+                "team": ["KC", "BUF"],
+                "status": ["Active", "Active"],
+                "injury_status": ["", ""],
+                "fantasy_positions": [["WR"], ["WR"]],
+                "years_exp": [0, 0],
+            }
+        ),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            {
+                "season": [int(season), int(season)],
+                "round": [1, 5],
+                "pick": [1, 140],
+                "position": ["WR", "WR"],
+                "pfr_player_name": ["Rookie Star", "Rookie Deep Bench"],
+                "gsis_id": ["X1", "X2"],
+                "sleeper_id": ["101", "102"],
+            }
+        ),
+        repo_root / "data" / "nfl" / "draft_picks.parquet",
+        schema_version=DRAFT_PICKS_SCHEMA_VERSION,
+    )
+
+
+def test_cmd_draft_board_prints_rookie_watch_section_when_draft_picks_data_present(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_rookie_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Rookie watch" in out
+    assert "Rookie Star" in out
+    # Round-5 WR is below the WR triage cutoff (rounds 1-2) — never surfaced.
+    assert "Rookie Deep Bench" not in out
+
+
+def test_cmd_draft_board_rookie_watch_excludes_already_drafted_rookie(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_rookie_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    {
+                        "draft_id": "did1",
+                        "round": 1,
+                        "pick_no": 1,
+                        "draft_slot": 1,
+                        "roster_id": 9,
+                        "player_id": "101",
+                        "is_keeper": False,
+                        "picked_by": "u9",
+                        "metadata": {
+                            "first_name": "Rookie",
+                            "last_name": "Star",
+                            "position": "WR",
+                        },
+                    }
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Rookie watch" not in out  # only triaged rookie was drafted
+
+
+def test_cmd_draft_board_omits_rookie_watch_when_no_draft_picks_data(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    # No data/nfl/draft_picks.parquet written.
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Rookie watch" not in out
+
+
 def test_cmd_draft_board_reports_missing_vorp(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -1277,6 +1654,61 @@ def test_cmd_draft_board_watch_writes_decision_log(
     assert exit_code == 0
     log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
     assert log_path.exists()
+
+
+def test_cmd_draft_board_watch_threads_rookie_watch_into_decision_log(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["1"],
+                "name": ["A"],
+                "position": ["RB"],
+                "vorp_season": [1.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+    _write_rookie_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=True,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args,
+            repo_root=repo_root,
+            base_url=base_url,
+            today=lambda: date(2026, 7, 26),
+            max_watch_iterations=1,
+        )
+
+    assert exit_code == 0
+    log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
+    assert "Rookie watch" in log_path.read_text()
+    assert "Rookie Star" in log_path.read_text()
 
 
 def test_cmd_draft_board_with_draft_id_skips_league_lookup(

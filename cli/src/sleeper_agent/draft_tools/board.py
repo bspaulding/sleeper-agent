@@ -17,7 +17,8 @@ from pathlib import Path
 
 import polars as pl
 
-from sleeper_agent.models.sleeper import Draft, DraftPick
+from sleeper_agent.draft_tools.rookies import TriagedRookie
+from sleeper_agent.models.sleeper import Draft, DraftPick, Player
 from sleeper_agent.sleeper_client.draft import fetch_draft_picks
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
 
@@ -28,6 +29,13 @@ FLEX_ELIGIBLE_POSITIONS = frozenset({"RB", "WR", "TE"})
 class RosterRequirement:
     hard_min: dict[str, int]
     flex_capacity: int
+
+
+@dataclass(frozen=True)
+class RookieWatchRow:
+    player: Player
+    draft_round: int
+    news_excerpt: tuple[str, ...]
 
 
 def roster_requirement_from_draft(draft: Draft) -> RosterRequirement:
@@ -73,6 +81,34 @@ def board_view(
     drafted_ids = {pick.player_id for pick in drafted_picks}
     available = vorp_df.filter(~pl.col("sleeper_id").is_in(list(drafted_ids)))
     return available.sort("vorp_season", descending=True).head(top_n)
+
+
+def rookie_watch_rows(
+    triaged_rookies: Sequence[TriagedRookie],
+    drafted_picks: Sequence[DraftPick],
+    *,
+    news_by_sleeper_id: dict[str, list[str]] | None = None,
+) -> list[RookieWatchRow]:
+    """Available triaged rookies, cross-referenced against drafted picks.
+
+    Mirrors `board_view`'s drafted-player exclusion, but stays a separate
+    function/list rather than folding into `board_view`'s VORP-sorted
+    output — triaged rookies have no VORP number to sort by (inventing a
+    synthetic one would blend a qualitative triage judgment into a number
+    the rest of the board treats as directly comparable), so they render as
+    an unranked "Rookie watch" section instead (see `render_board`).
+    """
+    drafted_ids = {pick.player_id for pick in drafted_picks}
+    news_by_sleeper_id = news_by_sleeper_id or {}
+    return [
+        RookieWatchRow(
+            player=rookie.player,
+            draft_round=rookie.draft_round,
+            news_excerpt=tuple(news_by_sleeper_id.get(rookie.player.player_id, ())),
+        )
+        for rookie in triaged_rookies
+        if rookie.player.player_id not in drafted_ids
+    ]
 
 
 def compute_tiers(board: pl.DataFrame) -> dict[str, int]:
@@ -127,6 +163,7 @@ def render_board(
     *,
     my_counts: dict[str, int] | None = None,
     requirement: RosterRequirement | None = None,
+    rookie_watch: Sequence[RookieWatchRow] | None = None,
 ) -> str:
     annotation = (
         (my_counts, requirement)
@@ -151,6 +188,20 @@ def render_board(
             tag = position_tag(row["position"], counts.get(row["position"], 0), req)
             line += f" tier={tier} [{tag}]"
         lines.append(line)
+    if rookie_watch:
+        lines.append("")
+        lines.append(
+            "Rookie watch (triaged, not ranked against VORP — "
+            "see wiki/team/rookie-evaluation.md):"
+        )
+        for entry in rookie_watch:
+            line = (
+                f"    {entry.player.name:<25} {entry.player.position:<3} "
+                f"R{entry.draft_round}"
+            )
+            if entry.news_excerpt:
+                line += f"  {entry.news_excerpt[0]}"
+            lines.append(line)
     return "\n".join(lines)
 
 
@@ -170,6 +221,8 @@ def watch_board(
     log_path: Path | None = None,
     my_roster_id: int | None = None,
     requirement: RosterRequirement | None = None,
+    triaged_rookies: Sequence[TriagedRookie] = (),
+    rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
 ) -> None:
     previous_drafted_ids: frozenset[str] | None = None
     iteration = 0
@@ -183,10 +236,18 @@ def watch_board(
                 if my_roster_id is not None
                 else None
             )
+            rookie_watch = (
+                rookie_watch_rows(
+                    triaged_rookies, picks, news_by_sleeper_id=rookie_news_by_sleeper_id
+                )
+                if triaged_rookies
+                else None
+            )
             rendered = render_board(
                 board,
                 my_counts=my_counts,
                 requirement=requirement if my_roster_id is not None else None,
+                rookie_watch=rookie_watch,
             )
             render(rendered)
             if log_path is not None:
