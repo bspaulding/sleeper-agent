@@ -309,3 +309,66 @@ def watch_board(
         iteration += 1
         if max_iterations is None or iteration < max_iterations:
             sleep(poll_seconds)
+
+
+def _render_pick_line(pick: DraftPick, my_draft_slot: int | None) -> str:
+    name = pick.player_name or pick.player_id
+    position = pick.player_position or "?"
+    team = pick.player_team or "?"
+    line = f"Pick {pick.pick_no} (slot {pick.draft_slot}): {name} ({position}, {team})"
+    if my_draft_slot is not None and pick.draft_slot == my_draft_slot:
+        line += " <== MY PICK"
+    return line
+
+
+def watch_picks(
+    draft_id: str,
+    *,
+    num_teams: int,
+    draft_type: str,
+    my_draft_slot: int | None,
+    total_picks: int,
+    render_full_board: Callable[[list[DraftPick]], str],
+    base_url: str = SLEEPER_BASE_URL,
+    poll_seconds: float = 1.0,
+    sleep: Callable[[float], None] = time.sleep,
+    max_iterations: int | None = None,
+    render: Callable[[str], None] = _flush_print,
+    fetch_picks: Callable[..., list[DraftPick]] = fetch_draft_picks,
+) -> None:
+    """Stream one line per new pick; auto-render the full board the instant
+    the next pick is mine.
+
+    Deliberately lighter-weight than `watch_board`: it never reprints the
+    whole board for picks that aren't mine, and only fetches/renders the
+    board once per "my turn" (not on every poll while the human is still on
+    the clock) — see `.claude/skills/draft.md`'s "Preferred live setup".
+    """
+    printed_count = 0
+    announced_pick_no: int | None = None
+    iteration = 0
+    while max_iterations is None or iteration < max_iterations:
+        picks = fetch_picks(draft_id, base_url=base_url)
+        for pick in picks[printed_count:]:
+            render(_render_pick_line(pick, my_draft_slot))
+        printed_count = len(picks)
+
+        if (
+            draft_type == "snake"
+            and my_draft_slot is not None
+            and printed_count < total_picks
+        ):
+            next_pick_no = printed_count + 1
+            if (
+                slot_for_pick(next_pick_no, num_teams) == my_draft_slot
+                and announced_pick_no != next_pick_no
+            ):
+                render(render_full_board(picks))
+                announced_pick_no = next_pick_no
+
+        if printed_count >= total_picks:
+            return
+
+        iteration += 1
+        if max_iterations is None or iteration < max_iterations:
+            sleep(poll_seconds)
