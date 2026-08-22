@@ -75,6 +75,33 @@ supplemental round — treat it that way:
      mock draft (`decisions/2026/2026-08-09-draft-mock-draft-1-turn-by-turn.md`) lost two entire
      rounds to exactly this — the board wasn't re-fetched often/promptly enough and the picks
      happened underneath it.
+   - **If a refresh comes back identical to the last one, immediately retry rather than reporting
+     "board unchanged."** During real-time drafting the human is on a pick clock and wants the
+     fastest path to a fresh, correct board, not a diagnostic aside. Loop a few quick re-fetches
+     (short/no delay) until the top-ranked player differs from the last reported board, *then*
+     report — don't wait to be told a recommended player was actually already gone. Only fall back
+     to flagging a possible sync issue once retries are genuinely exhausted and it's still
+     identical. (2026-08-09 and 2026-08-22 mocks both hit stale single-fetch recommendations
+     before this became standard.)
+   - **Don't root-cause anomalies mid-pick.** If something looks wrong during a live/mock draft
+     (a stale-looking refresh, an implausible roster count), do not stop to debug it in the
+     moment — no raw API `curl` digging, no reading source files, no exploring the wiki. Flag it
+     in one short sentence and keep moving with the refresh/recommend loop; investigate only
+     after the draft (or at minimum the current pick) is done. During the 2026-08-09 mock, a
+     stale board got root-caused live via direct Sleeper API calls, which cost enough time that
+     two full rounds went by with no board refresh or recommendation at all — real value left on
+     the board. Every second spent investigating is a second not spent picking.
+   - **A wrong recommendation that gets self-corrected too late is a latency bug, not
+     necessarily a staleness bug** — treat them differently. During the 2026-08-22 mock #3
+     rehearsal, a Gainwell-over-Stafford recommendation was wrong because of a judgment error
+     (undervaluing a backup QB's bye-week-insurance role in this league's single-QB-slot
+     best-ball format — see `wiki/team/roster-philosophy.md` line ~69 on zero-scoring empty
+     slots), not stale data — an immediate re-fetch confirmed the board was byte-identical. The
+     correction was reasoned out correctly but took a second round-trip to post, by which point
+     the original (worse) pick had already been submitted. Re-fetching more aggressively doesn't
+     fix this failure mode; do the harder roster-construction/format-specific thinking (bye-week
+     coverage, single-slot-position insurance, etc.) on the *first* pass, before answering, not as
+     a follow-up triggered by the human pushing back with "are you sure?".
    - `--watch` polls every **5 seconds** by default (`poll_seconds` in
      `draft_tools/board.py:watch_board`) — chosen from Sleeper's own documented rate limit ("stay
      under 1000 API calls per minute, otherwise you risk being IP-blocked," per
