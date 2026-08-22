@@ -3,14 +3,14 @@ last_updated: '2026-08-22'
 source: research pass following up on todo.md's "Rookie / new-outlook player research strategy"
 ---
 
-# Rookie & new-situation player evaluation
+# Rookie evaluation
 
-Standing reference for evaluating players `stats vorp`/`draft board` structurally can't rank:
-rookies with no prior-NFL-season stats, and players whose team/role changed enough via free
-agency or trade that last season's stats no longer describe their outlook. Distinct from
-`wiki/team/draft-strategy.md` (general VBD/positional-allocation theory for players the tool
-*can* rank) and `roster-philosophy.md` (this team's own retrospectives) — this file is the
-qualitative-signal counterpart for the players those two are silent on.
+Standing reference for evaluating rookies — players with no prior-NFL-season stats, structurally
+invisible to `stats vorp`/`draft board`. Distinct from `wiki/team/draft-strategy.md` (general
+VBD/positional-allocation theory for players the tool *can* rank), `roster-philosophy.md` (this
+team's own retrospectives), and `wiki/team/role-changers.md` (the sibling gap for players whose
+team/role changed via free agency or trade — a *stale*-VORP problem, not a *missing*-VORP one, so
+it gets its own page with a different detection mechanism and research framework).
 
 ## The structural gap, in numbers
 
@@ -132,25 +132,6 @@ lean the RB strategy spectrum toward Hero-RB rather than Zero-RB applies here to
   landing spots, camp battles, and preseason usage are already mostly public. Worth remembering
   for next year's *early*-drafting window if this team ever drafts before landing spots are set.
 
-## New-situation veterans (free agency / trade)
-
-No standardized draft-capital-style table exists for this half of the gap — the frameworks here
-are qualitative and example-driven rather than backed by a decade of round-by-round hit rates:
-
-- **Vacated opportunity** is the core question: what target share, touch share, or red-zone role
-  did a departed player leave behind on the new team (or the old team, for the player who left),
-  and does the player in question profile to inherit it? Concrete 2026 examples confirm this
-  works both directions — Javonte Williams signed to fill Rico Dowdle's vacated Dallas role and
-  finished the season as RB12 on 287 touches; Mike Evans's move to San Francisco was framed
-  around clear volume/TD opportunity in a new offense.
-- **Scheme fit matters alongside the raw opportunity math** — a scheme change (new OC, new
-  play-caller) can matter as much as the target evaluation, since a player inheriting "the WR2
-  role" means less if the new offense's passing scheme doesn't feature that role the way the old
-  one did.
-- Practically: **schedule, and the health/quality of the teammates around the player**, are the
-  standard modifiers layered on top of the opportunity read — a clean vacancy can still be a bad
-  bet behind a shaky offensive line or an unresolved QB competition.
-
 ## Sources
 
 - [Footballguys: Draft Capital Matters — Rookie Tight Ends (2026)](https://www.footballguys.com/article/2026-draft-capital-matters-rookie-tight-ends)
@@ -165,5 +146,3 @@ are qualitative and example-driven rather than backed by a decade of round-by-ro
 - [RotoWire: 2026 NFL Rookie Rankings — Snap Share & Role Growth Tracker](https://www.rotowire.com/football/article/nfl-rookie-impact-129165)
 - [DraftSharks: Best Ball Draft Strategy 2026](https://www.draftsharks.com/kb/best-ball-draft-strategy)
 - [FantasyLife: Underdog Best Ball Draft Strategy — Rookie ADPs to Draft or Fade](https://www.fantasylife.com/articles/best-ball/underdog-best-ball-draft-strategy-jordyn-tyson-and-rookie-adps)
-- [ESPN: Six Players Who Benefit Most from Vacated Targets and Touches](https://www.espn.com/fantasy/football/story/_/id/49401787/espn-nfl-fantasy-football-advice-players-benefit-vacated-targets)
-- [ESPN: Fantasy Guide to Offseason Signings — 2026 Free Agency/Trade Impact](https://www.espn.com/fantasy/football/story/_/id/47899702/nfl-free-agency-2026-fantasy-football-impact-signings-trades-grades)
