@@ -33,9 +33,16 @@ This is close to a full startup draft each year (§0 of `IMPLEMENTATION_PLAN.md`
 supplemental round — treat it that way:
 
 1. Before the draft: review `value rank --top 50` (and by position) to build a mental tier list.
-   Check `wiki/team/roster-philosophy.md`, `wiki/team/draft-strategy.md`, and
+   Check `wiki/team/roster-philosophy.md`, `wiki/team/draft-strategy.md`,
+   `wiki/team/rookie-evaluation.md`, `wiki/team/role-changers.md`, and
    `wiki/team/keeper-strategy.md` if they exist for standing strategy notes from prior seasons
-   and general drafting theory.
+   and general drafting theory. Also run, if not already done for this season: `stats
+   draft-picks sync --season <year>` (feeds Rookie watch), `wiki scaffold rookies --season
+   <year>` and `wiki scaffold role-changers --season <prior-year>` (stub any missing pages for
+   the triaged lists), and `wiki sync-frontmatter` after any `sleeper players sync` (keeps
+   `nfl_team` current on already-scaffolded pages — it's only set once at scaffold time
+   otherwise). Rookie watch and the `MOVED` tag are silently absent from `draft board` if this
+   data hasn't been synced, not an error — check for them explicitly rather than assuming.
 2. During the draft: `draft board --league-id <id> --rounds 15 --me [--watch]` shows
    best-available by value, already excluding every drafted and kept player. **Always pass
    `--me`** (or `--roster-id <id>` if not drafting from this team's usual roster_id) — without
@@ -45,6 +52,11 @@ supplemental round — treat it that way:
    semi-attended session — it polls and re-renders on every change, and mirrors the board to a
    decision-log entry (`decisions/<season>/<date>-draft-live.md`) so there's a record even if
    nobody's watching every pick.
+   - Given the pre-draft sync in step 1, the same output also carries a **Rookie watch** section
+     (triaged incoming rookies, unranked — no VORP number exists for them) and an inline
+     **`[MOVED: <old>→<new>]`** tag on any main-board row whose player changed team via
+     free agency/trade this offseason. Neither changes the main list's sort order or values —
+     see step 3 for how to actually weigh them.
    - For a **mock draft** (practice run before the real draft — no league object exists for it),
      use `draft board --draft-id <mock-draft-id> --value-season <year> --draft-slot <n>
      [--num-teams <n>] [--watch]` instead: it points straight at the draft's public picks
@@ -84,6 +96,30 @@ supplemental round — treat it that way:
      many players from the same bye week at a thin position, still matters).
    - A player who just became keeper-ineligible after 2 years (see above) may be a value target
      if their price has dropped relative to their real ability.
+   - **Weighing a Rookie watch entry against the main board.** There's no VORP number to compare
+     directly — that's deliberate (`docs/superpowers/specs/2026-08-22-rookie-and-new-outlook-
+     player-visibility.md`), not a gap to route around with a made-up number. The reasoning
+     chain: (1) presence in Rookie watch already means the position/round cleared
+     `wiki/team/rookie-evaluation.md`'s draft-capital hit-rate bar, so the question is "worth it
+     *now*," not "worth it at all"; (2) weight by how strong that specific round's hit rate is —
+     a round-1 TE/RB is a much stronger bet than a round-3 RB or round-2 WR, even though both
+     cleared triage; (3) check the main board's own `tier=N` at the position you'd otherwise
+     draft — take the sure VORP thing if there's still tier-1/2 depth there, lean toward the
+     rookie swing if the next option there drops a tier (a real cliff); (4) NEED beats SURPLUS
+     for a rookie the same as for any main-board pick; (5) this league's best-ball scoring
+     forgives a slow start (every week banks toward the season total, no start/sit to lose value
+     on), so shade a bit more aggressive toward the swing than non-best-ball advice would,
+     especially in bench/FLEX-adjacent rounds; (6) use the rookie's researched news line as the
+     tie-breaker, not the primary signal — has the draft-capital-implied opportunity actually
+     shown up in camp/depth-chart reports, or is it still murky.
+   - **A `[MOVED: <old>→<new>]` tag is a different kind of signal** — that player already has a
+     real VORP number computed from last season; the tag just flags that the team/scheme context
+     behind it may no longer hold. It's "trust this number more or less than face value," not a
+     separate bucket to weigh against the rest of the board. Check the player's wiki page (linked
+     research from `wiki/team/role-changers.md`'s vacated-opportunity/scheme-continuity framework)
+     before trusting the raw figure — e.g. a confirmed clean vacancy argues the real number is
+     probably *better* than last season's VORP suggests, a muddied committee/depth-chart
+     situation argues *worse*.
 4. After the draft: file a `decisions new --kind draft --slug <slug>` entry summarizing the full
    draft (or let a running `draft-live.md` entry from `--watch` stand as the record, promoted to a
    final decision entry), and update `wiki/team/roster-philosophy.md` with anything learned.

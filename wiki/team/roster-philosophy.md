@@ -1,5 +1,5 @@
 ---
-last_updated: '2026-08-09'
+last_updated: '2026-08-22'
 source: decisions/2026/2026-08-09-draft-mock-draft-1-turn-by-turn.md
 ---
 
@@ -40,6 +40,17 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
    best-ball positional-allocation reasoning) that motivated rule 1 and the `draft board`
    annotation above — this file stays scoped to this team's own retrospectives and specific
    rules.
+8. **A Rookie watch entry or a `MOVED`-tagged player never compares to the main board on a
+   shared number — weigh them by reasoning instead.** Rookies have no VORP row at all by
+   construction (`wiki/team/rookie-evaluation.md`'s structural-gap section); role-changers have a
+   correct VORP row that may just no longer describe their situation
+   (`wiki/team/role-changers.md`). Neither gets a synthetic score bolted on to make it
+   directly comparable — that was a deliberate design choice, not a gap. The actual decision
+   chain (draft-capital hit rate for the round, the main board's own `tier=N`/NEED cliff at that
+   position, best-ball's tolerance for a slow-starting rookie, the researched news as
+   tie-breaker for a rookie; vacated-opportunity/scheme-continuity research as the trust-more-
+   or-less read for a role-changer) is spelled out in `.claude/skills/draft.md`'s "Draft-day
+   judgment" section — read it there, not re-derived at the table.
 
 ## Roster grid (this league, 2026)
 
