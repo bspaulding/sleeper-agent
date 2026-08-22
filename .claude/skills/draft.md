@@ -124,6 +124,12 @@ supplemental round — treat it that way:
      (`fetch_draft`/`fetch_draft_picks`, no POST path), and Sleeper doesn't expose a public
      draft-pick-submission endpoint either — so the human still clicks the pick in Sleeper; the
      goal is only to get the recommendation into their hands the instant it's computable.
+   - **Present each pick-clock recommendation as a short table** (player, position, VORP,
+     NEED/FLEX/SURPLUS status) for the top 2-4 candidates, then 1-3 sentences of the actual
+     judgment call (tier cliffs, NEED vs. FLEX/SURPLUS, roster-construction risk) — not prose
+     alone. Confirmed during the 2026-08-22 mock #3 as a fast-scannable format under a live pick
+     clock; don't expand it into a large table — `draft board`'s own output is already the full
+     dump, this is just the live decision set.
 3. Draft-day judgment the tool can't automate:
    - Positional runs: if a position is being drafted heavily by other teams, weigh reaching for
      the position against best-player-available. `draft board --me` now shows the facts this

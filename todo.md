@@ -1,5 +1,23 @@
 # Project TODO
 
+## Live-draft pick tracker should be a tested CLI command, not an ad hoc script
+
+During the 2026-08-22 mock draft #3 (`decisions/2026/2026-08-22-draft-mock-draft-3-slot8.md`),
+the live-pick monitor loop (poll Sleeper's picks endpoint, compute snake order, detect "next pick
+is mine", fetch+print a fresh `draft board`) was written from scratch as a throwaway bash script
+in the scratchpad directory and run under the `Monitor` tool.
+
+**Why:** User flagged (2026-08-22) that this shouldn't be re-derived ad hoc every draft session —
+it should be a proper, tested `sleeper-agent` subcommand (e.g. `draft watch-picks` or folded into
+`draft board --watch`'s existing machinery) so the snake-order math and turn-detection logic are
+covered by tests instead of being freshly (and untested-ly) rewritten each time.
+
+**How to apply:** Next draft-tooling pass, promote the bash-loop logic into `draft_tools/board.py`
+(or a sibling module) as a real command, with unit tests for the snake-order pick→slot math
+(round parity, ascending/descending offset) and the "next pick is mine" detection. Keep the
+`Monitor`-tool wrapper (still useful for surfacing notifications), but the actual polling/logic
+should live in tested project code, not a scratchpad script.
+
 ## Rookie / new-outlook player research strategy
 
 Need a follow-up design pass on how to research and evaluate players whose fantasy outlook
