@@ -14,6 +14,7 @@ from sleeper_agent.draft_tools.board import (
     render_roster_summary,
     rookie_watch_rows,
     roster_requirement_from_draft,
+    slot_for_pick,
     watch_board,
 )
 from sleeper_agent.draft_tools.keepers import (
@@ -754,6 +755,35 @@ def test_compute_tiers_treats_non_positive_vorp_as_always_a_break() -> None:
     tiers = compute_tiers(board)
 
     assert tiers == {"1": 1, "2": 2, "3": 3}
+
+
+# --- slot_for_pick -------------------------------------------------------
+
+
+def test_slot_for_pick_round_1_is_ascending() -> None:
+    assert slot_for_pick(1, 12) == 1
+    assert slot_for_pick(8, 12) == 8
+    assert slot_for_pick(12, 12) == 12
+
+
+def test_slot_for_pick_round_2_is_descending() -> None:
+    assert slot_for_pick(13, 12) == 12
+    assert slot_for_pick(17, 12) == 8
+    assert slot_for_pick(24, 12) == 1
+
+
+def test_slot_for_pick_round_3_returns_to_ascending() -> None:
+    assert slot_for_pick(25, 12) == 1
+    assert slot_for_pick(36, 12) == 12
+
+
+def test_slot_for_pick_with_odd_num_teams() -> None:
+    # 10-team draft: round 1 ascending 1..10, round 2 descending 10..1.
+    assert slot_for_pick(1, 10) == 1
+    assert slot_for_pick(10, 10) == 10
+    assert slot_for_pick(11, 10) == 10
+    assert slot_for_pick(20, 10) == 1
+    assert slot_for_pick(21, 10) == 1
 
 
 # --- rookie watch -----------------------------------------------------------

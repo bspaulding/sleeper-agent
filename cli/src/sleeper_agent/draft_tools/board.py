@@ -234,6 +234,20 @@ def render_board(
     return "\n".join(lines)
 
 
+def slot_for_pick(pick_no: int, num_teams: int) -> int:
+    """Which draft slot owns a given overall pick number, standard snake order.
+
+    Odd rounds go 1..num_teams ascending; even rounds reverse (num_teams..1).
+    No 3rd-round-reversal — this league's drafts (and every mock run so far)
+    use plain snake.
+    """
+    round_number = (pick_no - 1) // num_teams + 1
+    pos_in_round = pick_no - (round_number - 1) * num_teams
+    if round_number % 2 == 1:
+        return pos_in_round
+    return num_teams - pos_in_round + 1
+
+
 def watch_board(
     draft_id: str,
     vorp_df: pl.DataFrame,
