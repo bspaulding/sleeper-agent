@@ -21,6 +21,7 @@ from sleeper_agent.draft_tools.rookies import TriagedRookie
 from sleeper_agent.models.sleeper import Draft, DraftPick, Player
 from sleeper_agent.sleeper_client.draft import fetch_draft_picks
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
+from sleeper_agent.value.team_changes import TeamChange
 
 FLEX_ELIGIBLE_POSITIONS = frozenset({"RB", "WR", "TE"})
 
@@ -164,6 +165,7 @@ def render_board(
     my_counts: dict[str, int] | None = None,
     requirement: RosterRequirement | None = None,
     rookie_watch: Sequence[RookieWatchRow] | None = None,
+    team_changes: dict[str, TeamChange] | None = None,
 ) -> str:
     annotation = (
         (my_counts, requirement)
@@ -177,6 +179,7 @@ def render_board(
         lines.append("")
     lines.append("Best available by value:")
     tiers = compute_tiers(board) if annotation is not None else {}
+    team_changes = team_changes or {}
     for rank, row in enumerate(board.to_dicts(), start=1):
         line = (
             f"{rank:2d}. {row['name']:<25} {row['position']:<3} "
@@ -187,6 +190,9 @@ def render_board(
             tier = tiers.get(row["sleeper_id"], 1)
             tag = position_tag(row["position"], counts.get(row["position"], 0), req)
             line += f" tier={tier} [{tag}]"
+        change = team_changes.get(row["sleeper_id"])
+        if change is not None:
+            line += f" [MOVED: {change.old_team}→{change.new_team}]"
         lines.append(line)
     if rookie_watch:
         lines.append("")
@@ -223,6 +229,7 @@ def watch_board(
     requirement: RosterRequirement | None = None,
     triaged_rookies: Sequence[TriagedRookie] = (),
     rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
+    team_changes: dict[str, TeamChange] | None = None,
 ) -> None:
     previous_drafted_ids: frozenset[str] | None = None
     iteration = 0
@@ -248,6 +255,7 @@ def watch_board(
                 my_counts=my_counts,
                 requirement=requirement if my_roster_id is not None else None,
                 rookie_watch=rookie_watch,
+                team_changes=team_changes,
             )
             render(rendered)
             if log_path is not None:

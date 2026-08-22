@@ -40,8 +40,14 @@ from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
 from sleeper_agent.sleeper_client.league import fetch_league
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
 from sleeper_agent.value.scoring import filter_rostered, recent_news_excerpt
+from sleeper_agent.value.team_changes import (
+    TeamChange,
+    detect_team_changes,
+    triage_team_changes,
+)
 
 ME_ROSTER_ID = 5
 VORP_SCHEMA_VERSION = 1
@@ -145,6 +151,27 @@ def _rookie_news_by_sleeper_id(
         )
         for rookie in rookies
     }
+
+
+def _team_changes_by_sleeper_id(
+    root: Path, season: str, players_df: pl.DataFrame | None
+) -> dict[str, TeamChange]:
+    """Best-effort triaged role-changer (FA/trade) lookup for draft board's
+    `[MOVED: ...]` tag.
+
+    Absent `data/stats/weekly/{season}.parquet`, `data/stats/ids.parquet`, or
+    `data/sleeper/players.parquet`, this is just an empty dict — the board
+    renders exactly as it does today, same no-annotation-by-default
+    convention as `--me`/`--roster-id`/rookie watch.
+    """
+    weekly_path = data_dir(root) / "stats" / "weekly" / f"{season}.parquet"
+    ids_path = data_dir(root) / "stats" / "ids.parquet"
+    if players_df is None or not weekly_path.exists() or not ids_path.exists():
+        return {}
+    weekly = read_table(weekly_path, expected_schema_version=WEEKLY_SCHEMA_VERSION)
+    ids = read_table(ids_path, expected_schema_version=IDS_SCHEMA_VERSION)
+    changes = triage_team_changes(detect_team_changes(weekly, players_df, ids))
+    return {change.sleeper_id: change for change in changes}
 
 
 def cmd_draft_keepers(
@@ -291,6 +318,7 @@ def cmd_draft_board(
     players_df = _read_players(root)
     triaged_rookies = _triaged_rookies(root, players_df)
     rookie_news = _rookie_news_by_sleeper_id(root, triaged_rookies)
+    team_changes = _team_changes_by_sleeper_id(root, value_season, players_df)
     if players_df is not None:
         vorp_df = filter_rostered(vorp_df, players_df)
 
@@ -310,6 +338,7 @@ def cmd_draft_board(
             requirement=requirement if my_roster_id is not None else None,
             triaged_rookies=triaged_rookies,
             rookie_news_by_sleeper_id=rookie_news,
+            team_changes=team_changes,
         )
         return 0
 
@@ -329,6 +358,7 @@ def cmd_draft_board(
             my_counts=my_counts,
             requirement=requirement if my_roster_id is not None else None,
             rookie_watch=rookie_watch,
+            team_changes=team_changes,
         )
     )
     return 0

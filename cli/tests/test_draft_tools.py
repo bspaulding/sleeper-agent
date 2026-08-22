@@ -34,6 +34,7 @@ from sleeper_agent.sleeper_client.draft import (
     keeper_history,
 )
 from sleeper_agent.storage.parquet_store import write_table
+from sleeper_agent.value.team_changes import TeamChange
 
 TOTAL_ROUNDS = 15
 
@@ -533,6 +534,48 @@ def test_watch_board_without_triaged_rookies_omits_rookie_watch() -> None:
     assert "Rookie watch" not in rendered_calls[0]
 
 
+def test_watch_board_threads_team_changes_through_to_render_board() -> None:
+    vorp_df = make_vorp_df()  # sleeper_id "1" is RB/50.0
+    rendered_calls: list[str] = []
+
+    watch_board(
+        "did",
+        vorp_df,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=rendered_calls.append,
+        fetch_picks=lambda draft_id, *, base_url: [],
+        team_changes={
+            "1": TeamChange(
+                sleeper_id="1",
+                name="Player One",
+                position="RB",
+                old_team="CAR",
+                new_team="PIT",
+                total_touches=200,
+            )
+        },
+    )
+
+    assert "[MOVED: CAR" in rendered_calls[0]
+
+
+def test_watch_board_without_team_changes_omits_moved_tag() -> None:
+    vorp_df = make_vorp_df()
+    rendered_calls: list[str] = []
+
+    watch_board(
+        "did",
+        vorp_df,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=rendered_calls.append,
+        fetch_picks=lambda draft_id, *, base_url: [],
+    )
+
+    assert "[MOVED" not in rendered_calls[0]
+
+
 def make_draft(
     draft_id: str = "did",
     league_id: str = "lid",
@@ -785,3 +828,86 @@ def test_render_board_rookie_watch_includes_news_excerpt_when_present() -> None:
     rendered = render_board(board, rookie_watch=rows)
 
     assert "- fast start in camp" in rendered
+
+
+# --- role-changer (FA/trade) [MOVED] tag -------------------------------------
+
+
+def make_team_change(
+    sleeper_id: str = "1", old_team: str = "CAR", new_team: str = "PIT"
+) -> TeamChange:
+    return TeamChange(
+        sleeper_id=sleeper_id,
+        name="Player One",
+        position="RB",
+        old_team=old_team,
+        new_team=new_team,
+        total_touches=200,
+    )
+
+
+def test_render_board_without_team_changes_is_unchanged() -> None:
+    board = make_vorp_df().head(1)
+
+    rendered = render_board(board)
+
+    assert rendered == (
+        "Best available by value:\n 1. Player One                RB  vorp=   50.0"
+    )
+
+
+def test_render_board_tags_only_the_matching_player() -> None:
+    board = make_vorp_df()  # sleeper_id 1, 2, 3
+    team_changes = {"1": make_team_change(sleeper_id="1")}
+
+    rendered = render_board(board, team_changes=team_changes)
+
+    lines = rendered.splitlines()
+    assert "[MOVED: CAR" in lines[1]
+    assert "PIT]" in lines[1]
+    assert "[MOVED" not in lines[2]
+    assert "[MOVED" not in lines[3]
+
+
+def test_render_board_moved_tag_does_not_change_sort_order_or_vorp_values() -> None:
+    board = make_vorp_df()
+    team_changes = {"3": make_team_change(sleeper_id="3")}  # lowest-vorp player
+
+    rendered = render_board(board, team_changes=team_changes)
+
+    lines = rendered.splitlines()
+    # unchanged rank order: Player One, Player Two, Player Three
+    assert "Player One" in lines[1]
+    assert "Player Two" in lines[2]
+    assert "Player Three" in lines[3]
+    assert "vorp=   50.0" in lines[1]
+    assert "vorp=   30.0" in lines[2]
+    assert "vorp=   10.0" in lines[3]
+    assert "[MOVED" not in lines[1]
+    assert "[MOVED" not in lines[2]
+    assert "[MOVED" in lines[3]
+
+
+def test_render_board_moved_tag_combines_with_roster_need_annotation() -> None:
+    board = make_vorp_df()
+    requirement = RosterRequirement(
+        hard_min={"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}, flex_capacity=2
+    )
+    team_changes = {"1": make_team_change(sleeper_id="1")}
+
+    rendered = render_board(
+        board, my_counts={}, requirement=requirement, team_changes=team_changes
+    )
+
+    # roster summary, blank, "Best available by value:", then rank 1
+    line = rendered.splitlines()[3]
+    assert "[NEED]" in line
+    assert "[MOVED: CAR" in line
+
+
+def test_render_board_omits_moved_tag_when_no_team_changes_given() -> None:
+    board = make_vorp_df().head(1)
+
+    rendered = render_board(board)
+
+    assert "[MOVED" not in rendered

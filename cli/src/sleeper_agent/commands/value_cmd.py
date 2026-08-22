@@ -20,6 +20,17 @@ from sleeper_agent.value.scoring import (
     gsis_id_for_sleeper_id,
     recent_news_excerpt,
 )
+from sleeper_agent.value.team_changes import (
+    TeamChange,
+    detect_team_changes,
+    triage_team_changes,
+)
+
+# Columns `detect_team_changes` needs beyond what a bare weekly-stats fetch
+# always carries (e.g. hand-built fixtures in older tests) -- absence means
+# "not enough data to detect role changes yet", same best-effort-empty
+# convention as a missing `players.parquet`, not an error.
+_TEAM_CHANGE_WEEKLY_COLUMNS = {"team", "position", "carries", "targets"}
 
 VORP_SCHEMA_VERSION = 1
 ME_ROSTER_ID = 5
@@ -73,6 +84,29 @@ def _read_players(root: Path) -> pl.DataFrame | None:
     return read_table(path, expected_schema_version=PLAYERS_SCHEMA_VERSION)
 
 
+def _team_changes_by_sleeper_id(
+    root: Path, season: str, players_df: pl.DataFrame | None
+) -> dict[str, TeamChange]:
+    """Best-effort triaged role-changer (FA/trade) lookup for the `[MOVED:
+    ...]` tag on `value rank`/`value player` rows.
+
+    Absent `data/sleeper/players.parquet`, `data/stats/weekly/{season}.parquet`,
+    `data/stats/ids.parquet`, or the weekly table not yet carrying the
+    columns role-change detection needs, this is just an empty dict — the
+    output renders exactly as it does today.
+    """
+    weekly_path = data_dir(root) / "stats" / "weekly" / f"{season}.parquet"
+    ids_path = data_dir(root) / "stats" / "ids.parquet"
+    if players_df is None or not weekly_path.exists() or not ids_path.exists():
+        return {}
+    weekly = read_table(weekly_path, expected_schema_version=WEEKLY_SCHEMA_VERSION)
+    if not _TEAM_CHANGE_WEEKLY_COLUMNS.issubset(weekly.columns):
+        return {}
+    ids = read_table(ids_path, expected_schema_version=IDS_SCHEMA_VERSION)
+    changes = triage_team_changes(detect_team_changes(weekly, players_df, ids))
+    return {change.sleeper_id: change for change in changes}
+
+
 def cmd_value_player(args: argparse.Namespace, *, repo_root: Path | None = None) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
     season = args.season
@@ -110,7 +144,14 @@ def cmd_value_player(args: argparse.Namespace, *, repo_root: Path | None = None)
     )
     news = recent_news_excerpt(wiki_dir(root), args.sleeper_id)
 
-    print(f"{row['name']} ({row['position']})")
+    players_df = _read_players(root)
+    team_changes = _team_changes_by_sleeper_id(root, season, players_df)
+    change = team_changes.get(args.sleeper_id)
+
+    header = f"{row['name']} ({row['position']})"
+    if change is not None:
+        header += f" [MOVED: {change.old_team}→{change.new_team}]"
+    print(header)
     print(
         f"  VORP: season={row['vorp_season']:.1f} per-game={row['vorp_per_game']:.2f} "
         f"(points={row['season_points']:.1f} over {row['games_played']} games)"
@@ -141,15 +182,18 @@ def cmd_value_rank(args: argparse.Namespace, *, repo_root: Path | None = None) -
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
     vorp_df = _read_vorp(root, args.season)
     players_df = _read_players(root)
+    team_changes = _team_changes_by_sleeper_id(root, args.season, players_df)
     if players_df is not None:
         vorp_df = filter_rostered(vorp_df, players_df)
     if args.position:
         vorp_df = vorp_df.filter(pl.col("position") == args.position)
     ranked = vorp_df.sort("vorp_season", descending=True).head(args.top)
     for rank, row in enumerate(ranked.to_dicts(), start=1):
-        print(
-            f"{rank:2d}. {row['name']:<25} {row['position']:<3} vorp={row['vorp_season']:7.1f}"
-        )
+        line = f"{rank:2d}. {row['name']:<25} {row['position']:<3} vorp={row['vorp_season']:7.1f}"
+        change = team_changes.get(row["sleeper_id"])
+        if change is not None:
+            line += f" [MOVED: {change.old_team}→{change.new_team}]"
+        print(line)
     return 0
 
 

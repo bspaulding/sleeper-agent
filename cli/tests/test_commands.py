@@ -90,6 +90,16 @@ def test_wiki_scaffold_rookies_subcommand_is_registered() -> None:
     assert args.season == 2026
 
 
+def test_wiki_scaffold_role_changers_subcommand_is_registered() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(["wiki", "scaffold", "role-changers", "--season", "2025"])
+
+    assert args.func is wiki_cmd.cmd_wiki_scaffold_role_changers
+    assert args.season == 2025
+
+
 # --- sleeper league resolve ----------------------------------------------
 
 
@@ -712,6 +722,102 @@ def test_cmd_wiki_scaffold_rookies_leaves_existing_pages_untouched(
     assert "already researched" in page_path.read_text()
 
 
+def _write_role_changer_fixtures(repo_root: Path, *, season: str = "2025") -> None:
+    """A players.parquet + weekly stats + id-crosswalk trio with one
+    triaged role-changer (>=50 prior-season touches, CAR -> PIT) and one
+    below the opportunity floor (30 touches, triaged out)."""
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["1", "2"],
+                "name": ["Player One", "Player Two"],
+                "position": ["RB", "RB"],
+                "team": ["PIT", "SEA"],
+                "status": ["Active", "Active"],
+                "injury_status": ["", ""],
+                "fantasy_positions": [["RB"], ["RB"]],
+                "years_exp": [3, 2],
+            }
+        ),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["00-A", "00-A", "00-B"],
+                "position": ["RB", "RB", "RB"],
+                "week": [1, 2, 1],
+                "team": ["CAR", "CAR", "JAX"],
+                "carries": [30.0, 25.0, 30.0],
+                "targets": [0.0, 0.0, 0.0],
+            }
+        ),
+        repo_root / "data" / "stats" / "weekly" / f"{season}.parquet",
+        schema_version=1,
+    )
+    write_table(
+        pl.DataFrame(
+            {"gsis_id": ["00-A", "00-B"], "sleeper_id": [1, 2]},
+        ),
+        repo_root / "data" / "stats" / "ids.parquet",
+        schema_version=1,
+    )
+
+
+def test_cmd_wiki_scaffold_role_changers_creates_pages_for_triaged_movers(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_role_changer_fixtures(repo_root)
+
+    args = argparse.Namespace(season=2025)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_role_changers(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "created 1 player page(s)" in capsys.readouterr().out
+    assert (repo_root / "wiki" / "players" / "1-player-one.md").exists()
+    # 30 touches for Player Two is below the 50-touch opportunity floor.
+    assert not (repo_root / "wiki" / "players" / "2-player-two.md").exists()
+
+
+def test_cmd_wiki_scaffold_role_changers_leaves_existing_pages_untouched(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_role_changer_fixtures(repo_root)
+    page_path = repo_root / "wiki" / "players" / "1-player-one.md"
+    page_path.parent.mkdir(parents=True)
+    page_path.write_text(
+        "---\nsleeper_id: '1'\n---\n\n## News\n\n- already researched\n"
+    )
+
+    args = argparse.Namespace(season=2025)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_role_changers(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    assert "created 0 player page(s), 1 already existed" in capsys.readouterr().out
+    assert "already researched" in page_path.read_text()
+
+
+def test_cmd_wiki_scaffold_role_changers_reports_missing_weekly_stats(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    _write_players_parquet(sleeper_dir)
+    # No data/stats/weekly/2025.parquet written.
+
+    args = argparse.Namespace(season=2025)
+    exit_code = wiki_cmd.cmd_wiki_scaffold_role_changers(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "no weekly stats" in capsys.readouterr().out
+
+
 def test_cmd_wiki_stale_scoped_to_roster(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -972,6 +1078,110 @@ def test_cmd_value_rank_excludes_players_with_no_nfl_team(
     assert exit_code == 0
     assert "Runner A" in out
     assert "Runner B" not in out
+
+
+def _write_value_team_change_fixtures(repo_root: Path, season: str) -> None:
+    """Builds on `_write_value_fixtures`: Runner A (101) is a triaged
+    role-changer (55 touches, CAR -> PIT); Runner B (102) has a current
+    team on record but never changed it."""
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    _write_value_fixtures(repo_root, season)
+
+    stats_dir = repo_root / "data" / "stats"
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["00-A", "00-A", "00-B"],
+                "position": ["RB", "RB", "RB"],
+                "week": [1, 2, 1],
+                "team": ["CAR", "CAR", "SEA"],
+                "carries": [30.0, 25.0, 10.0],
+                "targets": [0.0, 0.0, 0.0],
+            }
+        ),
+        stats_dir / "weekly" / f"{season}.parquet",
+        schema_version=1,
+    )
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["101", "102"],
+                "name": ["Runner A", "Runner B"],
+                "position": ["RB", "RB"],
+                "team": ["PIT", "SEA"],
+                "status": ["Active", "Active"],
+                "injury_status": ["", ""],
+                "fantasy_positions": [["RB"], ["RB"]],
+                "years_exp": [3, 2],
+            }
+        ),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+
+def test_cmd_value_rank_tags_triaged_role_changer(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_team_change_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(season="2025", position=None, top=20)
+    exit_code = value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    lines = out.splitlines()
+    runner_a_line = next(line for line in lines if "Runner A" in line)
+    runner_b_line = next(line for line in lines if "Runner B" in line)
+    assert "[MOVED: CAR" in runner_a_line
+    assert "PIT]" in runner_a_line
+    assert "[MOVED" not in runner_b_line
+
+
+def test_cmd_value_rank_omits_moved_tag_without_players_data(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")  # no players.parquet written
+
+    args = argparse.Namespace(season="2025", position=None, top=20)
+    exit_code = value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "[MOVED" not in out
+
+
+def test_cmd_value_player_tags_triaged_role_changer(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_team_change_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(sleeper_id="101", season="2025")
+    exit_code = value_cmd.cmd_value_player(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "[MOVED: CAR" in out
+    assert "PIT]" in out
+
+
+def test_cmd_value_player_omits_moved_tag_for_non_mover(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_value_team_change_fixtures(repo_root, "2025")
+
+    args = argparse.Namespace(sleeper_id="102", season="2025")
+    exit_code = value_cmd.cmd_value_player(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "[MOVED" not in out
 
 
 def test_cmd_value_roster_prints_positional_breakdown(
@@ -1537,6 +1747,205 @@ def test_cmd_draft_board_omits_rookie_watch_when_no_draft_picks_data(
     out = capsys.readouterr().out
     assert exit_code == 0
     assert "Rookie watch" not in out
+
+
+def _write_team_change_fixtures(repo_root: Path, *, season: str = "2025") -> None:
+    """A players.parquet + weekly stats + id-crosswalk trio with one
+    triaged role-changer (>=50 prior-season touches, CAR -> PIT) and one
+    below the opportunity floor (30 touches, triaged out)."""
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["1", "2"],
+                "name": ["A", "Low Volume Guy"],
+                "position": ["RB", "RB"],
+                "team": ["PIT", "SEA"],
+                "status": ["Active", "Active"],
+                "injury_status": ["", ""],
+                "fantasy_positions": [["RB"], ["RB"]],
+                "years_exp": [3, 2],
+            }
+        ),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["00-A", "00-A", "00-B"],
+                "position": ["RB", "RB", "RB"],
+                "week": [1, 2, 1],
+                "team": ["CAR", "CAR", "JAX"],
+                "carries": [30.0, 25.0, 30.0],
+                "targets": [0.0, 0.0, 0.0],
+            }
+        ),
+        repo_root / "data" / "stats" / "weekly" / f"{season}.parquet",
+        schema_version=1,
+    )
+    write_table(
+        pl.DataFrame(
+            {"gsis_id": ["00-A", "00-B"], "sleeper_id": [1, 2]},
+        ),
+        repo_root / "data" / "stats" / "ids.parquet",
+        schema_version=1,
+    )
+
+
+def test_cmd_draft_board_tags_triaged_role_changer(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A", "Low Volume Guy"],
+            "position": ["RB", "RB"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_team_change_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "[MOVED: CAR" in out
+    assert "PIT]" in out
+    # 30 touches for player "2" is below the 50-touch opportunity floor.
+    lines = [line for line in out.splitlines() if "Low Volume Guy" in line]
+    assert len(lines) == 1
+    assert "[MOVED" not in lines[0]
+
+
+def test_cmd_draft_board_omits_moved_tag_when_no_stats_data(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    # No data/stats/weekly, data/stats/ids.parquet, or players.parquet written.
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "[MOVED" not in out
+
+
+def test_cmd_draft_board_watch_threads_moved_tag_into_decision_log(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["1"],
+                "name": ["A"],
+                "position": ["RB"],
+                "vorp_season": [50.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+    _write_team_change_fixtures(repo_root)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=True,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args,
+            repo_root=repo_root,
+            base_url=base_url,
+            today=lambda: date(2026, 7, 26),
+            max_watch_iterations=1,
+        )
+
+    assert exit_code == 0
+    log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
+    assert "[MOVED: CAR" in log_path.read_text()
 
 
 def test_cmd_draft_board_reports_missing_vorp(

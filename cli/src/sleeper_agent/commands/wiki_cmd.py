@@ -11,7 +11,9 @@ from sleeper_agent.models.sleeper import Player, parse_player
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
+from sleeper_agent.value.team_changes import detect_team_changes, triage_team_changes
 from sleeper_agent.wiki_tools.scaffold import (
     players_for_roster,
     scaffold_players,
@@ -48,6 +50,13 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     )
     rookies_parser.add_argument("--season", type=int, required=True)
     rookies_parser.set_defaults(func=cmd_wiki_scaffold_rookies)
+
+    role_changers_parser = scaffold_subparsers.add_parser(
+        "role-changers",
+        help="Scaffold pages for this season's triaged role changers (FA/trade)",
+    )
+    role_changers_parser.add_argument("--season", type=int, required=True)
+    role_changers_parser.set_defaults(func=cmd_wiki_scaffold_role_changers)
 
     stale_parser = wiki_subparsers.add_parser("stale", help="List stale wiki pages")
     stale_parser.add_argument("--days", type=int, default=7)
@@ -170,6 +179,51 @@ def cmd_wiki_scaffold_rookies(
 
     rookies = triage_rookies(draft_picks_df, players_df)
     result = scaffold_players(wiki_dir(root), [r.player for r in rookies])
+    print(
+        f"created {len(result.created)} player page(s), {len(result.already_existed)} already existed"
+    )
+    return 0
+
+
+def cmd_wiki_scaffold_role_changers(
+    args: argparse.Namespace, *, repo_root: Path | None = None
+) -> int:
+    """Scaffold `wiki/players/*.md` stubs for this season's triaged role
+    changers (FA/trade).
+
+    Unlike rookies, most role-changers are veterans who already have a wiki
+    page from a prior season -- this only creates the rare missing one
+    (e.g. a practice-squad call-up who never got scaffolded). `--season`
+    here is the prior season whose weekly stats define "old team" (matches
+    `value rank --season`/`stats vorp --season`'s convention), not the
+    season the players are moving into.
+    """
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    stats_dir = data_dir(root) / "stats"
+    weekly_path = stats_dir / "weekly" / f"{args.season}.parquet"
+    if not weekly_path.exists():
+        print(f"no weekly stats — run `stats sync --season {args.season}` first")
+        return 1
+
+    weekly_df = read_table(weekly_path, expected_schema_version=WEEKLY_SCHEMA_VERSION)
+    ids_df = read_table(
+        stats_dir / "ids.parquet", expected_schema_version=IDS_SCHEMA_VERSION
+    )
+
+    sleeper_dir = data_dir(root) / "sleeper"
+    players_df = read_table(
+        sleeper_dir / "players.parquet", expected_schema_version=PLAYERS_SCHEMA_VERSION
+    )
+    players_by_id = _read_players_by_id(sleeper_dir)
+
+    changes = triage_team_changes(detect_team_changes(weekly_df, players_df, ids_df))
+    players = [
+        players_by_id[change.sleeper_id]
+        for change in changes
+        if change.sleeper_id in players_by_id
+    ]
+
+    result = scaffold_players(wiki_dir(root), players)
     print(
         f"created {len(result.created)} player page(s), {len(result.already_existed)} already existed"
     )
