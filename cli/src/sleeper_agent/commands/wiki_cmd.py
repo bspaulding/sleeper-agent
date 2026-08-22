@@ -14,6 +14,7 @@ from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
 from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
 from sleeper_agent.value.team_changes import detect_team_changes, triage_team_changes
+from sleeper_agent.wiki_tools.frontmatter_sync import sync_player_team_frontmatter
 from sleeper_agent.wiki_tools.scaffold import (
     players_for_roster,
     scaffold_players,
@@ -57,6 +58,11 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     )
     role_changers_parser.add_argument("--season", type=int, required=True)
     role_changers_parser.set_defaults(func=cmd_wiki_scaffold_role_changers)
+
+    wiki_subparsers.add_parser(
+        "sync-frontmatter",
+        help="Refresh nfl_team on player pages from the latest players sync",
+    ).set_defaults(func=cmd_wiki_sync_frontmatter)
 
     stale_parser = wiki_subparsers.add_parser("stale", help="List stale wiki pages")
     stale_parser.add_argument("--days", type=int, default=7)
@@ -226,6 +232,32 @@ def cmd_wiki_scaffold_role_changers(
     result = scaffold_players(wiki_dir(root), players)
     print(
         f"created {len(result.created)} player page(s), {len(result.already_existed)} already existed"
+    )
+    return 0
+
+
+def cmd_wiki_sync_frontmatter(
+    args: argparse.Namespace, *, repo_root: Path | None = None
+) -> int:
+    """Refresh `nfl_team` on every `wiki/players/*.md` page from the latest
+    `data/sleeper/players.parquet` sync.
+
+    `nfl_team` is only ever set once, at scaffold time — a player who
+    changes team after their page already exists (the role-changer
+    population `value/team_changes.py` detects) goes stale silently
+    otherwise. Run after `sleeper players sync`, same as `wiki stale`
+    is a secondary check on News content, not something folded into the
+    sync itself.
+    """
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    sleeper_dir = data_dir(root) / "sleeper"
+    players_df = read_table(
+        sleeper_dir / "players.parquet", expected_schema_version=PLAYERS_SCHEMA_VERSION
+    )
+    result = sync_player_team_frontmatter(wiki_dir(root), players_df)
+    print(
+        f"updated {len(result.updated)} page(s), {len(result.unchanged)} unchanged, "
+        f"{len(result.skipped)} skipped (no matching player)"
     )
     return 0
 

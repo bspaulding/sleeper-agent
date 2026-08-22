@@ -100,6 +100,15 @@ def test_wiki_scaffold_role_changers_subcommand_is_registered() -> None:
     assert args.season == 2025
 
 
+def test_wiki_sync_frontmatter_subcommand_is_registered() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(["wiki", "sync-frontmatter"])
+
+    assert args.func is wiki_cmd.cmd_wiki_sync_frontmatter
+
+
 # --- sleeper league resolve ----------------------------------------------
 
 
@@ -816,6 +825,31 @@ def test_cmd_wiki_scaffold_role_changers_reports_missing_weekly_stats(
 
     assert exit_code == 1
     assert "no weekly stats" in capsys.readouterr().out
+
+
+def test_cmd_wiki_sync_frontmatter_updates_stale_pages(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    _write_players_parquet(sleeper_dir)  # Player One -> BUF, Player Two -> KC
+    players_dir = repo_root / "wiki" / "players"
+    players_dir.mkdir(parents=True)
+    stale_page = players_dir / "1-player-one.md"
+    stale_page.write_text(
+        "---\nsleeper_id: '1'\nnfl_team: WAS\n---\n\n## News\n\n- x\n"
+    )
+    fresh_page = players_dir / "2-player-two.md"
+    fresh_page.write_text("---\nsleeper_id: '2'\nnfl_team: KC\n---\n")
+
+    args = argparse.Namespace()
+    exit_code = wiki_cmd.cmd_wiki_sync_frontmatter(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    out = capsys.readouterr().out
+    assert "updated 1 page(s), 1 unchanged, 0 skipped" in out
+    assert "nfl_team: BUF" in stale_page.read_text()
+    assert "- x" in stale_page.read_text()
 
 
 def test_cmd_wiki_stale_scoped_to_roster(

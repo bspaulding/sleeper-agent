@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
+import polars as pl
 import pytest
 
 from sleeper_agent.models.sleeper import Player, Roster
@@ -13,6 +14,7 @@ from sleeper_agent.wiki_tools.frontmatter import (
     parse_page,
     render_page,
 )
+from sleeper_agent.wiki_tools.frontmatter_sync import sync_player_team_frontmatter
 from sleeper_agent.wiki_tools.scaffold import (
     NFL_TEAM_CODES,
     players_for_roster,
@@ -251,3 +253,82 @@ def test_stale_pages_rejects_unexpected_last_researched_type(tmp_path: Path) -> 
 
     with pytest.raises(TypeError):
         stale_pages(tmp_path, ["players"], today=lambda: date(2026, 7, 26))
+
+
+# --- frontmatter sync --------------------------------------------------
+
+
+def make_players_df(rows: list[dict[str, object]]) -> pl.DataFrame:
+    return pl.DataFrame(rows)
+
+
+def test_sync_player_team_frontmatter_updates_stale_team(tmp_path: Path) -> None:
+    players_dir = tmp_path / "players"
+    players_dir.mkdir()
+    page_path = players_dir / "1-player-one.md"
+    page_path.write_text(
+        "---\nsleeper_id: '1'\nname: Player One\nnfl_team: WAS\n"
+        "last_researched: '2026-08-01'\n---\n\n## News\n\n- real research notes\n"
+    )
+    players_df = make_players_df([{"player_id": "1", "team": "SF"}])
+
+    result = sync_player_team_frontmatter(tmp_path, players_df)
+
+    assert result.updated == (page_path,)
+    assert result.unchanged == ()
+    assert result.skipped == ()
+    page = parse_page(page_path.read_text())
+    assert page.frontmatter["nfl_team"] == "SF"
+    assert page.frontmatter["last_researched"] == "2026-08-01"
+    assert "real research notes" in page.body
+
+
+def test_sync_player_team_frontmatter_leaves_matching_pages_unchanged(
+    tmp_path: Path,
+) -> None:
+    players_dir = tmp_path / "players"
+    players_dir.mkdir()
+    page_path = players_dir / "1-player-one.md"
+    original_text = "---\nsleeper_id: '1'\nnfl_team: SF\n---\n\n## News\n\n- note\n"
+    page_path.write_text(original_text)
+    players_df = make_players_df([{"player_id": "1", "team": "SF"}])
+
+    result = sync_player_team_frontmatter(tmp_path, players_df)
+
+    assert result.updated == ()
+    assert result.unchanged == (page_path,)
+    assert page_path.read_text() == original_text
+
+
+def test_sync_player_team_frontmatter_skips_pages_with_no_matching_player(
+    tmp_path: Path,
+) -> None:
+    players_dir = tmp_path / "players"
+    players_dir.mkdir()
+    page_path = players_dir / "1-player-one.md"
+    original_text = "---\nsleeper_id: '1'\nnfl_team: WAS\n---\n"
+    page_path.write_text(original_text)
+    players_df = make_players_df([{"player_id": "2", "team": "SF"}])
+
+    result = sync_player_team_frontmatter(tmp_path, players_df)
+
+    assert result.updated == ()
+    assert result.unchanged == ()
+    assert result.skipped == (page_path,)
+    assert page_path.read_text() == original_text
+
+
+def test_sync_player_team_frontmatter_handles_player_with_no_current_team(
+    tmp_path: Path,
+) -> None:
+    players_dir = tmp_path / "players"
+    players_dir.mkdir()
+    page_path = players_dir / "1-player-one.md"
+    page_path.write_text("---\nsleeper_id: '1'\nnfl_team: WAS\n---\n")
+    players_df = make_players_df([{"player_id": "1", "team": None}])
+
+    result = sync_player_team_frontmatter(tmp_path, players_df)
+
+    assert result.updated == (page_path,)
+    page = parse_page(page_path.read_text())
+    assert page.frontmatter["nfl_team"] is None
