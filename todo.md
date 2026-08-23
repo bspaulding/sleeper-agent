@@ -1,24 +1,35 @@
 # Project TODO
 
-## Rookie / new-outlook player research strategy
+## Keeper decision — deadline Friday, Aug 28
 
-Need a follow-up design pass on how to research and evaluate players whose fantasy outlook
-isn't captured by `stats vorp` at all: rookies (no prior-NFL-season stats row), players who
-changed teams/roles via free agency or trade with a materially different offensive situation,
-and generally anyone with a new-for-this-season outlook. Flagged 2026-08-16 while scoping
-`docs/superpowers/specs/2026-08-16-draft-strategy-research-and-positional-need.md`
-(positional-need-aware `draft board`), explicitly left out of that spec's "Out of scope /
-follow-up" section to keep it focused.
+Run `draft keepers --me --season 2026`, make the ≤2 keeper call, log it with
+`decisions new --kind keeper`. Context that should feed the call:
+`wiki/team/defense-strategy.md` (draft-day plan), the 2026-08-22 injury sweep
+(`wiki/news-sources.md` checkpoint), and the fact that Kareem Hunt and Zach Ertz
+are **unsigned FAs** as of Aug 23 — two of the 15 roster spots are dead pending
+their signings or our drops.
 
-**Why:** The first 2026 mock draft already hit this concretely — 2025-rookie Colston Loveland
-was entirely invisible to `draft board`/`stats vorp` because he has zero rows in the prior
-season's stats (`wiki/team/roster-philosophy.md`'s data-currency caveat). This isn't a data-lag
-problem that resolves itself; it's structural — a player with no prior-season NFL stats will
-always be invisible to a stats-vorp-only pipeline, rookie or not.
+## Before the draft (Saturday, Aug 29)
 
-**How to apply:** The likely direction sketched at flag-time: extend the wiki News-page pattern
-already used for injury/trend context (`value/scoring.py`'s `recent_news_excerpt`) with a
-rookie/new-situation research sweep akin to `.claude/skills/news-research.md`, so qualitative
-signal (draft capital, college production, offensive scheme fit, camp reports) fills the gap
-VORP structurally can't. This is its own research+design cycle — don't fold it into small
-draft-tooling changes.
+- One more full news sweep (`news-research.md`) on Aug 27–28 — statuses still
+  fluid: Kittle PUP/practice clearance, Olave post-medical-tent, Thornton return,
+  Judkins nagging knee.
+- Create the draft-day one-shot Routine (`IMPLEMENTATION_PLAN.md` Phase H) with
+  `run_once_at` set to the actual draft window — the date is now known.
+
+## Routines first successful fire (before week 1, Sept 9)
+
+The three recurring Routines (weekly stats/VORP Tuesdays, waiver reminder
+Mondays, trade scouting Wednesdays) were created in Phase H but have never had
+a genuine run — they no-op'd while implementation was unmerged. Everything is
+on `main` now; verify via next scheduled firing or manual `fire_trigger`.
+
+## In-season
+
+- Sync `stats --season 2026` once nflverse starts publishing weekly files
+  (currently 404 pre-season — verified 2026-08-23), then `stats vorp --season
+  2026`. Until then `players.parquet`'s live `injury_status` tags are the only
+  current availability feed.
+- Watch Hunt/Ertz FA signings: if either lands somewhere, re-run
+  `sleeper players sync` + `wiki sync-frontmatter` so they stop being silently
+  dropped by `filter_rostered`.

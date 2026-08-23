@@ -113,3 +113,13 @@ board has no injury/availability signal beyond the researched-news lines shown f
 rookies/role-changers, and Charbonnet's PUP status surfaced only after the pick was made. Worth
 checking PUP/injury status explicitly for RB/WR depth picks in rounds 10+ going forward, rather
 than trusting raw VORP alone at that stage of the draft.
+
+## Follow-up resolution (2026-08-23)
+
+The retro's "check PUP/injury status explicitly for RB/WR depth picks in rounds
+10+" concern is now structurally addressed: `draft board` and `value rank`
+render live Sleeper `[INJ: ...]` tags (commit c09f72b, same day), so an
+available player's Questionable/IR/PUP designation is visible at pick time
+without a manual check. Charbonnet's own PUP status was also caught in the
+2026-08-22 news sweep (`wiki/players/11435-emanuel-wilson.md` covers his
+Seahawks backfield; his page carries the PUP note).

@@ -49,7 +49,7 @@ show a team abbreviation.
 - Produces: `DraftPick.player_team: str | None` — every later task that constructs or reads a
   `DraftPick` may pass/rely on this field.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `cli/tests/test_sleeper_client.py` (near `test_fetch_draft_picks_parses_real_fixture_including_keepers`):
 
@@ -67,12 +67,12 @@ def test_fetch_draft_picks_parses_player_team_from_metadata() -> None:
     assert picks[0].player_team == "CIN"
 ```
 
-- [ ] **Step 2: Run it, verify it fails**
+- [x] **Step 2: Run it, verify it fails**
 
 Run: `cd cli && pytest tests/test_sleeper_client.py::test_fetch_draft_picks_parses_player_team_from_metadata -v`
 Expected: FAIL — `AttributeError: 'DraftPick' object has no attribute 'player_team'`
 
-- [ ] **Step 3: Add the field to the model and parse it**
+- [x] **Step 3: Add the field to the model and parse it**
 
 In `cli/src/sleeper_agent/models/sleeper.py`, extend the `DraftPick` dataclass (currently ends at
 `player_position: str | None`):
@@ -118,19 +118,19 @@ def parse_draft_pick(raw: DraftPickRaw) -> DraftPick:
 
 (`DraftPickMetadataRaw` already declares `team: str` — no change needed there.)
 
-- [ ] **Step 4: Run the new test, verify it passes**
+- [x] **Step 4: Run the new test, verify it passes**
 
 Run: `cd cli && pytest tests/test_sleeper_client.py::test_fetch_draft_picks_parses_player_team_from_metadata -v`
 Expected: PASS
 
-- [ ] **Step 5: Run the full test suite and observe the fallout**
+- [x] **Step 5: Run the full test suite and observe the fallout**
 
 Run: `cd cli && pytest`
 Expected: FAIL — every other `DraftPick(...)` construction site now raises
 `TypeError: DraftPick.__init__() missing 1 required positional argument: 'player_team'`. This is
 expected; the remaining steps fix each site.
 
-- [ ] **Step 6: Thread `player_team` through the persisted-schema helpers**
+- [x] **Step 6: Thread `player_team` through the persisted-schema helpers**
 
 In `cli/src/sleeper_agent/sleeper_client/sync.py`, bump the schema version:
 
@@ -181,7 +181,7 @@ def dataframe_to_draft_picks(df: pl.DataFrame) -> list[DraftPick]:
     ]
 ```
 
-- [ ] **Step 7: Fix `test_sleeper_sync.py`'s two construction sites**
+- [x] **Step 7: Fix `test_sleeper_sync.py`'s two construction sites**
 
 In `cli/tests/test_sleeper_sync.py`, `test_draft_picks_dataframe_round_trips`, add `player_team=`
 to both picks (Ja'Marr Chase and Joe Burrow are both Bengals):
@@ -223,7 +223,7 @@ def test_draft_picks_dataframe_round_trips() -> None:
     assert result == picks
 ```
 
-- [ ] **Step 8: Fix `test_commands.py`'s four construction sites**
+- [x] **Step 8: Fix `test_commands.py`'s four construction sites**
 
 In `cli/tests/test_commands.py`, the `picks_2025` list (3 picks: Runner A/B/C) and `picks_2024`
 list (1 pick: Runner C) in the keeper-eligibility fixture each need `player_team="SF"` added
@@ -249,7 +249,7 @@ first entry becomes:
 Apply the same `player_team="SF"` addition to the other 3 sites in that fixture (Runner B, Runner
 C in `picks_2025`, and Runner C in `picks_2024`).
 
-- [ ] **Step 9: Fix `test_draft_tools.py`'s `make_pick` helper and remaining direct site**
+- [x] **Step 9: Fix `test_draft_tools.py`'s `make_pick` helper and remaining direct site**
 
 In `cli/tests/test_draft_tools.py`, extend `make_pick` with a defaulted `player_team` parameter
 (test-helper convenience — the dataclass itself still requires the field, the helper just
@@ -306,12 +306,12 @@ def test_my_roster_positions_buckets_missing_position_as_unk() -> None:
 
 (Leave the rest of the test body unchanged.)
 
-- [ ] **Step 10: Run the full test suite, verify everything passes**
+- [x] **Step 10: Run the full test suite, verify everything passes**
 
 Run: `cd cli && pytest`
 Expected: PASS (all tests, including the new one from Step 1)
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add cli/src/sleeper_agent/models/sleeper.py cli/src/sleeper_agent/sleeper_client/sync.py \
@@ -331,7 +331,7 @@ git commit -m "Add DraftPick.player_team, bump DRAFTS_SCHEMA_VERSION to 2"
 **Interfaces:**
 - Produces: `slot_for_pick(pick_no: int, num_teams: int) -> int`, used by Task 3's `watch_picks`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `cli/tests/test_draft_tools.py` (near the other `board.py`-level tests, e.g. after
 `compute_tiers`/`_is_tier_break` tests or near `my_roster_positions` tests):
@@ -363,14 +363,14 @@ def test_slot_for_pick_with_odd_num_teams() -> None:
     assert slot_for_pick(21, 10) == 1
 ```
 
-- [ ] **Step 2: Run them, verify they fail**
+- [x] **Step 2: Run them, verify they fail**
 
 Run: `cd cli && pytest tests/test_draft_tools.py -k slot_for_pick -v`
 Expected: FAIL — `ImportError` / `NameError: name 'slot_for_pick' is not defined` (add the import
 at the top of the test file alongside the other `board` imports first, then re-run to confirm the
 `NameError`/`ImportError` comes from the missing function itself, not a missing import).
 
-- [ ] **Step 3: Implement `slot_for_pick`**
+- [x] **Step 3: Implement `slot_for_pick`**
 
 Add to `cli/src/sleeper_agent/draft_tools/board.py`, near `watch_board` (top-level function, no
 class):
@@ -390,12 +390,12 @@ def slot_for_pick(pick_no: int, num_teams: int) -> int:
     return num_teams - pos_in_round + 1
 ```
 
-- [ ] **Step 4: Run the tests, verify they pass**
+- [x] **Step 4: Run the tests, verify they pass**
 
 Run: `cd cli && pytest tests/test_draft_tools.py -k slot_for_pick -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cli/src/sleeper_agent/draft_tools/board.py cli/tests/test_draft_tools.py
@@ -438,7 +438,7 @@ responsible for resolving it whether the user identified themselves via `--draft
 or via `--me`/`--roster-id` (reverse-lookup through `slot_to_roster_id`). `watch_picks` itself
 never deals with `roster_id`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `cli/tests/test_draft_tools.py`:
 
@@ -624,13 +624,13 @@ def test_watch_picks_without_my_draft_slot_never_renders_board() -> None:
     assert board_calls == []
 ```
 
-- [ ] **Step 2: Run them, verify they fail**
+- [x] **Step 2: Run them, verify they fail**
 
 Run: `cd cli && pytest tests/test_draft_tools.py -k watch_picks -v`
 Expected: FAIL — `NameError: name 'watch_picks' is not defined` (add the import first, alongside
 `watch_board`, then confirm the failure is about the missing function).
 
-- [ ] **Step 3: Implement `watch_picks`**
+- [x] **Step 3: Implement `watch_picks`**
 
 Add to `cli/src/sleeper_agent/draft_tools/board.py`, after `watch_board`:
 
@@ -698,17 +698,17 @@ def watch_picks(
             sleep(poll_seconds)
 ```
 
-- [ ] **Step 4: Run the tests, verify they pass**
+- [x] **Step 4: Run the tests, verify they pass**
 
 Run: `cd cli && pytest tests/test_draft_tools.py -k watch_picks -v`
 Expected: PASS (all 6 new tests)
 
-- [ ] **Step 5: Run the full test suite**
+- [x] **Step 5: Run the full test suite**
 
 Run: `cd cli && pytest`
 Expected: PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add cli/src/sleeper_agent/draft_tools/board.py cli/tests/test_draft_tools.py
@@ -730,12 +730,12 @@ extract without changing what any of them observe.
 - Produces: `DraftContext` dataclass and `_resolve_draft_context(args, root, *, base_url) ->
   DraftContext | None`, used by Task 5's `cmd_draft_watch_picks`.
 
-- [ ] **Step 1: Run the full test suite to establish the baseline**
+- [x] **Step 1: Run the full test suite to establish the baseline**
 
 Run: `cd cli && pytest tests/test_commands.py -k draft_board -v`
 Expected: PASS (this is the baseline — all `cmd_draft_board` tests green before touching anything)
 
-- [ ] **Step 2: Add the `Draft`/`DraftPick` imports**
+- [x] **Step 2: Add the `Draft`/`DraftPick` imports**
 
 In `cli/src/sleeper_agent/commands/draft_cmd.py`, add to the imports:
 
@@ -743,7 +743,7 @@ In `cli/src/sleeper_agent/commands/draft_cmd.py`, add to the imports:
 from sleeper_agent.models.sleeper import Draft, DraftPick
 ```
 
-- [ ] **Step 3: Add the `DraftContext` dataclass and `_resolve_draft_context` function**
+- [x] **Step 3: Add the `DraftContext` dataclass and `_resolve_draft_context` function**
 
 Add near the top of `draft_cmd.py`, after the existing `_team_changes_by_sleeper_id` helper (i.e.
 right before `cmd_draft_keepers`):
@@ -842,7 +842,7 @@ def _resolve_draft_context(
 Note: `dataclass` must already be imported in this file (`from dataclasses import dataclass`) — if
 it isn't, add that import too.
 
-- [ ] **Step 4: Rewrite `cmd_draft_board` to use the shared helper**
+- [x] **Step 4: Rewrite `cmd_draft_board` to use the shared helper**
 
 Replace the body of `cmd_draft_board` (currently lines ~266-369) with:
 
@@ -907,13 +907,13 @@ def cmd_draft_board(
     return 0
 ```
 
-- [ ] **Step 5: Run the full test suite, verify no regressions**
+- [x] **Step 5: Run the full test suite, verify no regressions**
 
 Run: `cd cli && pytest`
 Expected: PASS — every existing `test_cmd_draft_board_*` test still passes unchanged, proving the
 extraction is behavior-preserving.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add cli/src/sleeper_agent/commands/draft_cmd.py
@@ -934,7 +934,7 @@ git commit -m "Extract _resolve_draft_context from cmd_draft_board for reuse"
 - Produces: `cmd_draft_watch_picks(args, *, repo_root=None, base_url=SLEEPER_BASE_URL,
   max_iterations=None) -> int`, wired to the `draft watch-picks` subcommand.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `cli/tests/test_commands.py`, near the other `cmd_draft_board` tests (these use the same
 `_league_payload`/`_draft_object_payload` helpers already defined in that file):
@@ -1156,12 +1156,12 @@ def test_cmd_draft_watch_picks_reports_missing_vorp(tmp_path: Path) -> None:
     assert exit_code == 1
 ```
 
-- [ ] **Step 2: Run them, verify they fail**
+- [x] **Step 2: Run them, verify they fail**
 
 Run: `cd cli && pytest tests/test_commands.py -k watch_picks -v`
 Expected: FAIL — `AttributeError: module 'draft_cmd' has no attribute 'cmd_draft_watch_picks'`
 
-- [ ] **Step 3: Implement `cmd_draft_watch_picks` and wire the subparser**
+- [x] **Step 3: Implement `cmd_draft_watch_picks` and wire the subparser**
 
 Add the `watch_picks` import to `draft_cmd.py`'s existing `from sleeper_agent.draft_tools.board
 import (...)` block:
@@ -1291,17 +1291,17 @@ def cmd_draft_watch_picks(
     return 0
 ```
 
-- [ ] **Step 4: Run the tests, verify they pass**
+- [x] **Step 4: Run the tests, verify they pass**
 
 Run: `cd cli && pytest tests/test_commands.py -k watch_picks -v`
 Expected: PASS (all 4 new tests)
 
-- [ ] **Step 5: Run the full test suite**
+- [x] **Step 5: Run the full test suite**
 
 Run: `cd cli && pytest`
 Expected: PASS
 
-- [ ] **Step 6: Manually smoke-test against a real (or recent) draft ID**
+- [x] **Step 6: Manually smoke-test against a real (or recent) draft ID**
 
 Run (using a real past mock/league draft ID if one is handy, e.g. from a recent
 `decisions/2026/*.md` entry):
@@ -1315,7 +1315,7 @@ Expected: streams every historical pick as a line, then exits once it reaches th
 completed draft's pick count equals `rounds * num_teams`). Confirms the command runs against the
 real Sleeper API, not just mocked tests.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add cli/src/sleeper_agent/commands/draft_cmd.py cli/tests/test_commands.py
@@ -1332,7 +1332,7 @@ git commit -m "Add draft watch-picks CLI command"
 
 **Interfaces:** None (documentation only).
 
-- [ ] **Step 1: Update `.claude/skills/draft.md`'s "Preferred live setup" bullet**
+- [x] **Step 1: Update `.claude/skills/draft.md`'s "Preferred live setup" bullet**
 
 Find the bullet starting "**Preferred live setup: a `Monitor`-tool loop, not `--watch`
 directly.**" (in the "During the draft" section) and replace its content to point at the new
@@ -1356,12 +1356,12 @@ this surfaces as chat notifications). Rewrite it to something like:
      into their hands the instant it's computable.
 ```
 
-- [ ] **Step 2: Remove the now-completed `todo.md` entry**
+- [x] **Step 2: Remove the now-completed `todo.md` entry**
 
 Delete the "## Live-draft pick tracker should be a tested CLI command, not an ad hoc script"
 section from `todo.md` (it's done).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add .claude/skills/draft.md todo.md
