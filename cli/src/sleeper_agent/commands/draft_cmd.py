@@ -105,6 +105,16 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
             "--me/--roster-id in league mode."
         ),
     )
+    board_parser.add_argument(
+        "--exclude-players",
+        default=None,
+        help=(
+            "Comma-separated sleeper_ids to drop from the board (e.g. projected "
+            "league keepers when practicing against a mock draft, which has no "
+            "keeper data of its own). Real drafts don't need this: is_keeper picks "
+            "are already excluded from the live feed."
+        ),
+    )
     board_parser.set_defaults(func=cmd_draft_board)
 
     watch_picks_parser = draft_subparsers.add_parser(
@@ -156,6 +166,14 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         type=float,
         default=1.0,
         help="Picks-endpoint poll interval — cheap enough to poll faster than draft board --watch's 5s default.",
+    )
+    watch_picks_parser.add_argument(
+        "--exclude-players",
+        default=None,
+        help=(
+            "Comma-separated sleeper_ids to drop from the board (e.g. projected "
+            "league keepers for a mock draft). Real drafts don't need this."
+        ),
     )
     watch_picks_parser.set_defaults(func=cmd_draft_watch_picks)
 
@@ -246,6 +264,19 @@ class DraftContext:
     injury_statuses: dict[str, str]
 
 
+def parse_excluded_players(raw: str | None) -> list[str]:
+    """Parse `--exclude-players "2449,4943"` into a clean sleeper_id list.
+
+    Tolerates whitespace and trailing commas; empty/None input means no
+    exclusions. Used by `draft board`/`draft watch-picks` to drop projected
+    league keepers when practicing against a mock draft (which carries no
+    keeper data of its own).
+    """
+    if not raw:
+        return []
+    return [part.strip() for part in raw.split(",") if part.strip()]
+
+
 def _injury_statuses_by_sleeper_id(
     root: Path, players_df: pl.DataFrame | None
 ) -> dict[str, str]:
@@ -320,6 +351,14 @@ def _resolve_draft_context(
     team_changes = _team_changes_by_sleeper_id(root, value_season, players_df)
     if players_df is not None:
         vorp_df = filter_rostered(vorp_df, players_df)
+
+    # Mock-draft practice aid: projected league keepers are known to be off the
+    # pool but don't appear on a mock's picks endpoint, so without this the
+    # board overstates availability. Filtering here means every downstream
+    # consumer (board_view, tiers, watch loops) sees the same reduced pool.
+    excluded = parse_excluded_players(getattr(args, "exclude_players", None))
+    if excluded:
+        vorp_df = vorp_df.filter(~pl.col("sleeper_id").is_in(excluded))
 
     return DraftContext(
         draft_id=draft_id,

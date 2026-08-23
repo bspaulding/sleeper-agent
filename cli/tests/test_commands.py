@@ -1608,6 +1608,65 @@ def test_cmd_draft_board_prints_available_players(
     assert "My roster so far" not in out  # no --me/--roster-id/--draft-slot given
 
 
+def test_cmd_draft_board_exclude_players_drops_projected_keepers(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Mock-draft practice: projected league keepers don't appear on a mock's
+    picks endpoint, so --exclude-players must drop them from the board."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2", "3"],
+            "name": ["A", "B", "C"],
+            "position": ["RB", "WR", "QB"],
+            "vorp_season": [50.0, 30.0, 10.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+        exclude_players="2, 9999,",
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "B\n" not in out
+    assert "A" in out and "C" in out
+
+
+def test_parse_excluded_players_tolerates_whitespace_and_empty() -> None:
+    from sleeper_agent.commands.draft_cmd import parse_excluded_players
+
+    assert parse_excluded_players(None) == []
+    assert parse_excluded_players("") == []
+    assert parse_excluded_players("2449") == ["2449"]
+    assert parse_excluded_players("2449, 4943,") == ["2449", "4943"]
+
+
 def test_cmd_draft_board_tags_live_sleeper_injury_designations(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
