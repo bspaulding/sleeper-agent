@@ -16,11 +16,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import polars as pl
+from requests import RequestException
 
 from sleeper_agent.draft_tools.rookies import TriagedRookie
 from sleeper_agent.models.sleeper import Draft, DraftPick, Player
 from sleeper_agent.sleeper_client.draft import fetch_draft_picks
-from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
+from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL, SleeperHTTPError
 from sleeper_agent.value.team_changes import TeamChange
 
 FLEX_ELIGIBLE_POSITIONS = frozenset({"RB", "WR", "TE"})
@@ -99,8 +100,11 @@ def my_roster_positions(
     return counts
 
 
+DEFAULT_TOP_N = 30
+
+
 def board_view(
-    vorp_df: pl.DataFrame, drafted_picks: list[DraftPick], *, top_n: int = 30
+    vorp_df: pl.DataFrame, drafted_picks: list[DraftPick], *, top_n: int = DEFAULT_TOP_N
 ) -> pl.DataFrame:
     drafted_ids = {pick.player_id for pick in drafted_picks}
     available = vorp_df.filter(~pl.col("sleeper_id").is_in(list(drafted_ids)))
@@ -234,6 +238,49 @@ def render_board(
     return "\n".join(lines)
 
 
+def render_board_for_picks(
+    vorp_df: pl.DataFrame,
+    picks: Sequence[DraftPick],
+    *,
+    top_n: int = DEFAULT_TOP_N,
+    my_roster_id: int | None = None,
+    my_draft_slot: int | None = None,
+    requirement: RosterRequirement | None = None,
+    triaged_rookies: Sequence[TriagedRookie] = (),
+    rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
+    team_changes: dict[str, TeamChange] | None = None,
+) -> str:
+    """Assemble + render the full board for a given picks list.
+
+    The `board_view` -> `my_roster_positions` -> `rookie_watch_rows` ->
+    `render_board` sequence (including the "only annotate when we know who
+    'me' is" gating on `my_roster_id`) was independently duplicated in three
+    places — `watch_board`, `draft board`'s one-shot path, and `draft
+    watch-picks`' on-my-turn board. This is that sequence, once.
+    """
+    picks_list = list(picks)
+    board = board_view(vorp_df, picks_list, top_n=top_n)
+    my_counts = (
+        my_roster_positions(picks_list, my_roster_id, my_draft_slot=my_draft_slot)
+        if my_roster_id is not None
+        else None
+    )
+    rookie_watch: list[RookieWatchRow] | None = (
+        rookie_watch_rows(
+            triaged_rookies, picks_list, news_by_sleeper_id=rookie_news_by_sleeper_id
+        )
+        if triaged_rookies
+        else None
+    )
+    return render_board(
+        board,
+        my_counts=my_counts,
+        requirement=requirement if my_roster_id is not None else None,
+        rookie_watch=rookie_watch,
+        team_changes=team_changes,
+    )
+
+
 def slot_for_pick(pick_no: int, num_teams: int) -> int:
     """Which draft slot owns a given overall pick number, standard snake order.
 
@@ -279,26 +326,14 @@ def watch_board(
         picks = fetch_picks(draft_id, base_url=base_url)
         drafted_ids = frozenset(pick.player_id for pick in picks)
         if drafted_ids != previous_drafted_ids:
-            board = board_view(vorp_df, picks)
-            my_counts = (
-                my_roster_positions(
-                    picks, my_roster_id, my_draft_slot=my_draft_slot
-                )
-                if my_roster_id is not None
-                else None
-            )
-            rookie_watch = (
-                rookie_watch_rows(
-                    triaged_rookies, picks, news_by_sleeper_id=rookie_news_by_sleeper_id
-                )
-                if triaged_rookies
-                else None
-            )
-            rendered = render_board(
-                board,
-                my_counts=my_counts,
-                requirement=requirement if my_roster_id is not None else None,
-                rookie_watch=rookie_watch,
+            rendered = render_board_for_picks(
+                vorp_df,
+                picks,
+                my_roster_id=my_roster_id,
+                my_draft_slot=my_draft_slot,
+                requirement=requirement,
+                triaged_rookies=triaged_rookies,
+                rookie_news_by_sleeper_id=rookie_news_by_sleeper_id,
                 team_changes=team_changes,
             )
             render(rendered)
@@ -319,6 +354,29 @@ def _render_pick_line(pick: DraftPick, my_draft_slot: int | None) -> str:
     if my_draft_slot is not None and pick.draft_slot == my_draft_slot:
         line += " <== MY PICK"
     return line
+
+
+def _next_unmade_pick_no(
+    picks_by_no: dict[int, DraftPick], total_picks: int
+) -> int | None:
+    """Smallest pick_no <= total_picks that hasn't happened yet, or None if the
+    draft is over.
+
+    Not `len(picks_by_no) + 1` and not `max(picks_by_no) + 1`: Sleeper
+    pre-fills `is_keeper: true` picks into the picks endpoint at their real
+    `pick_no` from the very first poll (see this module's docstring and
+    `tests/fixtures/sleeper/draft_picks.json`, which has live picks at 1-3
+    sitting alongside keepers at 47/48). Both shortcuts would skip straight
+    past the live picks still to come in the gap.
+    """
+    for pick_no in range(1, total_picks + 1):
+        if pick_no not in picks_by_no:
+            return pick_no
+    return None
+
+
+def _picks_in_order(picks_by_no: dict[int, DraftPick]) -> list[DraftPick]:
+    return [picks_by_no[pick_no] for pick_no in sorted(picks_by_no)]
 
 
 def watch_picks(
@@ -343,41 +401,48 @@ def watch_picks(
     whole board for picks that aren't mine, and only fetches/renders the
     board once per "my turn" (not on every poll while the human is still on
     the clock) — see `.claude/skills/draft.md`'s "Preferred live setup".
+
+    Progress is tracked as an accumulated `pick_no -> DraftPick` map, merged
+    into (never replaced) from each fetch, rather than as a count of picks
+    seen. Counting assumes the picks endpoint is a contiguous prefix ordered
+    by `pick_no`, which is false in this league: keeper picks arrive
+    pre-filled at their real `pick_no` (47, 48, ...) from the first poll, so
+    a count-based "next pick" jumps clean over every live pick still to come
+    below them. Keying by `pick_no` also makes a transiently short/partial
+    response a structural no-op — it can only fail to add entries, never drop
+    or re-print ones already seen — so no separate shrinking-response guard
+    is needed.
     """
-    printed_count = 0
+    picks_by_no: dict[int, DraftPick] = {}
     announced_pick_no: int | None = None
     iteration = 0
     while max_iterations is None or iteration < max_iterations:
-        picks = fetch_picks(draft_id, base_url=base_url)
-        # Guard against transiently shrinking responses (network blips, etc.).
-        # If a fetch returns fewer picks than the last successful one, skip this
-        # iteration entirely — don't update printed_count, don't print, don't
-        # check for board render. Just retry on the next poll.
-        if len(picks) < printed_count:
-            iteration += 1
-            if max_iterations is None or iteration < max_iterations:
-                sleep(poll_seconds)
-            continue
+        try:
+            picks = fetch_picks(draft_id, base_url=base_url)
+        except (SleeperHTTPError, RequestException) as exc:
+            # This command is built to run unattended under `Monitor` for the
+            # hours a real draft takes; a single timeout/DNS blip/reset must not
+            # end live tracking. Warn and retry on the next poll instead.
+            render(f"fetch failed, retrying: {exc}")
+        else:
+            for pick in sorted(picks, key=lambda p: p.pick_no):
+                is_new = pick.pick_no not in picks_by_no
+                picks_by_no[pick.pick_no] = pick
+                if is_new:
+                    render(_render_pick_line(pick, my_draft_slot))
 
-        for pick in picks[printed_count:]:
-            render(_render_pick_line(pick, my_draft_slot))
-        printed_count = len(picks)
+            if draft_type == "snake" and my_draft_slot is not None:
+                next_pick_no = _next_unmade_pick_no(picks_by_no, total_picks)
+                if (
+                    next_pick_no is not None
+                    and slot_for_pick(next_pick_no, num_teams) == my_draft_slot
+                    and announced_pick_no != next_pick_no
+                ):
+                    render(render_full_board(_picks_in_order(picks_by_no)))
+                    announced_pick_no = next_pick_no
 
-        if (
-            draft_type == "snake"
-            and my_draft_slot is not None
-            and printed_count < total_picks
-        ):
-            next_pick_no = printed_count + 1
-            if (
-                slot_for_pick(next_pick_no, num_teams) == my_draft_slot
-                and announced_pick_no != next_pick_no
-            ):
-                render(render_full_board(picks))
-                announced_pick_no = next_pick_no
-
-        if printed_count >= total_picks:
-            return
+            if len(picks_by_no) >= total_picks:
+                return
 
         iteration += 1
         if max_iterations is None or iteration < max_iterations:
