@@ -33,7 +33,7 @@ This is close to a full startup draft each year (§0 of `IMPLEMENTATION_PLAN.md`
 supplemental round — treat it that way:
 
 1. Before the draft: review `value rank --top 50` (and by position) to build a mental tier list.
-   Check `wiki/team/roster-philosophy.md`, `wiki/team/draft-strategy.md`,
+   Check `wiki/team/roster-philosophy.md`, `wiki/team/draft-strategy.md`, `wiki/team/defense-strategy.md`,
    `wiki/team/rookie-evaluation.md`, `wiki/team/role-changers.md`, and
    `wiki/team/keeper-strategy.md` if they exist for standing strategy notes from prior seasons
    and general drafting theory. Also run, if not already done for this season: `stats
