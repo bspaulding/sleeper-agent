@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
@@ -12,6 +13,7 @@ import polars as pl
 from sleeper_agent.config import data_dir, decisions_dir, find_repo_root, wiki_dir
 from sleeper_agent.draft_tools.board import (
     RookieWatchRow,
+    RosterRequirement,
     board_view,
     my_roster_positions,
     render_board,
@@ -26,6 +28,7 @@ from sleeper_agent.draft_tools.keepers import (
     rank_keeper_candidates,
 )
 from sleeper_agent.draft_tools.rookies import TriagedRookie, triage_rookies
+from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
     KeeperEligible,
@@ -174,6 +177,96 @@ def _team_changes_by_sleeper_id(
     return {change.sleeper_id: change for change in changes}
 
 
+@dataclass(frozen=True)
+class DraftContext:
+    draft_id: str
+    value_season: str
+    num_teams: int
+    draft: Draft
+    vorp_df: pl.DataFrame
+    my_roster_id: int | None
+    my_draft_slot: int | None
+    requirement: RosterRequirement
+    triaged_rookies: list[TriagedRookie]
+    rookie_news: dict[str, list[str]]
+    team_changes: dict[str, TeamChange]
+
+
+def _resolve_draft_context(
+    args: argparse.Namespace, root: Path, *, base_url: str
+) -> DraftContext | None:
+    """Shared setup for `draft board` and `draft watch-picks`: resolve the
+    draft/value-season/num-teams (from --league-id or --draft-id), resolve
+    "me" (--me/--roster-id/--draft-slot), and load VORP + rookie-watch +
+    team-changes data. Prints its own error message and returns None on
+    failure, same convention as the code it was extracted from.
+    """
+    if args.draft_id is not None:
+        if args.value_season is None:
+            print(
+                "--value-season is required with --draft-id (e.g. for a Sleeper mock "
+                "draft, there's no league to infer a season from)"
+            )
+            return None
+        draft_id = args.draft_id
+        value_season = args.value_season
+        num_teams = args.num_teams
+    else:
+        league = fetch_league(args.league_id, base_url=base_url)
+        if league.draft_id is None:
+            print(f"league {args.league_id} has no draft_id")
+            return None
+        draft_id = league.draft_id
+        value_season = args.value_season or league.season
+        num_teams = max(league.settings.num_teams, 1)
+
+    vorp_df = _read_vorp(root, value_season)
+    if vorp_df is None:
+        print(
+            f"no VORP data for season {value_season} — run `stats vorp --season {value_season}` first"
+        )
+        return None
+
+    draft = fetch_draft(draft_id, base_url=base_url)
+    requirement = roster_requirement_from_draft(draft)
+    my_roster_id: int | None = None
+    my_draft_slot: int | None = None
+    if args.draft_slot is not None:
+        my_roster_id = draft.slot_to_roster_id.get(args.draft_slot)
+        if my_roster_id is None:
+            print(
+                f"--draft-slot {args.draft_slot} is not in this draft's "
+                f"slot_to_roster_id (valid slots: {sorted(draft.slot_to_roster_id)})"
+            )
+            return None
+        my_draft_slot = args.draft_slot
+    elif args.me:
+        my_roster_id = ME_ROSTER_ID
+    elif args.roster_id is not None:
+        my_roster_id = args.roster_id
+
+    players_df = _read_players(root)
+    triaged_rookies = _triaged_rookies(root, players_df)
+    rookie_news = _rookie_news_by_sleeper_id(root, triaged_rookies)
+    team_changes = _team_changes_by_sleeper_id(root, value_season, players_df)
+    if players_df is not None:
+        vorp_df = filter_rostered(vorp_df, players_df)
+
+    return DraftContext(
+        draft_id=draft_id,
+        value_season=value_season,
+        num_teams=num_teams,
+        draft=draft,
+        vorp_df=vorp_df,
+        my_roster_id=my_roster_id,
+        my_draft_slot=my_draft_slot,
+        requirement=requirement,
+        triaged_rookies=triaged_rookies,
+        rookie_news=rookie_news,
+        team_changes=team_changes,
+    )
+
+
 def cmd_draft_keepers(
     args: argparse.Namespace, *, repo_root: Path | None = None
 ) -> int:
@@ -272,98 +365,52 @@ def cmd_draft_board(
     max_watch_iterations: int | None = None,
 ) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
-
-    if args.draft_id is not None:
-        if args.value_season is None:
-            print(
-                "--value-season is required with --draft-id (e.g. for a Sleeper mock "
-                "draft, there's no league to infer a season from)"
-            )
-            return 1
-        draft_id = args.draft_id
-        value_season = args.value_season
-        num_teams = args.num_teams
-    else:
-        league = fetch_league(args.league_id, base_url=base_url)
-        if league.draft_id is None:
-            print(f"league {args.league_id} has no draft_id")
-            return 1
-        draft_id = league.draft_id
-        value_season = args.value_season or league.season
-        num_teams = max(league.settings.num_teams, 1)
-
-    vorp_df = _read_vorp(root, value_season)
-    if vorp_df is None:
-        print(
-            f"no VORP data for season {value_season} — run `stats vorp --season {value_season}` first"
-        )
+    context = _resolve_draft_context(args, root, base_url=base_url)
+    if context is None:
         return 1
 
-    draft = fetch_draft(draft_id, base_url=base_url)
-    requirement = roster_requirement_from_draft(draft)
-    my_roster_id: int | None = None
-    my_draft_slot: int | None = None
-    if args.draft_slot is not None:
-        my_roster_id = draft.slot_to_roster_id.get(args.draft_slot)
-        if my_roster_id is None:
-            print(
-                f"--draft-slot {args.draft_slot} is not in this draft's "
-                f"slot_to_roster_id (valid slots: {sorted(draft.slot_to_roster_id)})"
-            )
-            return 1
-        my_draft_slot = args.draft_slot
-    elif args.me:
-        my_roster_id = ME_ROSTER_ID
-    elif args.roster_id is not None:
-        my_roster_id = args.roster_id
-
-    players_df = _read_players(root)
-    triaged_rookies = _triaged_rookies(root, players_df)
-    rookie_news = _rookie_news_by_sleeper_id(root, triaged_rookies)
-    team_changes = _team_changes_by_sleeper_id(root, value_season, players_df)
-    if players_df is not None:
-        vorp_df = filter_rostered(vorp_df, players_df)
-
-    top_n = args.rounds * num_teams
+    top_n = args.rounds * context.num_teams
 
     if args.watch:
         log_path = (
-            decisions_dir(root) / value_season / f"{today().isoformat()}-draft-live.md"
+            decisions_dir(root)
+            / context.value_season
+            / f"{today().isoformat()}-draft-live.md"
         )
         watch_board(
-            draft_id,
-            vorp_df,
+            context.draft_id,
+            context.vorp_df,
             base_url=base_url,
             log_path=log_path,
             max_iterations=max_watch_iterations,
-            my_roster_id=my_roster_id,
-            my_draft_slot=my_draft_slot,
-            requirement=requirement if my_roster_id is not None else None,
-            triaged_rookies=triaged_rookies,
-            rookie_news_by_sleeper_id=rookie_news,
-            team_changes=team_changes,
+            my_roster_id=context.my_roster_id,
+            my_draft_slot=context.my_draft_slot,
+            requirement=context.requirement if context.my_roster_id is not None else None,
+            triaged_rookies=context.triaged_rookies,
+            rookie_news_by_sleeper_id=context.rookie_news,
+            team_changes=context.team_changes,
         )
         return 0
 
-    picks = fetch_draft_picks(draft_id, base_url=base_url)
-    board = board_view(vorp_df, picks, top_n=top_n)
+    picks = fetch_draft_picks(context.draft_id, base_url=base_url)
+    board = board_view(context.vorp_df, picks, top_n=top_n)
     my_counts = (
-        my_roster_positions(picks, my_roster_id, my_draft_slot=my_draft_slot)
-        if my_roster_id is not None
+        my_roster_positions(picks, context.my_roster_id, my_draft_slot=context.my_draft_slot)
+        if context.my_roster_id is not None
         else None
     )
     rookie_watch: list[RookieWatchRow] | None = (
-        rookie_watch_rows(triaged_rookies, picks, news_by_sleeper_id=rookie_news)
-        if triaged_rookies
+        rookie_watch_rows(context.triaged_rookies, picks, news_by_sleeper_id=context.rookie_news)
+        if context.triaged_rookies
         else None
     )
     print(
         render_board(
             board,
             my_counts=my_counts,
-            requirement=requirement if my_roster_id is not None else None,
+            requirement=context.requirement if context.my_roster_id is not None else None,
             rookie_watch=rookie_watch,
-            team_changes=team_changes,
+            team_changes=context.team_changes,
         )
     )
     return 0
