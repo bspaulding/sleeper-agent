@@ -1,11 +1,11 @@
 ---
-last_swept: null
+last_swept: '2026-08-22T19:35:00-07:00'
 ---
 
 # News sweep checkpoint
 
 Tracks the last time a **full** news-research sweep ran (time/source-scoped, not player-scoped —
-see `.claude/skills/news-research.md` §1). `last_swept: null` means no full sweep has run yet
+see `.claude/skills/news-research.md` §1). `last_swept: '2026-08-22T19:35:00-07:00'` means no full sweep has run yet
 under this model; treat that as "look back ~7 days" for the first one. After each full sweep,
 update `last_swept` to the date/time the sweep completed.
 

@@ -3,7 +3,7 @@ sleeper_id: '12529'
 name: TreVeyon Henderson
 position: RB
 nfl_team: NE
-last_researched: '2026-08-15'
+last_researched: '2026-08-22'
 ---
 
 ## News
