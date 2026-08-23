@@ -12,6 +12,7 @@ from sleeper_agent.value.scoring import (
     filter_rostered,
     find_player_wiki_page,
     gsis_id_for_sleeper_id,
+    injury_statuses,
     recent_news_excerpt,
 )
 
@@ -72,12 +73,15 @@ def test_compute_injury_returns_most_recent_report() -> None:
             "week": [3, 5, 5],
             "report_status": ["Questionable", "Out", "Out"],
             "report_primary_injury": ["Ankle", "Knee", "Hamstring"],
+            "season": [2025, 2025, 2025],
         }
     )
 
     injury = compute_injury(injuries, "00-A")
 
-    assert injury == InjuryReported(status="Out", primary_injury="Knee", as_of_week=5)
+    assert injury == InjuryReported(
+        status="Out", primary_injury="Knee", as_of_week=5, season=2025
+    )
 
 
 def test_compute_injury_ignores_null_report_status_rows() -> None:
@@ -104,6 +108,27 @@ def test_compute_injury_returns_no_record_for_unknown_player() -> None:
     )
 
     assert compute_injury(injuries, "00-ZZZ") == NoInjuryOnRecord()
+
+
+def test_injury_statuses_returns_live_sleeper_designations() -> None:
+    players = pl.DataFrame(
+        {
+            "player_id": ["1", "2", "3", "4", "5"],
+            "injury_status": ["Questionable", "PUP", None, "", "NA"],
+        }
+    )
+
+    statuses = injury_statuses(players)
+
+    # null (no designation), empty, and Sleeper's `NA` placeholder for
+    # non-players (coaches etc.) carry no information — only real flags come back.
+    assert statuses == {"1": "Questionable", "2": "PUP"}
+
+
+def test_injury_statuses_returns_empty_for_table_without_the_column() -> None:
+    players = pl.DataFrame({"player_id": ["1"], "team": ["KC"]})
+
+    assert injury_statuses(players) == {}
 
 
 def test_gsis_id_for_sleeper_id_casts_float_sleeper_id_column() -> None:

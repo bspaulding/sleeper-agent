@@ -18,6 +18,7 @@ from sleeper_agent.value.scoring import (
     compute_trend,
     filter_rostered,
     gsis_id_for_sleeper_id,
+    injury_statuses,
     recent_news_excerpt,
 )
 from sleeper_agent.value.team_changes import (
@@ -145,6 +146,7 @@ def cmd_value_player(args: argparse.Namespace, *, repo_root: Path | None = None)
     news = recent_news_excerpt(wiki_dir(root), args.sleeper_id)
 
     players_df = _read_players(root)
+    statuses = injury_statuses(players_df) if players_df is not None else {}
     team_changes = _team_changes_by_sleeper_id(root, season, players_df)
     change = team_changes.get(args.sleeper_id)
 
@@ -165,10 +167,14 @@ def cmd_value_player(args: argparse.Namespace, *, repo_root: Path | None = None)
         print("  Trend: not available")
     if isinstance(injury, InjuryReported):
         print(
-            f"  Injury: {injury.status} ({injury.primary_injury or 'unspecified'}) as of week {injury.as_of_week}"
+            f"  Injury: {injury.status} ({injury.primary_injury or 'unspecified'}) "
+            f"as of week {injury.as_of_week} of the {injury.season} season"
         )
     else:
         print("  Injury: none on record")
+    designation = statuses.get(args.sleeper_id)
+    if designation is not None:
+        print(f"  Current Sleeper designation: {designation}")
     if news:
         print("  Recent news:")
         for line in news:
@@ -183,6 +189,7 @@ def cmd_value_rank(args: argparse.Namespace, *, repo_root: Path | None = None) -
     vorp_df = _read_vorp(root, args.season)
     players_df = _read_players(root)
     team_changes = _team_changes_by_sleeper_id(root, args.season, players_df)
+    statuses = injury_statuses(players_df) if players_df is not None else {}
     if players_df is not None:
         vorp_df = filter_rostered(vorp_df, players_df)
     if args.position:
@@ -193,6 +200,9 @@ def cmd_value_rank(args: argparse.Namespace, *, repo_root: Path | None = None) -
         change = team_changes.get(row["sleeper_id"])
         if change is not None:
             line += f" [MOVED: {change.old_team}→{change.new_team}]"
+        status = statuses.get(row["sleeper_id"])
+        if status is not None:
+            line += f" [INJ: {status}]"
         print(line)
     return 0
 

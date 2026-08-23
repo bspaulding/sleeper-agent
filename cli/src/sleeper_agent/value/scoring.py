@@ -46,6 +46,7 @@ class InjuryReported:
     status: str
     primary_injury: str | None
     as_of_week: int
+    season: int
 
 
 @dataclass(frozen=True)
@@ -93,7 +94,30 @@ def compute_injury(injuries: pl.DataFrame, gsis_id: str) -> InjuryInfo:
         status=row["report_status"],
         primary_injury=row.get("report_primary_injury"),
         as_of_week=row["week"],
+        season=row["season"],
     )
+
+
+def injury_statuses(players_df: pl.DataFrame) -> dict[str, str]:
+    """Live Sleeper injury designations keyed by sleeper_id.
+
+    `players.parquet`'s `injury_status` column is refreshed by every
+    `sleeper players sync`, so unlike the nflverse injuries feed (which only
+    has completed seasons until weekly reports start flowing) this reflects
+    preseason/current designations like `Questionable`/`IR`/`PUP`. Rows with
+    `NA` (Sleeper's placeholder for non-players like coaches) or an empty
+    string carry no information and are dropped. A players table missing the
+    column entirely (hand-built test fixtures) is treated as "no designations
+    known", same best-effort-empty convention as role-change detection.
+    """
+    if "injury_status" not in players_df.columns:
+        return {}
+    flagged = players_df.filter(
+        pl.col("injury_status").is_not_null()
+        & (pl.col("injury_status") != "")
+        & (pl.col("injury_status") != "NA")
+    )
+    return dict(zip(flagged["player_id"].to_list(), flagged["injury_status"].to_list()))
 
 
 def filter_rostered(vorp_df: pl.DataFrame, players_df: pl.DataFrame) -> pl.DataFrame:

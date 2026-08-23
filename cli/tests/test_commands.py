@@ -981,6 +981,7 @@ def _write_value_fixtures(repo_root: Path, season: str) -> None:
             "week": [2],
             "report_status": ["Questionable"],
             "report_primary_injury": ["Ankle"],
+            "season": [2025],
         }
     )
     write_table(
@@ -1026,8 +1027,42 @@ def test_cmd_value_player_prints_full_valuation(
     assert "Runner A (RB)" in out
     assert "VORP: season=22.0" in out
     assert "Trend (carries)" in out
-    assert "Injury: Questionable (Ankle) as of week 2" in out
+    assert "Injury: Questionable (Ankle) as of week 2 of the 2025 season" in out
     assert "runner A update" in out
+
+
+def test_cmd_value_player_prints_live_sleeper_designation(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+    players_df = pl.DataFrame(
+        {
+            "player_id": ["101", "102"],
+            "name": ["Runner A", "Runner B"],
+            "position": ["RB", "RB"],
+            "team": ["KC", None],
+            "status": ["Active", "Active"],
+            "injury_status": ["Questionable", None],
+            "fantasy_positions": [["RB"], ["RB"]],
+            "years_exp": [3, 3],
+        }
+    )
+    write_table(
+        players_df,
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(sleeper_id="101", season="2025")
+    exit_code = value_cmd.cmd_value_player(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Current Sleeper designation: Questionable" in out
 
 
 def test_cmd_value_player_reports_missing_player(
@@ -1087,6 +1122,43 @@ def test_cmd_value_rank_without_position_filter_includes_all_positions(
     assert exit_code == 0
     assert "Runner A" in out
     assert "Runner B" in out
+
+
+def test_cmd_value_rank_tags_live_sleeper_injury_designations(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    _write_value_fixtures(repo_root, "2025")
+    players_df = pl.DataFrame(
+        {
+            "player_id": ["101", "102"],
+            "name": ["Runner A", "Runner B"],
+            "position": ["RB", "RB"],
+            "team": ["KC", "LV"],
+            "status": ["Active", "Active"],
+            "injury_status": ["PUP", None],
+            "fantasy_positions": [["RB"], ["RB"]],
+            "years_exp": [3, 3],
+        }
+    )
+    write_table(
+        players_df,
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season="2025", position=None, top=20)
+    exit_code = value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    runner_a_line = next(line for line in out.splitlines() if "Runner A" in line)
+    assert "[INJ: PUP]" in runner_a_line
+    runner_b_line = next(line for line in out.splitlines() if "Runner B" in line)
+    assert "[INJ" not in runner_b_line
 
 
 def test_cmd_value_rank_excludes_players_with_no_nfl_team(
@@ -1534,6 +1606,75 @@ def test_cmd_draft_board_prints_available_players(
     assert "Best available by value:" in out
     assert "A" in out
     assert "My roster so far" not in out  # no --me/--roster-id/--draft-slot given
+
+
+def test_cmd_draft_board_tags_live_sleeper_injury_designations(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A", "B"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    players_df = pl.DataFrame(
+        {
+            "player_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "team": ["KC"],
+            "status": ["Active"],
+            "injury_status": ["Questionable"],
+            "fantasy_positions": [["RB"]],
+            "years_exp": [3],
+        }
+    )
+    write_table(
+        players_df,
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    # only A carries an injury_status in players.parquet; the single [INJ: ...]
+    # tag must land on A's board row
+    tagged_lines = [line for line in out.splitlines() if "[INJ:" in line]
+    assert len(tagged_lines) == 1
+    assert " A " in tagged_lines[0]
+    assert "[INJ: Questionable]" in tagged_lines[0]
 
 
 def test_cmd_draft_board_excludes_players_with_no_nfl_team(

@@ -42,7 +42,11 @@ from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
 from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
-from sleeper_agent.value.scoring import filter_rostered, recent_news_excerpt
+from sleeper_agent.value.scoring import (
+    filter_rostered,
+    injury_statuses,
+    recent_news_excerpt,
+)
 from sleeper_agent.value.team_changes import (
     TeamChange,
     detect_team_changes,
@@ -239,6 +243,22 @@ class DraftContext:
     triaged_rookies: list[TriagedRookie]
     rookie_news: dict[str, list[str]]
     team_changes: dict[str, TeamChange]
+    injury_statuses: dict[str, str]
+
+
+def _injury_statuses_by_sleeper_id(
+    root: Path, players_df: pl.DataFrame | None
+) -> dict[str, str]:
+    """Best-effort live Sleeper injury designations for draft board's
+    `[INJ: ...]` tag.
+
+    Absent `data/sleeper/players.parquet`, this is just an empty dict — the
+    board renders exactly as it does today, same no-annotation-by-default
+    convention as `--me`/`--roster-id`/rookie watch/`[MOVED: ...]`.
+    """
+    if players_df is None:
+        return {}
+    return injury_statuses(players_df)
 
 
 def _resolve_draft_context(
@@ -313,6 +333,7 @@ def _resolve_draft_context(
         triaged_rookies=triaged_rookies,
         rookie_news=rookie_news,
         team_changes=team_changes,
+        injury_statuses=_injury_statuses_by_sleeper_id(root, players_df),
     )
 
 
@@ -440,6 +461,7 @@ def cmd_draft_board(
             triaged_rookies=context.triaged_rookies,
             rookie_news_by_sleeper_id=context.rookie_news,
             team_changes=context.team_changes,
+            injury_statuses=context.injury_statuses,
         )
         return 0
 
@@ -461,6 +483,7 @@ def _render_context_board(
         triaged_rookies=context.triaged_rookies,
         rookie_news_by_sleeper_id=context.rookie_news,
         team_changes=context.team_changes,
+        injury_statuses=context.injury_statuses,
     )
 
 

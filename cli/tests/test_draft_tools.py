@@ -584,6 +584,62 @@ def test_watch_board_without_team_changes_omits_moved_tag() -> None:
     assert "[MOVED" not in rendered_calls[0]
 
 
+def test_render_board_injury_status_tags_only_flagged_players() -> None:
+    board = make_vorp_df()
+
+    rendered = render_board(board, injury_statuses={"2": "PUP"})
+
+    # flagged player gets the tag; unflagged players render exactly as before
+    player_two_line = next(
+        line for line in rendered.splitlines() if "Player Two" in line
+    )
+    assert "[INJ: PUP]" in player_two_line
+    assert "[INJ" not in rendered.split("Player Two")[0]
+
+
+def test_render_board_injury_tag_combines_with_moved_tag() -> None:
+    board = make_vorp_df()
+    change = TeamChange(
+        sleeper_id="1",
+        name="Player One",
+        position="RB",
+        old_team="CAR",
+        new_team="PIT",
+        total_touches=200,
+    )
+
+    rendered = render_board(
+        board, team_changes={"1": change}, injury_statuses={"1": "Questionable"}
+    )
+
+    assert "[MOVED: CAR→PIT] [INJ: Questionable]" in rendered
+
+
+def test_render_board_without_injury_statuses_is_unchanged() -> None:
+    board = make_vorp_df().head(1)
+
+    rendered = render_board(board, injury_statuses=None)
+
+    assert "[INJ" not in rendered
+
+
+def test_watch_board_threads_injury_statuses_through_to_render_board() -> None:
+    vorp_df = make_vorp_df()  # sleeper_id "1" is RB/50.0
+    rendered_calls: list[str] = []
+
+    watch_board(
+        "did",
+        vorp_df,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=rendered_calls.append,
+        fetch_picks=lambda draft_id, *, base_url: [],
+        injury_statuses={"1": "IR"},
+    )
+
+    assert "[INJ: IR]" in rendered_calls[0]
+
+
 def make_draft(
     draft_id: str = "did",
     league_id: str = "lid",

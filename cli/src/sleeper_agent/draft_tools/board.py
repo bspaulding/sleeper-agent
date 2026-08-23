@@ -193,6 +193,7 @@ def render_board(
     requirement: RosterRequirement | None = None,
     rookie_watch: Sequence[RookieWatchRow] | None = None,
     team_changes: dict[str, TeamChange] | None = None,
+    injury_statuses: dict[str, str] | None = None,
 ) -> str:
     annotation = (
         (my_counts, requirement)
@@ -207,6 +208,7 @@ def render_board(
     lines.append("Best available by value:")
     tiers = compute_tiers(board) if annotation is not None else {}
     team_changes = team_changes or {}
+    injury_statuses = injury_statuses or {}
     for rank, row in enumerate(board.to_dicts(), start=1):
         line = (
             f"{rank:2d}. {row['name']:<25} {row['position']:<3} "
@@ -220,6 +222,9 @@ def render_board(
         change = team_changes.get(row["sleeper_id"])
         if change is not None:
             line += f" [MOVED: {change.old_team}→{change.new_team}]"
+        status = injury_statuses.get(row["sleeper_id"])
+        if status is not None:
+            line += f" [INJ: {status}]"
         lines.append(line)
     if rookie_watch:
         lines.append("")
@@ -249,6 +254,7 @@ def render_board_for_picks(
     triaged_rookies: Sequence[TriagedRookie] = (),
     rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
     team_changes: dict[str, TeamChange] | None = None,
+    injury_statuses: dict[str, str] | None = None,
 ) -> str:
     """Assemble + render the full board for a given picks list.
 
@@ -278,6 +284,7 @@ def render_board_for_picks(
         requirement=requirement if my_roster_id is not None else None,
         rookie_watch=rookie_watch,
         team_changes=team_changes,
+        injury_statuses=injury_statuses,
     )
 
 
@@ -319,6 +326,7 @@ def watch_board(
     triaged_rookies: Sequence[TriagedRookie] = (),
     rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
     team_changes: dict[str, TeamChange] | None = None,
+    injury_statuses: dict[str, str] | None = None,
 ) -> None:
     previous_drafted_ids: frozenset[str] | None = None
     iteration = 0
@@ -335,6 +343,7 @@ def watch_board(
                 triaged_rookies=triaged_rookies,
                 rookie_news_by_sleeper_id=rookie_news_by_sleeper_id,
                 team_changes=team_changes,
+                injury_statuses=injury_statuses,
             )
             render(rendered)
             if log_path is not None:
