@@ -110,20 +110,19 @@ supplemental round — treat it that way:
      fast (e.g. an all-bot rapid mock), it's safe to poll even faster — 1-second polling is still
      only 60 req/min, 6% of the limit — there's no rate-limit reason to ever default back toward
      the old 30s cadence that caused the missed-rounds problem above.
-   - **Preferred live setup: a `Monitor`-tool loop, not `--watch` directly.** `--watch` reprints
-     the *entire* board on every change, even picks that aren't yours — noisy as a notification
-     stream. Instead run a lightweight bash loop under `Monitor` (1s poll) that hits the picks
-     endpoint directly, prints one line per new pick, and — this is the part that matters — the
-     moment it detects the *next* pick number belongs to you, calls `draft board --me` itself,
-     inline, in that same loop iteration, and includes the fresh board in that same notification.
-     Confirmed during the 2026-08-22 mock #3 rehearsal: doing the board-fetch as a *separate*
-     step after acknowledging "your turn next" costs a full extra round-trip per pick (notify →
-     acknowledge → notify again → *then* fetch+recommend) — real wasted time on a live pick
-     clock. Folding the fetch into the detection event itself collapses that to one round-trip.
-     There is no way to auto-submit the actual pick — this project's Sleeper client is read-only
-     (`fetch_draft`/`fetch_draft_picks`, no POST path), and Sleeper doesn't expose a public
-     draft-pick-submission endpoint either — so the human still clicks the pick in Sleeper; the
-     goal is only to get the recommendation into their hands the instant it's computable.
+   - **Preferred live setup: `draft watch-picks` under a `Monitor`-tool wrapper.** Run
+     `sleeper-agent draft watch-picks --draft-id <id> --value-season <year> --draft-slot <n>
+     [--num-teams <n>]` (or `--league-id`/`--me` for the real league draft) under `Monitor` — it
+     streams one line per pick (not the whole board, unlike `--watch`) and, the moment the next
+     pick is mine, fetches and prints the full board inline in that same event — no separate
+     round-trip. This replaced an ad hoc bash Monitor-loop script that used to be rewritten from
+     scratch each draft (see `docs/superpowers/plans/2026-08-22-draft-watch-picks.md` and
+     `decisions/2026/2026-08-22-draft-mock-draft-3-slot8.md`) — the snake-order math and turn
+     detection are now tested project code (`draft_tools/board.py::slot_for_pick`/`watch_picks`),
+     not something re-derived live. There is still no way to auto-submit the actual pick — this
+     project's Sleeper client is read-only and Sleeper has no public pick-submission endpoint —
+     so the human still clicks the pick in Sleeper; the goal is only to get the recommendation
+     into their hands the instant it's computable.
    - **Present each pick-clock recommendation as a short table** (player, position, VORP,
      NEED/FLEX/SURPLUS status) for the top 2-4 candidates, then 1-3 sentences of the actual
      judgment call (tier cliffs, NEED vs. FLEX/SURPLUS, roster-construction risk) — not prose
