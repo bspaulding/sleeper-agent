@@ -85,6 +85,30 @@ Per iteration:
    `Pick {pick_no} (slot {draft_slot}): {name} ({position}, {team})`, appending ` <== MY PICK`
    when the pick belongs to me. Matching convention mirrors `my_roster_positions`: compare
    `draft_slot` when `my_draft_slot` is set, else `roster_id`.
+
+### 0. `DraftPick.player_team` schema migration (prerequisite)
+
+`DraftPick` (`models/sleeper.py`) doesn't carry a team abbreviation today — only `player_name`
+and `player_position` are parsed from Sleeper's pick metadata, even though the raw payload's
+`DraftPickMetadataRaw` already includes `team`. Add a required `player_team: str | None` field:
+
+- `models/sleeper.py`: add the field to the `DraftPick` dataclass; `parse_draft_pick` reads
+  `metadata.get("team")`.
+- `sleeper_client/sync.py`: `draft_picks_to_dataframe`/`dataframe_to_draft_picks` gain a
+  `player_team` column; bump `DRAFTS_SCHEMA_VERSION` from `1` to `2` (this is the schema that
+  persists `data/sleeper/drafts/<season>.parquet` for keeper-eligibility history —
+  `storage/parquet_store.read_table` fails loudly on a version mismatch by design, so existing
+  synced data simply needs a resync via `sleeper sync`, no in-place migration script).
+- Every existing `DraftPick(...)` construction site (production and test) needs an explicit
+  `player_team=` argument — no default value, matching this dataclass's existing all-required-
+  fields convention. Sites: `sleeper_client/sync.py::dataframe_to_draft_picks`,
+  `tests/test_sleeper_sync.py` (2 sites), `tests/test_commands.py` (4 sites, keeper-eligibility
+  fixtures), `tests/test_draft_tools.py` (the `make_pick` test helper, which may keep a default
+  value *for the helper's own signature* since it's test-only convenience code, plus one other
+  direct construction).
+
+This is unrelated in *purpose* to `watch_picks` but is a prerequisite `DraftPick` needs before the
+per-pick line can show a team — sized as its own task in the implementation plan.
 3. Compute `next_pick_no = len(picks) + 1`. If `draft_type == "snake"` and my slot/roster is
    known and `slot_for_pick(next_pick_no, num_teams)` is mine, and this `next_pick_no` hasn't
    already been announced: render the full board and print it, then remember `next_pick_no` as
