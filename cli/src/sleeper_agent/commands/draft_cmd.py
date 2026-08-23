@@ -12,12 +12,8 @@ import polars as pl
 
 from sleeper_agent.config import data_dir, decisions_dir, find_repo_root, wiki_dir
 from sleeper_agent.draft_tools.board import (
-    RookieWatchRow,
     RosterRequirement,
-    board_view,
-    my_roster_positions,
-    render_board,
-    rookie_watch_rows,
+    render_board_for_picks,
     roster_requirement_from_draft,
     watch_board,
     watch_picks,
@@ -120,13 +116,24 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
             "draft, which has no league of its own. Requires --value-season."
         ),
     )
-    watch_picks_parser.add_argument("--rounds", type=int, default=15)
+    watch_picks_parser.add_argument(
+        "--rounds",
+        type=int,
+        default=15,
+        help=(
+            "Board display depth only (rounds x teams rows). Draft *length* comes "
+            "from the draft object's own settings.rounds, not this."
+        ),
+    )
     watch_picks_parser.add_argument("--value-season", default=None)
     watch_picks_parser.add_argument(
         "--num-teams",
         type=int,
         default=12,
-        help="Only used with --draft-id, where there's no league.settings to read it from.",
+        help=(
+            "Ignored here: turn-detection geometry is read from the draft object's "
+            "own settings.teams. Accepted for symmetry with `draft board`."
+        ),
     )
     watch_picks_parser.add_argument("--me", action="store_true")
     watch_picks_parser.add_argument("--roster-id", type=int, default=None)
@@ -427,7 +434,9 @@ def cmd_draft_board(
             max_iterations=max_watch_iterations,
             my_roster_id=context.my_roster_id,
             my_draft_slot=context.my_draft_slot,
-            requirement=context.requirement if context.my_roster_id is not None else None,
+            requirement=context.requirement
+            if context.my_roster_id is not None
+            else None,
             triaged_rookies=context.triaged_rookies,
             rookie_news_by_sleeper_id=context.rookie_news,
             team_changes=context.team_changes,
@@ -435,27 +444,24 @@ def cmd_draft_board(
         return 0
 
     picks = fetch_draft_picks(context.draft_id, base_url=base_url)
-    board = board_view(context.vorp_df, picks, top_n=top_n)
-    my_counts = (
-        my_roster_positions(picks, context.my_roster_id, my_draft_slot=context.my_draft_slot)
-        if context.my_roster_id is not None
-        else None
-    )
-    rookie_watch: list[RookieWatchRow] | None = (
-        rookie_watch_rows(context.triaged_rookies, picks, news_by_sleeper_id=context.rookie_news)
-        if context.triaged_rookies
-        else None
-    )
-    print(
-        render_board(
-            board,
-            my_counts=my_counts,
-            requirement=context.requirement if context.my_roster_id is not None else None,
-            rookie_watch=rookie_watch,
-            team_changes=context.team_changes,
-        )
-    )
+    print(_render_context_board(context, picks, top_n=top_n))
     return 0
+
+
+def _render_context_board(
+    context: DraftContext, picks: list[DraftPick], *, top_n: int
+) -> str:
+    return render_board_for_picks(
+        context.vorp_df,
+        picks,
+        top_n=top_n,
+        my_roster_id=context.my_roster_id,
+        my_draft_slot=context.my_draft_slot,
+        requirement=context.requirement,
+        triaged_rookies=context.triaged_rookies,
+        rookie_news_by_sleeper_id=context.rookie_news,
+        team_changes=context.team_changes,
+    )
 
 
 def cmd_draft_watch_picks(
@@ -466,8 +472,25 @@ def cmd_draft_watch_picks(
     max_iterations: int | None = None,
 ) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    if args.poll_seconds < 0:
+        print(f"--poll-seconds must be >= 0 (got {args.poll_seconds})")
+        return 1
     context = _resolve_draft_context(args, root, base_url=base_url)
     if context is None:
+        return 1
+
+    # Draft geometry comes from the Draft object Sleeper itself returned, not
+    # from --num-teams/--rounds. Those flags default to 12/15 and are silently
+    # wrong for any other league shape — and a wrong num_teams makes
+    # `slot_for_pick`'s snake math wrong for every round >= 2 with no error.
+    draft_num_teams = context.draft.num_teams
+    draft_rounds = context.draft.rounds
+    if draft_num_teams <= 0 or draft_rounds <= 0:
+        print(
+            f"draft {context.draft_id} reports no usable geometry "
+            f"(settings.teams={draft_num_teams}, settings.rounds={draft_rounds}) — "
+            "turn detection needs both"
+        )
         return 1
 
     turn_detection_slot = context.my_draft_slot
@@ -480,39 +503,26 @@ def cmd_draft_watch_picks(
             ),
             None,
         )
+        if turn_detection_slot is None:
+            print(
+                f"warning: roster_id {context.my_roster_id} is not in this draft's "
+                f"slot_to_roster_id (mapped slots: "
+                f"{sorted(context.draft.slot_to_roster_id)}) — streaming picks "
+                "without turn detection (no MY PICK markers, no board on your "
+                "turn). Pass --draft-slot to fix."
+            )
 
-    top_n = args.rounds * context.num_teams
+    top_n = args.rounds * draft_num_teams
 
     def render_full_board(picks: list[DraftPick]) -> str:
-        board = board_view(context.vorp_df, picks, top_n=top_n)
-        my_counts = (
-            my_roster_positions(
-                picks, context.my_roster_id, my_draft_slot=context.my_draft_slot
-            )
-            if context.my_roster_id is not None
-            else None
-        )
-        rookie_watch: list[RookieWatchRow] | None = (
-            rookie_watch_rows(
-                context.triaged_rookies, picks, news_by_sleeper_id=context.rookie_news
-            )
-            if context.triaged_rookies
-            else None
-        )
-        return render_board(
-            board,
-            my_counts=my_counts,
-            requirement=context.requirement if context.my_roster_id is not None else None,
-            rookie_watch=rookie_watch,
-            team_changes=context.team_changes,
-        )
+        return _render_context_board(context, picks, top_n=top_n)
 
     watch_picks(
         context.draft_id,
-        num_teams=context.num_teams,
+        num_teams=draft_num_teams,
         draft_type=context.draft.draft_type,
         my_draft_slot=turn_detection_slot,
-        total_picks=args.rounds * context.num_teams,
+        total_picks=draft_rounds * draft_num_teams,
         render_full_board=render_full_board,
         base_url=base_url,
         poll_seconds=args.poll_seconds,

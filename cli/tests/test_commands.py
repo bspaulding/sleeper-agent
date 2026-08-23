@@ -1465,14 +1465,18 @@ def _league_payload(draft_id: str | None = "did1") -> dict[str, object]:
 
 
 def _draft_object_payload(
-    draft_id: str = "did1", slot_to_roster_id: dict[str, int] | None = None
+    draft_id: str = "did1",
+    slot_to_roster_id: dict[str, int] | None = None,
+    *,
+    rounds: int = 15,
+    teams: int = 12,
 ) -> dict[str, object]:
     return {
         "draft_id": draft_id,
         "type": "snake",
         "settings": {
-            "rounds": 15,
-            "teams": 12,
+            "rounds": rounds,
+            "teams": teams,
             "slots_qb": 1,
             "slots_rb": 2,
             "slots_wr": 2,
@@ -2562,7 +2566,12 @@ def test_cmd_draft_watch_picks_resolves_turn_slot_from_me_flag(
         "player_id": "1",
         "is_keeper": False,
         "picked_by": "u5",
-        "metadata": {"first_name": "Mine", "last_name": "Guy", "position": "RB", "team": "SF"},
+        "metadata": {
+            "first_name": "Mine",
+            "last_name": "Guy",
+            "position": "RB",
+            "team": "SF",
+        },
     }
     call_log = [[], [my_pick]]
 
@@ -2593,7 +2602,9 @@ def test_cmd_draft_watch_picks_resolves_turn_slot_from_me_flag(
 
     out = capsys.readouterr().out
     assert exit_code == 0
-    assert out.count("Best available by value:") == 1  # rendered before any picks existed
+    assert (
+        out.count("Best available by value:") == 1
+    )  # rendered before any picks existed
     assert "Pick 1 (slot 1): Mine Guy (RB, SF) <== MY PICK" in out
 
 
@@ -2646,7 +2657,9 @@ def test_cmd_draft_watch_picks_skips_board_for_non_snake_draft(
     assert "Best available by value:" not in out
 
 
-def test_cmd_draft_watch_picks_reports_missing_vorp(tmp_path: Path) -> None:
+def test_cmd_draft_watch_picks_reports_missing_vorp(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     repo_root = make_repo_root(tmp_path)
     args = argparse.Namespace(
         league_id=None,
@@ -2663,6 +2676,189 @@ def test_cmd_draft_watch_picks_reports_missing_vorp(tmp_path: Path) -> None:
     exit_code = draft_cmd.cmd_draft_watch_picks(args, repo_root=repo_root)
 
     assert exit_code == 1
+    assert "no VORP data for season 2025" in capsys.readouterr().out
+
+
+def _watch_picks_args(**overrides: object) -> argparse.Namespace:
+    defaults: dict[str, object] = {
+        "league_id": None,
+        "draft_id": "did1",
+        "rounds": 15,
+        "value_season": "2025",
+        "num_teams": 12,
+        "me": False,
+        "roster_id": None,
+        "draft_slot": None,
+        "poll_seconds": 0.0,
+    }
+    defaults.update(overrides)
+    return argparse.Namespace(**defaults)
+
+
+def _write_watch_picks_vorp(repo_root: Path) -> None:
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["999"],
+                "name": ["Available Player"],
+                "position": ["RB"],
+                "vorp_season": [10.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+
+
+def _pick_payload(pick_no: int, draft_slot: int) -> dict[str, object]:
+    return {
+        "draft_id": "did1",
+        "round": (pick_no - 1) // 10 + 1,
+        "pick_no": pick_no,
+        "draft_slot": draft_slot,
+        "roster_id": draft_slot,
+        "player_id": str(pick_no),
+        "is_keeper": False,
+        "picked_by": f"u{draft_slot}",
+        "metadata": {
+            "first_name": f"Player{pick_no}",
+            "last_name": "Test",
+            "position": "RB",
+            "team": "SF",
+        },
+    }
+
+
+def test_cmd_draft_watch_picks_uses_draft_object_num_teams_not_flag(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # The draft object says 10 teams; --num-teams says 12. 11 picks are in, so
+    # the next pick is #12. Under the draft's real geometry (10 teams) pick 12
+    # is round 2, position 2 of a reversed round -> slot 9, which is my slot.
+    # Under the --num-teams=12 flag it would be round 1 slot 12, not mine.
+    # So the board rendering at all proves the Draft object's value won.
+    repo_root = make_repo_root(tmp_path)
+    _write_watch_picks_vorp(repo_root)
+    eleven_picks = [_pick_payload(n, ((n - 1) % 10) + 1) for n in range(1, 12)]
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(slot_to_roster_id={"9": 5}, teams=10, rounds=15)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(eleven_picks)
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = _watch_picks_args(num_teams=12, draft_slot=9)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_watch_picks(
+            args, repo_root=repo_root, base_url=base_url, max_iterations=1
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert out.count("Best available by value:") == 1
+
+
+def test_cmd_draft_watch_picks_uses_draft_object_rounds_for_total_picks(
+    tmp_path: Path,
+) -> None:
+    # The draft object says 1 round x 10 teams = 10 total picks; --rounds says
+    # 15. Feeding exactly 10 picks must end the watch immediately. If
+    # total_picks had come from --rounds (150) the loop would poll again and
+    # pop from an empty call_log.
+    repo_root = make_repo_root(tmp_path)
+    _write_watch_picks_vorp(repo_root)
+    call_log: list[list[dict[str, object]]] = [
+        [_pick_payload(n, ((n - 1) % 10) + 1) for n in range(1, 11)]
+    ]
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(slot_to_roster_id={"1": 5}, teams=10, rounds=1)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(call_log.pop(0))
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = _watch_picks_args(rounds=15, num_teams=12, draft_slot=1)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_watch_picks(
+            args, repo_root=repo_root, base_url=base_url, max_iterations=5
+        )
+
+    assert exit_code == 0
+    assert call_log == []  # exactly one fetch, then the completion check fired
+
+
+def test_cmd_draft_watch_picks_reports_unusable_draft_geometry(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_watch_picks_vorp(repo_root)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            payload = _draft_object_payload()
+            payload["settings"] = {}  # Sleeper occasionally returns no settings
+            return json_response(payload)
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = _watch_picks_args(draft_slot=None)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_watch_picks(
+            args, repo_root=repo_root, base_url=base_url, max_iterations=1
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "no usable geometry" in out
+    assert "settings.teams=0" in out
+
+
+def test_cmd_draft_watch_picks_warns_when_roster_id_has_no_draft_slot(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    _write_watch_picks_vorp(repo_root)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload(slot_to_roster_id={"1": 5}))
+        if request.path == "/draft/did1/picks":
+            return json_response([_pick_payload(1, 1)])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = _watch_picks_args(roster_id=99)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_watch_picks(
+            args, repo_root=repo_root, base_url=base_url, max_iterations=1
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0  # degraded, not fatal: picks still stream
+    assert "roster_id 99 is not in this draft's slot_to_roster_id" in out
+    assert "mapped slots: [1]" in out
+    assert "Pick 1 (slot 1): Player1 Test (RB, SF)" in out
+    assert "<== MY PICK" not in out
+    assert "Best available by value:" not in out
+
+
+def test_cmd_draft_watch_picks_rejects_negative_poll_seconds(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    args = _watch_picks_args(poll_seconds=-1.0)
+
+    # No base_url/mock server: the guard must fire before any network call.
+    exit_code = draft_cmd.cmd_draft_watch_picks(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "--poll-seconds must be >= 0 (got -1.0)" in capsys.readouterr().out
 
 
 # --- waiver / freeagent ------------------------------------------------

@@ -111,8 +111,10 @@ supplemental round — treat it that way:
      only 60 req/min, 6% of the limit — there's no rate-limit reason to ever default back toward
      the old 30s cadence that caused the missed-rounds problem above.
    - **Preferred live setup: `draft watch-picks` under a `Monitor`-tool wrapper.** Run
-     `sleeper-agent draft watch-picks --draft-id <id> --value-season <year> --draft-slot <n>
-     [--num-teams <n>]` (or `--league-id`/`--me` for the real league draft) under `Monitor` — it
+     `sleeper-agent draft watch-picks --draft-id <id> --value-season <year> --draft-slot <n>`
+     (or `--league-id`/`--me` for the real league draft) under `Monitor` — no `--num-teams`
+     or `--rounds` needed, the draft's own `settings.teams`/`settings.rounds` drive the snake
+     math so a 10-team draft can't be silently scored as 12. It
      streams one line per pick (not the whole board, unlike `--watch`) and, the moment the next
      pick is mine, fetches and prints the full board inline in that same event — no separate
      round-trip. This replaced an ad hoc bash Monitor-loop script that used to be rewritten from
