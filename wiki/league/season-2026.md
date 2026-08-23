@@ -26,7 +26,13 @@ the linked decision entries for full reasoning and the verbatim keeper-rule conf
 - Each keeper is auto-drafted one round earlier than last year's draft slot.
 - No keeping 1st-rounders.
 - Max 2 consecutive years on a kept player, then they return to the open pool.
+- **Traded players and FA pickups reset to the player's current ADP − 1**
+  (clarified 2026-08-23, commissioner Aaron). ADP reference:
+  `https://www.draftsharks.com/adp/ppr/sleeper/12`.
 - Keeper status doesn't transfer in trades — new team, new draft rank.
+
+**2026 locks (set 2026-08-23, see `decisions/2026/2026-08-23-keeper-diggs-r7-
+darnold-r14.md`): Stefon Diggs (R7), Sam Darnold (R14). Our draft slot: 8 of 12.**
 
 This matches what `sleeper_client/draft.py`'s `keeper_history` already computes
 (`cost = last_round - 1`, `KeeperIneligibleCostBelowRoundOne` at cost 0,

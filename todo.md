@@ -1,16 +1,16 @@
 # Project TODO
 
-## Keeper decision — deadline Friday, Aug 28
+## Done
 
-Run `draft keepers --me --season 2026`, make the ≤2 keeper call, log it with
-`decisions new --kind keeper`. Context that should feed the call:
-`wiki/team/defense-strategy.md` (draft-day plan), the 2026-08-22 injury sweep
-(`wiki/news-sources.md` checkpoint), and the fact that Kareem Hunt and Zach Ertz
-are **unsigned FAs** as of Aug 23 — two of the 15 roster spots are dead pending
-their signings or our drops.
+- ~~Keeper decision~~ — Diggs (R7) + Darnold (R14) locked 2026-08-23; see
+  `decisions/2026/2026-08-23-keeper-diggs-r7-darnold-r14.md` and
+  `wiki/team/keeper-strategy.md`.
 
 ## Before the draft (Saturday, Aug 29)
 
+- Verify our `is_keeper` flags (Diggs/Darnold) once they appear on the draft
+  object's `/picks` endpoint (not visible pre-lock as of Aug 23), and diff
+  `wiki/league/projected-keepers-2026.md` against the real inserted set.
 - One more full news sweep (`news-research.md`) on Aug 27–28 — statuses still
   fluid: Kittle PUP/practice clearance, Olave post-medical-tent, Thornton return,
   Judkins nagging knee.
@@ -26,6 +26,10 @@ on `main` now; verify via next scheduled firing or manual `fire_trigger`.
 
 ## In-season
 
+- Replace `KeeperEligibleUndraftedDefault`'s hard R15 fallback with the
+  clarified rule (traded/FA players reset to current DraftSharks
+  Sleeper/PPR/12-team ADP − 1): needs an ADP lookup integration plus a way to
+  pin/reference the ADP snapshot used at keep time.
 - Sync `stats --season 2026` once nflverse starts publishing weekly files
   (currently 404 pre-season — verified 2026-08-23), then `stats vorp --season
   2026`. Until then `players.parquet`'s live `injury_status` tags are the only
