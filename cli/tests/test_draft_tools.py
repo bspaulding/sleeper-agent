@@ -1037,6 +1037,7 @@ def test_watch_picks_marks_my_pick() -> None:
         fetch_picks=fake_fetch,
     )
 
+    assert len(rendered) == 2
     assert rendered[0] == "Pick 1 (slot 1): Alpha (RB, SF)"
     assert rendered[1] == "Pick 2 (slot 8): Beta (RB, SF) <== MY PICK"
 
@@ -1110,6 +1111,7 @@ def test_watch_picks_skips_board_for_non_snake_draft_type() -> None:
         return call_log.pop(0)
 
     board_calls: list[list[DraftPick]] = []
+    rendered: list[str] = []
     watch_picks(
         "did",
         num_teams=12,
@@ -1119,11 +1121,13 @@ def test_watch_picks_skips_board_for_non_snake_draft_type() -> None:
         render_full_board=lambda picks: board_calls.append(picks) or "BOARD",
         sleep=lambda seconds: None,
         max_iterations=2,
-        render=lambda line: None,
+        render=rendered.append,
         fetch_picks=fake_fetch,
     )
 
     assert board_calls == []
+    assert len(rendered) == 1  # per-pick line still rendered
+    assert "Pick 1 (slot 8): Player (RB, SF)" in rendered[0]
 
 
 def test_watch_picks_without_my_draft_slot_never_renders_board() -> None:
@@ -1147,3 +1151,38 @@ def test_watch_picks_without_my_draft_slot_never_renders_board() -> None:
     )
 
     assert board_calls == []
+
+
+def test_watch_picks_ignores_transiently_shorter_response() -> None:
+    # Simulate a network blip: fetch 2 picks, then transiently return only 1,
+    # then return 3 (2 original + 1 new). The transiently shorter response
+    # should not cause a duplicate print or state change.
+    two_picks = [_wp(1, 1, name="Alpha"), _wp(2, 2, name="Beta")]
+    call_log: list[list[DraftPick]] = [
+        two_picks,  # fetch 1: 2 picks
+        [two_picks[0]],  # fetch 2: network blip, only 1 pick (should be ignored)
+        two_picks + [_wp(3, 3, name="Gamma")],  # fetch 3: back to normal, 3 picks
+    ]
+
+    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
+        return call_log.pop(0)
+
+    rendered: list[str] = []
+    watch_picks(
+        "did",
+        num_teams=12,
+        draft_type="snake",
+        my_draft_slot=None,
+        total_picks=180,
+        render_full_board=lambda picks: "BOARD",
+        sleep=lambda seconds: None,
+        max_iterations=3,
+        render=rendered.append,
+        fetch_picks=fake_fetch,
+    )
+
+    # Should have exactly 3 picks rendered (Alpha, Beta, Gamma), no duplicates
+    assert len(rendered) == 3
+    assert rendered[0] == "Pick 1 (slot 1): Alpha (RB, SF)"
+    assert rendered[1] == "Pick 2 (slot 2): Beta (RB, SF)"
+    assert rendered[2] == "Pick 3 (slot 3): Gamma (RB, SF)"

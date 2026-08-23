@@ -349,6 +349,16 @@ def watch_picks(
     iteration = 0
     while max_iterations is None or iteration < max_iterations:
         picks = fetch_picks(draft_id, base_url=base_url)
+        # Guard against transiently shrinking responses (network blips, etc.).
+        # If a fetch returns fewer picks than the last successful one, skip this
+        # iteration entirely — don't update printed_count, don't print, don't
+        # check for board render. Just retry on the next poll.
+        if len(picks) < printed_count:
+            iteration += 1
+            if max_iterations is None or iteration < max_iterations:
+                sleep(poll_seconds)
+            continue
+
         for pick in picks[printed_count:]:
             render(_render_pick_line(pick, my_draft_slot))
         printed_count = len(picks)
