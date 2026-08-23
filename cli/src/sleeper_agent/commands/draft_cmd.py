@@ -20,6 +20,7 @@ from sleeper_agent.draft_tools.board import (
     rookie_watch_rows,
     roster_requirement_from_draft,
     watch_board,
+    watch_picks,
 )
 from sleeper_agent.draft_tools.keepers import (
     KeeperCandidate,
@@ -105,6 +106,47 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     board_parser.set_defaults(func=cmd_draft_board)
+
+    watch_picks_parser = draft_subparsers.add_parser(
+        "watch-picks",
+        help="Live pick-by-pick tracker; auto-fetches the board the instant it's your turn",
+    )
+    watch_picks_source = watch_picks_parser.add_mutually_exclusive_group(required=True)
+    watch_picks_source.add_argument("--league-id")
+    watch_picks_source.add_argument(
+        "--draft-id",
+        help=(
+            "Draft ID directly, bypassing league lookup — needed for a Sleeper mock "
+            "draft, which has no league of its own. Requires --value-season."
+        ),
+    )
+    watch_picks_parser.add_argument("--rounds", type=int, default=15)
+    watch_picks_parser.add_argument("--value-season", default=None)
+    watch_picks_parser.add_argument(
+        "--num-teams",
+        type=int,
+        default=12,
+        help="Only used with --draft-id, where there's no league.settings to read it from.",
+    )
+    watch_picks_parser.add_argument("--me", action="store_true")
+    watch_picks_parser.add_argument("--roster-id", type=int, default=None)
+    watch_picks_parser.add_argument(
+        "--draft-slot",
+        type=int,
+        default=None,
+        help=(
+            "Resolve my roster_id from this draft's slot_to_roster_id map — needed for "
+            "a mock draft (no stable roster_id across seasons), or as an alternative to "
+            "--me/--roster-id in league mode."
+        ),
+    )
+    watch_picks_parser.add_argument(
+        "--poll-seconds",
+        type=float,
+        default=1.0,
+        help="Picks-endpoint poll interval — cheap enough to poll faster than draft board --watch's 5s default.",
+    )
+    watch_picks_parser.set_defaults(func=cmd_draft_watch_picks)
 
 
 def _read_vorp(root: Path, season: str) -> pl.DataFrame | None:
@@ -412,5 +454,68 @@ def cmd_draft_board(
             rookie_watch=rookie_watch,
             team_changes=context.team_changes,
         )
+    )
+    return 0
+
+
+def cmd_draft_watch_picks(
+    args: argparse.Namespace,
+    *,
+    repo_root: Path | None = None,
+    base_url: str = SLEEPER_BASE_URL,
+    max_iterations: int | None = None,
+) -> int:
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    context = _resolve_draft_context(args, root, base_url=base_url)
+    if context is None:
+        return 1
+
+    turn_detection_slot = context.my_draft_slot
+    if turn_detection_slot is None and context.my_roster_id is not None:
+        turn_detection_slot = next(
+            (
+                slot
+                for slot, roster_id in context.draft.slot_to_roster_id.items()
+                if roster_id == context.my_roster_id
+            ),
+            None,
+        )
+
+    top_n = args.rounds * context.num_teams
+
+    def render_full_board(picks: list[DraftPick]) -> str:
+        board = board_view(context.vorp_df, picks, top_n=top_n)
+        my_counts = (
+            my_roster_positions(
+                picks, context.my_roster_id, my_draft_slot=context.my_draft_slot
+            )
+            if context.my_roster_id is not None
+            else None
+        )
+        rookie_watch: list[RookieWatchRow] | None = (
+            rookie_watch_rows(
+                context.triaged_rookies, picks, news_by_sleeper_id=context.rookie_news
+            )
+            if context.triaged_rookies
+            else None
+        )
+        return render_board(
+            board,
+            my_counts=my_counts,
+            requirement=context.requirement if context.my_roster_id is not None else None,
+            rookie_watch=rookie_watch,
+            team_changes=context.team_changes,
+        )
+
+    watch_picks(
+        context.draft_id,
+        num_teams=context.num_teams,
+        draft_type=context.draft.draft_type,
+        my_draft_slot=turn_detection_slot,
+        total_picks=args.rounds * context.num_teams,
+        render_full_board=render_full_board,
+        base_url=base_url,
+        poll_seconds=args.poll_seconds,
+        max_iterations=max_iterations,
     )
     return 0

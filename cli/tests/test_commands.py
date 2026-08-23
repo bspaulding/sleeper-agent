@@ -2449,6 +2449,222 @@ def test_cmd_draft_board_with_draft_id_requires_value_season(
     assert "--value-season is required with --draft-id" in capsys.readouterr().out
 
 
+def test_cmd_draft_watch_picks_streams_lines_and_renders_board_on_my_turn(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["9"],
+                "name": ["Available Player"],
+                "position": ["RB"],
+                "vorp_season": [10.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+
+    seven_picks = [
+        {
+            "draft_id": "did1",
+            "round": 1,
+            "pick_no": n,
+            "draft_slot": n,
+            "roster_id": n,
+            "player_id": str(n),
+            "is_keeper": False,
+            "picked_by": f"u{n}",
+            "metadata": {
+                "first_name": f"Player{n}",
+                "last_name": "Test",
+                "position": "RB",
+                "team": "SF",
+            },
+        }
+        for n in range(1, 8)
+    ]
+    eighth_pick = {
+        "draft_id": "did1",
+        "round": 1,
+        "pick_no": 8,
+        "draft_slot": 8,
+        "roster_id": 5,
+        "player_id": "8",
+        "is_keeper": False,
+        "picked_by": "u5",
+        "metadata": {
+            "first_name": "Mine",
+            "last_name": "Guy",
+            "position": "RB",
+            "team": "SF",
+        },
+    }
+    call_log = [seven_picks, seven_picks, seven_picks + [eighth_pick]]
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload(slot_to_roster_id={"8": 5}))
+        if request.path == "/draft/did1/picks":
+            return json_response(call_log.pop(0))
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="did1",
+        rounds=15,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=8,
+        poll_seconds=0.0,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_watch_picks(
+            args, repo_root=repo_root, base_url=base_url, max_iterations=3
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Pick 1 (slot 1): Player1 Test (RB, SF)" in out
+    assert "Pick 8 (slot 8): Mine Guy (RB, SF) <== MY PICK" in out
+    assert out.count("Best available by value:") == 1
+
+
+def test_cmd_draft_watch_picks_resolves_turn_slot_from_me_flag(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["9"],
+                "name": ["Available Player"],
+                "position": ["RB"],
+                "vorp_season": [10.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+    my_pick = {
+        "draft_id": "did1",
+        "round": 1,
+        "pick_no": 1,
+        "draft_slot": 1,
+        "roster_id": 5,  # ME_ROSTER_ID
+        "player_id": "1",
+        "is_keeper": False,
+        "picked_by": "u5",
+        "metadata": {"first_name": "Mine", "last_name": "Guy", "position": "RB", "team": "SF"},
+    }
+    call_log = [[], [my_pick]]
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload(slot_to_roster_id={"1": 5}))
+        if request.path == "/draft/did1/picks":
+            return json_response(call_log.pop(0))
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        value_season=None,
+        num_teams=12,
+        me=True,
+        roster_id=None,
+        draft_slot=None,
+        poll_seconds=0.0,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_watch_picks(
+            args, repo_root=repo_root, base_url=base_url, max_iterations=2
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert out.count("Best available by value:") == 1  # rendered before any picks existed
+    assert "Pick 1 (slot 1): Mine Guy (RB, SF) <== MY PICK" in out
+
+
+def test_cmd_draft_watch_picks_skips_board_for_non_snake_draft(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["9"],
+                "name": ["Available Player"],
+                "position": ["RB"],
+                "vorp_season": [10.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=1,
+    )
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            payload = _draft_object_payload(slot_to_roster_id={"8": 5})
+            payload["type"] = "linear"
+            return json_response(payload)
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="did1",
+        rounds=15,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=8,
+        poll_seconds=0.0,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_watch_picks(
+            args, repo_root=repo_root, base_url=base_url, max_iterations=1
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Best available by value:" not in out
+
+
+def test_cmd_draft_watch_picks_reports_missing_vorp(tmp_path: Path) -> None:
+    repo_root = make_repo_root(tmp_path)
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="did1",
+        rounds=15,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+        poll_seconds=0.0,
+    )
+
+    exit_code = draft_cmd.cmd_draft_watch_picks(args, repo_root=repo_root)
+
+    assert exit_code == 1
+
+
 # --- waiver / freeagent ------------------------------------------------
 
 
