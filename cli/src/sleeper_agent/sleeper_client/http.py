@@ -10,13 +10,18 @@ transport-mocking pattern, since `requests` itself is never replaced.
 
 from __future__ import annotations
 
+import os
 import time
 from collections.abc import Callable
 from typing import Any
 
 import requests
 
-SLEEPER_BASE_URL = "https://api.sleeper.app/v1"
+# Overridable for local wargaming against a mock Sleeper server (see
+# scripts/wargame_server.py). Read at import time — one process, one base URL.
+SLEEPER_BASE_URL = os.environ.get(
+    "SLEEPER_AGENT_BASE_URL", "https://api.sleeper.app/v1"
+)
 
 _RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
 _MAX_ATTEMPTS = 4
