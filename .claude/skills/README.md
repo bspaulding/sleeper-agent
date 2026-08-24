@@ -1,10 +1,12 @@
 # Skills — self-revision process
 
 The files in this directory (`draft.md`, `trades.md`, `waivers.md`, `free-agents.md`,
-`news-research.md`, `code-review.md`) are playbooks for the judgment calls the CLI's pure
-functions can't make by themselves (`PROJECT_PLAN.md` §9). They are meant to change over the
-season as decisions play out — this is the "skills that update themselves" requirement, not a
-one-time authoring exercise.
+`news-research.md`, `code-review.md`, `wargame.md`) are playbooks for the judgment calls the
+CLI's pure functions can't make by themselves (`PROJECT_PLAN.md` §9). They are meant to change
+over the season as decisions play out — this is the "skills that update themselves" requirement,
+not a one-time authoring exercise. `wargame.md` is the exception in kind (a rehearsal runbook,
+not an in-season judgment playbook) but follows the same revision trigger: update it after any
+wargame run whose retro surfaces a process gap, not on a fixed cadence.
 
 ## When to revise a skill
 
