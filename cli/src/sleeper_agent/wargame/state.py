@@ -63,6 +63,9 @@ class DraftState:
     board: Mapping[str, WargamePlayer]
     personas: Mapping[int, BotPersona] = field(default_factory=dict)
     picks: list[WargamePick] = field(default_factory=list)
+    # Set by the server shell when a rule is violated hard enough to void the
+    # exercise (e.g. pick-clock expiry). Once set, selections are refused.
+    void_reason: str | None = None
 
     def available_players(self) -> dict[str, WargamePlayer]:
         drafted = {pick.player_id for pick in self.picks}
@@ -90,6 +93,8 @@ class DraftState:
         next_pick_no = self.next_pick_no()
         if next_pick_no is None:
             return DraftComplete()
+        if self.void_reason is not None:
+            return DraftVoided(reason=self.void_reason)
         on_clock = self.on_clock_roster_id()
         if roster_id != on_clock:
             return NotYourTurn(on_clock_roster_id=on_clock)
@@ -198,4 +203,11 @@ class DraftComplete:
     pass
 
 
-SelectionResult = SelectionMade | NotYourTurn | PlayerUnavailable | DraftComplete
+@dataclass(frozen=True)
+class DraftVoided:
+    reason: str
+
+
+SelectionResult = (
+    SelectionMade | NotYourTurn | PlayerUnavailable | DraftComplete | DraftVoided
+)

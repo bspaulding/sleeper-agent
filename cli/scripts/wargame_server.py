@@ -26,6 +26,7 @@ from sleeper_agent.wargame.state import (
     BotPersona,
     DraftConfig,
     DraftState,
+    DraftVoided,
     SelectionMade,
     WargamePlayer,
 )
@@ -33,6 +34,8 @@ from sleeper_agent.wargame.state import (
 STATE: DraftState | None = None
 LOCK = threading.Lock()
 HUMAN_ROSTER_ID = 5
+PICK_CLOCK_SECONDS = 60.0
+_on_clock_since: float | None = None
 
 
 def build_state(seed: dict) -> DraftState:
@@ -92,6 +95,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # http.server API
         with LOCK:
             assert STATE is not None
+            status = "voided_pick_clock" if STATE.void_reason else "drafting"
             if self.path == f"/v1/league/{STATE.config.league_id}":
                 self._json(
                     200,
@@ -99,7 +103,7 @@ class Handler(BaseHTTPRequestHandler):
                         "league_id": STATE.config.league_id,
                         "name": "Wargame League",
                         "season": "2026",
-                        "status": "drafting",
+                        "status": status,
                         "draft_id": STATE.config.draft_id,
                         "settings": {
                             "num_teams": STATE.config.num_teams,
@@ -139,7 +143,7 @@ class Handler(BaseHTTPRequestHandler):
                         "league_id": STATE.config.league_id,
                         "season": "2026",
                         "type": "snake",
-                        "status": "drafting",
+                        "status": status,
                         "start_time": None,
                         "settings": {
                             "rounds": STATE.config.rounds,
@@ -180,7 +184,10 @@ class Handler(BaseHTTPRequestHandler):
                 int(body["roster_id"]), str(body["player_id"])
             )
             if isinstance(result, SelectionMade):
+                _reset_human_clock()
                 self._json(200, {"ok": True, "pick": pick_payload(result.pick)})
+            elif isinstance(result, DraftVoided):
+                self._json(410, {"error": "DraftVoided", "detail": result.reason})
             else:
                 kind = type(result).__name__
                 detail = getattr(result, "on_clock_roster_id", None) or getattr(
@@ -189,17 +196,40 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(409, {"error": kind, "detail": str(detail)})
 
 
+def _reset_human_clock() -> None:
+    global _on_clock_since
+    _on_clock_since = None
+
+
 def ticker(poll_seconds: float) -> None:
-    """Advance bot picks whenever a bot team is on the clock."""
+    """Advance bot picks when a bot is on the clock; enforce the human pick
+    clock. Expiry voids the entire exercise (hard fail)."""
     import time
 
+    global _on_clock_since
     while True:
         time.sleep(poll_seconds)
         with LOCK:
             assert STATE is not None
+            if STATE.void_reason is not None:
+                return
             on_clock = STATE.on_clock_roster_id()
             if on_clock is not None and on_clock in STATE.personas:
                 STATE._run_bots()
+                continue
+            if on_clock == HUMAN_ROSTER_ID:
+                now = time.monotonic()
+                if _on_clock_since is None:
+                    _on_clock_since = now
+                elif now - _on_clock_since > PICK_CLOCK_SECONDS:
+                    reason = (
+                        f"pick clock expired ({PICK_CLOCK_SECONDS:.0f}s) "
+                        f"before roster {HUMAN_ROSTER_ID} selection at pick "
+                        f"{STATE.next_pick_no()}"
+                    )
+                    print(f"HARD FAIL: {reason}", flush=True)
+                    STATE.void_reason = reason
+                    return
 
 
 def main() -> int:
