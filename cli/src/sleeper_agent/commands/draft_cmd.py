@@ -10,7 +10,14 @@ from pathlib import Path
 
 import polars as pl
 
-from sleeper_agent.config import data_dir, decisions_dir, find_repo_root, wiki_dir
+from sleeper_agent.config import data_dir, decisions_dir, find_repo_root
+from sleeper_agent.draft_tools.bigboard import (
+    BigboardNotBuiltError,
+    BigboardRow,
+    BigboardUnresolvedRowError,
+    filter_off_roster,
+    load_bigboard,
+)
 from sleeper_agent.draft_tools.board import (
     RosterRequirement,
     render_board_for_picks,
@@ -24,7 +31,6 @@ from sleeper_agent.draft_tools.keepers import (
     infer_total_rounds,
     rank_keeper_candidates,
 )
-from sleeper_agent.draft_tools.rookies import TriagedRookie, load_triaged_rookies
 from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
@@ -41,11 +47,7 @@ from sleeper_agent.sleeper_client.league import fetch_league
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
-from sleeper_agent.value.scoring import (
-    filter_rostered,
-    injury_statuses,
-    recent_news_excerpt,
-)
+from sleeper_agent.value.scoring import injury_statuses
 from sleeper_agent.value.team_changes import (
     TeamChange,
     detect_team_changes,
@@ -191,18 +193,6 @@ def _read_players(root: Path) -> pl.DataFrame | None:
     return read_table(path, expected_schema_version=PLAYERS_SCHEMA_VERSION)
 
 
-def _rookie_news_by_sleeper_id(
-    root: Path, rookies: list[TriagedRookie]
-) -> dict[str, list[str]]:
-    wiki_root = wiki_dir(root)
-    return {
-        rookie.player.player_id: recent_news_excerpt(
-            wiki_root, rookie.player.player_id, limit=1
-        )
-        for rookie in rookies
-    }
-
-
 def _team_changes_by_sleeper_id(
     root: Path, season: str, players_df: pl.DataFrame | None
 ) -> dict[str, TeamChange]:
@@ -212,7 +202,7 @@ def _team_changes_by_sleeper_id(
     Absent `data/stats/weekly/{season}.parquet`, `data/stats/ids.parquet`, or
     `data/sleeper/players.parquet`, this is just an empty dict — the board
     renders exactly as it does today, same no-annotation-by-default
-    convention as `--me`/`--roster-id`/rookie watch.
+    convention as `--me`/`--roster-id`.
     """
     weekly_path = data_dir(root) / "stats" / "weekly" / f"{season}.parquet"
     ids_path = data_dir(root) / "stats" / "ids.parquet"
@@ -230,12 +220,10 @@ class DraftContext:
     value_season: str
     num_teams: int
     draft: Draft
-    vorp_df: pl.DataFrame
+    bigboard_rows: list[BigboardRow]
     my_roster_id: int | None
     my_draft_slot: int | None
     requirement: RosterRequirement
-    triaged_rookies: list[TriagedRookie]
-    rookie_news: dict[str, list[str]]
     team_changes: dict[str, TeamChange]
     injury_statuses: dict[str, str]
 
@@ -261,7 +249,7 @@ def _injury_statuses_by_sleeper_id(
 
     Absent `data/sleeper/players.parquet`, this is just an empty dict — the
     board renders exactly as it does today, same no-annotation-by-default
-    convention as `--me`/`--roster-id`/rookie watch/`[MOVED: ...]`.
+    convention as `--me`/`--roster-id`/`[MOVED: ...]`.
     """
     if players_df is None:
         return {}
@@ -273,9 +261,9 @@ def _resolve_draft_context(
 ) -> DraftContext | None:
     """Shared setup for `draft board` and `draft watch-picks`: resolve the
     draft/value-season/num-teams (from --league-id or --draft-id), resolve
-    "me" (--me/--roster-id/--draft-slot), and load VORP + rookie-watch +
-    team-changes data. Prints its own error message and returns None on
-    failure, same convention as the code it was extracted from.
+    "me" (--me/--roster-id/--draft-slot), and load the big board + team-
+    changes data. Prints its own error message and returns None on failure,
+    same convention as the code it was extracted from.
     """
     if args.draft_id is not None:
         if args.value_season is None:
@@ -296,11 +284,10 @@ def _resolve_draft_context(
         value_season = args.value_season or league.season
         num_teams = max(league.settings.num_teams, 1)
 
-    vorp_df = _read_vorp(root, value_season)
-    if vorp_df is None:
-        print(
-            f"no VORP data for season {value_season} — run `stats vorp --season {value_season}` first"
-        )
+    try:
+        bigboard_rows = load_bigboard(root, value_season)
+    except (BigboardNotBuiltError, BigboardUnresolvedRowError) as exc:
+        print(str(exc))
         return None
 
     draft = fetch_draft(draft_id, base_url=base_url)
@@ -322,31 +309,27 @@ def _resolve_draft_context(
         my_roster_id = args.roster_id
 
     players_df = _read_players(root)
-    triaged_rookies = load_triaged_rookies(root, value_season)
-    rookie_news = _rookie_news_by_sleeper_id(root, triaged_rookies)
     team_changes = _team_changes_by_sleeper_id(root, value_season, players_df)
     if players_df is not None:
-        vorp_df = filter_rostered(vorp_df, players_df)
+        bigboard_rows = filter_off_roster(bigboard_rows, players_df)
 
     # Mock-draft practice aid: projected league keepers are known to be off the
     # pool but don't appear on a mock's picks endpoint, so without this the
     # board overstates availability. Filtering here means every downstream
-    # consumer (board_view, tiers, watch loops) sees the same reduced pool.
+    # consumer (bigboard_view, tiers, watch loops) sees the same reduced pool.
     excluded = parse_excluded_players(getattr(args, "exclude_players", None))
     if excluded:
-        vorp_df = vorp_df.filter(~pl.col("sleeper_id").is_in(excluded))
+        bigboard_rows = [row for row in bigboard_rows if row.player_id not in excluded]
 
     return DraftContext(
         draft_id=draft_id,
         value_season=value_season,
         num_teams=num_teams,
         draft=draft,
-        vorp_df=vorp_df,
+        bigboard_rows=bigboard_rows,
         my_roster_id=my_roster_id,
         my_draft_slot=my_draft_slot,
         requirement=requirement,
-        triaged_rookies=triaged_rookies,
-        rookie_news=rookie_news,
         team_changes=team_changes,
         injury_statuses=_injury_statuses_by_sleeper_id(root, players_df),
     )
@@ -464,7 +447,7 @@ def cmd_draft_board(
         )
         watch_board(
             context.draft_id,
-            context.vorp_df,
+            context.bigboard_rows,
             base_url=base_url,
             log_path=log_path,
             max_iterations=max_watch_iterations,
@@ -473,8 +456,6 @@ def cmd_draft_board(
             requirement=context.requirement
             if context.my_roster_id is not None
             else None,
-            triaged_rookies=context.triaged_rookies,
-            rookie_news_by_sleeper_id=context.rookie_news,
             team_changes=context.team_changes,
             injury_statuses=context.injury_statuses,
         )
@@ -489,14 +470,12 @@ def _render_context_board(
     context: DraftContext, picks: list[DraftPick], *, top_n: int
 ) -> str:
     return render_board_for_picks(
-        context.vorp_df,
+        context.bigboard_rows,
         picks,
         top_n=top_n,
         my_roster_id=context.my_roster_id,
         my_draft_slot=context.my_draft_slot,
         requirement=context.requirement,
-        triaged_rookies=context.triaged_rookies,
-        rookie_news_by_sleeper_id=context.rookie_news,
         team_changes=context.team_changes,
         injury_statuses=context.injury_statuses,
     )

@@ -1624,6 +1624,29 @@ def _draft_object_payload(
     }
 
 
+def _write_bigboard(repo_root: Path, season: str, vorp_df: pl.DataFrame) -> None:
+    """Write a data/bigboard/<season>.csv counterpart to a VORP fixture: same
+    players, sequential rank in vorp_df's row order, source="vorp", no
+    rationale (so it's never flagged unresolved)."""
+    from sleeper_agent.draft_tools.bigboard import BigboardRow, save_bigboard
+
+    rows = [
+        BigboardRow(
+            rank=i,
+            player_id=r["sleeper_id"],
+            name=r["name"],
+            position=r["position"],
+            source="vorp",
+            vorp=r["vorp_season"],
+            draft_round=None,
+            rationale="",
+            log_ref=None,
+        )
+        for i, r in enumerate(vorp_df.to_dicts(), start=1)
+    ]
+    save_bigboard(repo_root, season, rows)
+
+
 def test_cmd_draft_board_prints_available_players(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -1639,6 +1662,7 @@ def test_cmd_draft_board_prints_available_players(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
@@ -1689,6 +1713,7 @@ def test_cmd_draft_board_exclude_players_drops_projected_keepers(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
@@ -1747,6 +1772,7 @@ def test_cmd_draft_board_tags_live_sleeper_injury_designations(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
     players_df = pl.DataFrame(
         {
             "player_id": ["1"],
@@ -1816,6 +1842,7 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
         }
     )
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
     write_table(
         pl.DataFrame({"player_id": ["1", "2"], "team": ["KC", ""]}),
         repo_root / "data" / "sleeper" / "players.parquet",
@@ -1851,208 +1878,6 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
     assert exit_code == 0
     assert "Rostered Guy" in out
     assert "Teamless Guy" not in out
-
-
-def _write_rookie_fixtures(repo_root: Path, *, season: str = "2025") -> None:
-    """A players.parquet + data/nfl/draft_picks.parquet pair with one
-    round-1 WR rookie (triaged in) and one round-5 WR rookie (triaged out)."""
-    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
-    from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
-    from sleeper_agent.storage.parquet_store import write_table
-
-    write_table(
-        pl.DataFrame(
-            {
-                "player_id": ["101", "102"],
-                "name": ["Rookie Star", "Rookie Deep Bench"],
-                "position": ["WR", "WR"],
-                "team": ["KC", "BUF"],
-                "status": ["Active", "Active"],
-                "injury_status": ["", ""],
-                "fantasy_positions": [["WR"], ["WR"]],
-                "years_exp": [0, 0],
-            }
-        ),
-        repo_root / "data" / "sleeper" / "players.parquet",
-        schema_version=PLAYERS_SCHEMA_VERSION,
-    )
-    write_table(
-        pl.DataFrame(
-            {
-                "season": [int(season), int(season)],
-                "round": [1, 5],
-                "pick": [1, 140],
-                "position": ["WR", "WR"],
-                "pfr_player_name": ["Rookie Star", "Rookie Deep Bench"],
-                "gsis_id": ["X1", "X2"],
-                "sleeper_id": ["101", "102"],
-            }
-        ),
-        repo_root / "data" / "nfl" / "draft_picks.parquet",
-        schema_version=DRAFT_PICKS_SCHEMA_VERSION,
-    )
-
-
-def test_cmd_draft_board_prints_rookie_watch_section_when_draft_picks_data_present(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["1"],
-            "name": ["A"],
-            "position": ["RB"],
-            "vorp_season": [50.0],
-        }
-    )
-    from sleeper_agent.storage.parquet_store import write_table
-
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
-    _write_rookie_fixtures(repo_root)
-
-    def handler(request: Request) -> Response:
-        if request.path == "/league/lid1":
-            return json_response(_league_payload())
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload())
-        if request.path == "/draft/did1/picks":
-            return json_response([])
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id="lid1",
-        draft_id=None,
-        rounds=15,
-        watch=False,
-        value_season=None,
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=None,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_board(
-            args, repo_root=repo_root, base_url=base_url
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0
-    assert "Rookie watch" in out
-    assert "Rookie Star" in out
-    # Round-5 WR is below the WR triage cutoff (rounds 1-2) — never surfaced.
-    assert "Rookie Deep Bench" not in out
-
-
-def test_cmd_draft_board_rookie_watch_excludes_already_drafted_rookie(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["1"],
-            "name": ["A"],
-            "position": ["RB"],
-            "vorp_season": [50.0],
-        }
-    )
-    from sleeper_agent.storage.parquet_store import write_table
-
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
-    _write_rookie_fixtures(repo_root)
-
-    def handler(request: Request) -> Response:
-        if request.path == "/league/lid1":
-            return json_response(_league_payload())
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload())
-        if request.path == "/draft/did1/picks":
-            return json_response(
-                [
-                    {
-                        "draft_id": "did1",
-                        "round": 1,
-                        "pick_no": 1,
-                        "draft_slot": 1,
-                        "roster_id": 9,
-                        "player_id": "101",
-                        "is_keeper": False,
-                        "picked_by": "u9",
-                        "metadata": {
-                            "first_name": "Rookie",
-                            "last_name": "Star",
-                            "position": "WR",
-                        },
-                    }
-                ]
-            )
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id="lid1",
-        draft_id=None,
-        rounds=15,
-        watch=False,
-        value_season=None,
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=None,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_board(
-            args, repo_root=repo_root, base_url=base_url
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0
-    assert "Rookie watch" not in out  # only triaged rookie was drafted
-
-
-def test_cmd_draft_board_omits_rookie_watch_when_no_draft_picks_data(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["1"],
-            "name": ["A"],
-            "position": ["RB"],
-            "vorp_season": [50.0],
-        }
-    )
-    from sleeper_agent.storage.parquet_store import write_table
-
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
-    # No data/nfl/draft_picks.parquet written.
-
-    def handler(request: Request) -> Response:
-        if request.path == "/league/lid1":
-            return json_response(_league_payload())
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload())
-        if request.path == "/draft/did1/picks":
-            return json_response([])
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id="lid1",
-        draft_id=None,
-        rounds=15,
-        watch=False,
-        value_season=None,
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=None,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_board(
-            args, repo_root=repo_root, base_url=base_url
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0
-    assert "Rookie watch" not in out
 
 
 def _write_team_change_fixtures(repo_root: Path, *, season: str = "2025") -> None:
@@ -2116,6 +1941,7 @@ def test_cmd_draft_board_tags_triaged_role_changer(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
     _write_team_change_fixtures(repo_root)
 
     def handler(request: Request) -> Response:
@@ -2168,6 +1994,7 @@ def test_cmd_draft_board_omits_moved_tag_when_no_stats_data(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
     # No data/stats/weekly, data/stats/ids.parquet, or players.parquet written.
 
     def handler(request: Request) -> Response:
@@ -2206,18 +2033,20 @@ def test_cmd_draft_board_watch_threads_moved_tag_into_decision_log(
     repo_root = make_repo_root(tmp_path)
     from sleeper_agent.storage.parquet_store import write_table
 
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
     write_table(
-        pl.DataFrame(
-            {
-                "sleeper_id": ["1"],
-                "name": ["A"],
-                "position": ["RB"],
-                "vorp_season": [50.0],
-            }
-        ),
+        vorp_df,
         repo_root / "data" / "vorp" / "2025.parquet",
         schema_version=1,
     )
+    _write_bigboard(repo_root, "2025", vorp_df)
     _write_team_change_fixtures(repo_root)
 
     def handler(request: Request) -> Response:
@@ -2254,10 +2083,11 @@ def test_cmd_draft_board_watch_threads_moved_tag_into_decision_log(
     assert "[MOVED: CAR" in log_path.read_text()
 
 
-def test_cmd_draft_board_reports_missing_vorp(
+def test_cmd_draft_board_reports_missing_bigboard(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     repo_root = make_repo_root(tmp_path)
+    # No data/bigboard/2025.csv written.
 
     def handler(request: Request) -> Response:
         return json_response(_league_payload())
@@ -2276,7 +2106,52 @@ def test_cmd_draft_board_reports_missing_vorp(
         )
 
     assert exit_code == 1
-    assert "no VORP data" in capsys.readouterr().out
+    assert "data/bigboard/2025.csv not found" in capsys.readouterr().out
+
+
+def test_cmd_draft_board_reports_unresolved_bigboard_rows(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    from sleeper_agent.draft_tools.bigboard import BigboardRow, save_bigboard
+
+    save_bigboard(
+        repo_root,
+        "2025",
+        [
+            BigboardRow(
+                rank=1,
+                player_id="101",
+                name="Rookie Star",
+                position="WR",
+                source="rookie",
+                vorp=None,
+                draft_round=1,
+                rationale="[NEEDS REVIEW: new rookie placement]",
+                log_ref=None,
+            )
+        ],
+    )
+
+    def handler(request: Request) -> Response:
+        return json_response(_league_payload())
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "unresolved row" in captured.out
 
 
 def test_cmd_draft_board_reports_missing_draft_id(
@@ -2324,18 +2199,20 @@ def test_cmd_draft_board_watch_writes_decision_log(
     repo_root = make_repo_root(tmp_path)
     from sleeper_agent.storage.parquet_store import write_table
 
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [1.0],
+        }
+    )
     write_table(
-        pl.DataFrame(
-            {
-                "sleeper_id": ["1"],
-                "name": ["A"],
-                "position": ["RB"],
-                "vorp_season": [1.0],
-            }
-        ),
+        vorp_df,
         repo_root / "data" / "vorp" / "2025.parquet",
         schema_version=1,
     )
+    _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
@@ -2371,61 +2248,6 @@ def test_cmd_draft_board_watch_writes_decision_log(
     assert log_path.exists()
 
 
-def test_cmd_draft_board_watch_threads_rookie_watch_into_decision_log(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    from sleeper_agent.storage.parquet_store import write_table
-
-    write_table(
-        pl.DataFrame(
-            {
-                "sleeper_id": ["1"],
-                "name": ["A"],
-                "position": ["RB"],
-                "vorp_season": [1.0],
-            }
-        ),
-        repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
-    )
-    _write_rookie_fixtures(repo_root)
-
-    def handler(request: Request) -> Response:
-        if request.path == "/league/lid1":
-            return json_response(_league_payload())
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload())
-        if request.path == "/draft/did1/picks":
-            return json_response([])
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id="lid1",
-        draft_id=None,
-        rounds=15,
-        watch=True,
-        value_season=None,
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=None,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_board(
-            args,
-            repo_root=repo_root,
-            base_url=base_url,
-            today=lambda: date(2026, 7, 26),
-            max_watch_iterations=1,
-        )
-
-    assert exit_code == 0
-    log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
-    assert "Rookie watch" in log_path.read_text()
-    assert "Rookie Star" in log_path.read_text()
-
-
 def test_cmd_draft_board_with_draft_id_skips_league_lookup(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -2442,6 +2264,7 @@ def test_cmd_draft_board_with_draft_id_skips_league_lookup(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2026", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/draft/mockdid1":
@@ -2487,6 +2310,7 @@ def test_cmd_draft_board_annotates_with_me_flag(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
@@ -2553,6 +2377,7 @@ def test_cmd_draft_board_annotates_with_roster_id_flag(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
@@ -2619,6 +2444,7 @@ def test_cmd_draft_board_annotates_with_draft_slot_in_mock_mode(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2026", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/draft/mockdid1":
@@ -2667,6 +2493,7 @@ def test_cmd_draft_board_reports_unresolvable_draft_slot(
     from sleeper_agent.storage.parquet_store import write_table
 
     write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2026", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/draft/mockdid1":
@@ -2723,18 +2550,20 @@ def test_cmd_draft_watch_picks_streams_lines_and_renders_board_on_my_turn(
     repo_root = make_repo_root(tmp_path)
     from sleeper_agent.storage.parquet_store import write_table
 
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["9"],
+            "name": ["Available Player"],
+            "position": ["RB"],
+            "vorp_season": [10.0],
+        }
+    )
     write_table(
-        pl.DataFrame(
-            {
-                "sleeper_id": ["9"],
-                "name": ["Available Player"],
-                "position": ["RB"],
-                "vorp_season": [10.0],
-            }
-        ),
+        vorp_df,
         repo_root / "data" / "vorp" / "2025.parquet",
         schema_version=1,
     )
+    _write_bigboard(repo_root, "2025", vorp_df)
 
     seven_picks = [
         {
@@ -2809,18 +2638,20 @@ def test_cmd_draft_watch_picks_resolves_turn_slot_from_me_flag(
     repo_root = make_repo_root(tmp_path)
     from sleeper_agent.storage.parquet_store import write_table
 
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["9"],
+            "name": ["Available Player"],
+            "position": ["RB"],
+            "vorp_season": [10.0],
+        }
+    )
     write_table(
-        pl.DataFrame(
-            {
-                "sleeper_id": ["9"],
-                "name": ["Available Player"],
-                "position": ["RB"],
-                "vorp_season": [10.0],
-            }
-        ),
+        vorp_df,
         repo_root / "data" / "vorp" / "2025.parquet",
         schema_version=1,
     )
+    _write_bigboard(repo_root, "2025", vorp_df)
     my_pick = {
         "draft_id": "did1",
         "round": 1,
@@ -2878,18 +2709,20 @@ def test_cmd_draft_watch_picks_skips_board_for_non_snake_draft(
     repo_root = make_repo_root(tmp_path)
     from sleeper_agent.storage.parquet_store import write_table
 
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["9"],
+            "name": ["Available Player"],
+            "position": ["RB"],
+            "vorp_season": [10.0],
+        }
+    )
     write_table(
-        pl.DataFrame(
-            {
-                "sleeper_id": ["9"],
-                "name": ["Available Player"],
-                "position": ["RB"],
-                "vorp_season": [10.0],
-            }
-        ),
+        vorp_df,
         repo_root / "data" / "vorp" / "2025.parquet",
         schema_version=1,
     )
+    _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
         if request.path == "/draft/did1":
@@ -2921,10 +2754,11 @@ def test_cmd_draft_watch_picks_skips_board_for_non_snake_draft(
     assert "Best available by value:" not in out
 
 
-def test_cmd_draft_watch_picks_reports_missing_vorp(
+def test_cmd_draft_watch_picks_reports_missing_bigboard(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     repo_root = make_repo_root(tmp_path)
+    # No data/bigboard/2025.csv written.
     args = argparse.Namespace(
         league_id=None,
         draft_id="did1",
@@ -2940,7 +2774,7 @@ def test_cmd_draft_watch_picks_reports_missing_vorp(
     exit_code = draft_cmd.cmd_draft_watch_picks(args, repo_root=repo_root)
 
     assert exit_code == 1
-    assert "no VORP data for season 2025" in capsys.readouterr().out
+    assert "data/bigboard/2025.csv not found" in capsys.readouterr().out
 
 
 def _watch_picks_args(**overrides: object) -> argparse.Namespace:
@@ -2962,18 +2796,20 @@ def _watch_picks_args(**overrides: object) -> argparse.Namespace:
 def _write_watch_picks_vorp(repo_root: Path) -> None:
     from sleeper_agent.storage.parquet_store import write_table
 
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["999"],
+            "name": ["Available Player"],
+            "position": ["RB"],
+            "vorp_season": [10.0],
+        }
+    )
     write_table(
-        pl.DataFrame(
-            {
-                "sleeper_id": ["999"],
-                "name": ["Available Player"],
-                "position": ["RB"],
-                "vorp_season": [10.0],
-            }
-        ),
+        vorp_df,
         repo_root / "data" / "vorp" / "2025.parquet",
         schema_version=1,
     )
+    _write_bigboard(repo_root, "2025", vorp_df)
 
 
 def _pick_payload(pick_no: int, draft_slot: int) -> dict[str, object]:
