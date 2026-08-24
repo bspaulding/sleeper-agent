@@ -180,7 +180,13 @@ def render_board(
         if row.source == "rookie":
             line = f"{rank:2d}. {row.name:<25} {row.position:<3} [ROOKIE R{row.draft_round}]"
         else:
-            line = f"{rank:2d}. {row.name:<25} {row.position:<3} vorp={row.vorp:7.1f}"
+            # A hand-edited bigboard CSV could have source="vorp" with an empty
+            # `vorp` cell and still load fine (bigboard.py doesn't enforce the
+            # pairing) — this runs inside watch_board's live polling loop, so a
+            # bare TypeError here would end a live draft session. Render it
+            # visibly instead of crashing.
+            vorp_display = f"{row.vorp:7.1f}" if row.vorp is not None else "    n/a"
+            line = f"{rank:2d}. {row.name:<25} {row.position:<3} vorp={vorp_display}"
         if annotation is not None:
             counts, req = annotation
             tag = position_tag(row.position, counts.get(row.position, 0), req)

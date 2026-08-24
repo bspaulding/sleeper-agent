@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 import pytest
 import requests
@@ -326,7 +327,7 @@ def _bigboard_row(
     player_id: str,
     name: str | None = None,
     position: str = "RB",
-    source: str = "vorp",
+    source: Literal["vorp", "rookie"] = "vorp",
     vorp: float | None = 0.0,
     draft_round: int | None = None,
     rationale: str = "",
@@ -374,6 +375,21 @@ def test_bigboard_view_respects_top_n() -> None:
     result = bigboard_view(board, [], top_n=1)
 
     assert [row.player_id for row in result] == ["1"]
+
+
+def test_bigboard_view_preserves_bigboard_rank_order_not_vorp_order() -> None:
+    # rank order and VORP order deliberately disagree: rank=1 has the lower
+    # VORP. bigboard_view must return bigboard rank order (the LLM-reviewed
+    # ordinal ranking) — the old board_view re-sorted by vorp_season, which
+    # this task's rewrite deliberately dropped.
+    board = [
+        _bigboard_row(rank=1, player_id="1", vorp=10.0),
+        _bigboard_row(rank=2, player_id="2", vorp=50.0),
+    ]
+
+    result = bigboard_view(board, [])
+
+    assert [row.player_id for row in result] == ["1", "2"]
 
 
 def test_render_board_formats_ranked_lines() -> None:
@@ -435,6 +451,19 @@ def test_render_board_annotation_requires_both_counts_and_requirement() -> None:
     assert "tier=" not in rendered
     rendered_other_way = render_board(board, my_counts=None, requirement=requirement)
     assert "My roster so far" not in rendered_other_way
+
+
+def test_render_board_source_vorp_row_with_null_vorp_does_not_crash() -> None:
+    # A hand-edited bigboard CSV could carry source="vorp" with an empty
+    # `vorp` cell and still load fine (nothing in bigboard.py enforces the
+    # pairing). render_board runs inside watch_board's live polling loop, so
+    # this must render something rather than raise a bare TypeError.
+    board = [_bigboard_row(rank=1, player_id="1", source="vorp", vorp=None)]
+
+    rendered = render_board(board)
+
+    assert "n/a" in rendered
+    assert " 1. Player 1" in rendered
 
 
 def test_render_board_renders_rookie_row_with_rookie_tag_not_vorp() -> None:
