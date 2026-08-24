@@ -201,12 +201,13 @@ def _reset_human_clock() -> None:
     _on_clock_since = None
 
 
-def ticker(poll_seconds: float) -> None:
+def ticker(poll_seconds: float, grace_seconds: float) -> None:
     """Advance bot picks when a bot is on the clock; enforce the human pick
-    clock. Expiry voids the entire exercise (hard fail)."""
+    clock (after the grace period). Expiry voids the entire exercise."""
     import time
 
     global _on_clock_since
+    started_at = time.monotonic()
     while True:
         time.sleep(poll_seconds)
         with LOCK:
@@ -217,7 +218,10 @@ def ticker(poll_seconds: float) -> None:
             if on_clock is not None and on_clock in STATE.personas:
                 STATE._run_bots()
                 continue
-            if on_clock == HUMAN_ROSTER_ID:
+            if (
+                on_clock == HUMAN_ROSTER_ID
+                and time.monotonic() - started_at > grace_seconds
+            ):
                 now = time.monotonic()
                 if _on_clock_since is None:
                     _on_clock_since = now
@@ -238,6 +242,15 @@ def main() -> int:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8321)
     parser.add_argument("--poll-seconds", type=float, default=0.5)
+    parser.add_argument(
+        "--grace-seconds",
+        type=float,
+        default=90.0,
+        help=(
+            "Cold-start allowance before the human pick clock arms (LLM "
+            "drafter boot time). Set 0 for no mercy."
+        ),
+    )
     args = parser.parse_args()
 
     global STATE
@@ -246,10 +259,13 @@ def main() -> int:
     STATE = build_state(seed)
     print(
         f"wargame draft {STATE.config.draft_id}: {len(STATE.picks)} keepers seeded, "
-        f"{len(STATE.available_players())} available; humans wait at roster_id={HUMAN_ROSTER_ID}",
+        f"{len(STATE.available_players())} available; pick clock arms after "
+        f"{args.grace_seconds:.0f}s grace; humans wait at roster_id={HUMAN_ROSTER_ID}",
         flush=True,
     )
-    threading.Thread(target=ticker, args=(args.poll_seconds,), daemon=True).start()
+    threading.Thread(
+        target=ticker, args=(args.poll_seconds, args.grace_seconds), daemon=True
+    ).start()
     ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()
     return 0
 
