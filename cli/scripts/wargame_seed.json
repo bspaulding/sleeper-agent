@@ -1337,6 +1337,198 @@
    "name": "Davis Allen",
    "position": "TE",
    "vorp": -100.3
+  },
+  {
+   "player_id": "ARI",
+   "name": "ARI Defense",
+   "position": "DEF",
+   "vorp": 6.0
+  },
+  {
+   "player_id": "ATL",
+   "name": "ATL Defense",
+   "position": "DEF",
+   "vorp": 4.3
+  },
+  {
+   "player_id": "BAL",
+   "name": "BAL Defense",
+   "position": "DEF",
+   "vorp": 2.6
+  },
+  {
+   "player_id": "BUF",
+   "name": "BUF Defense",
+   "position": "DEF",
+   "vorp": 0.9
+  },
+  {
+   "player_id": "CAR",
+   "name": "CAR Defense",
+   "position": "DEF",
+   "vorp": -0.8
+  },
+  {
+   "player_id": "CHI",
+   "name": "CHI Defense",
+   "position": "DEF",
+   "vorp": -2.5
+  },
+  {
+   "player_id": "CIN",
+   "name": "CIN Defense",
+   "position": "DEF",
+   "vorp": -4.2
+  },
+  {
+   "player_id": "CLE",
+   "name": "CLE Defense",
+   "position": "DEF",
+   "vorp": -5.9
+  },
+  {
+   "player_id": "DAL",
+   "name": "DAL Defense",
+   "position": "DEF",
+   "vorp": -7.6
+  },
+  {
+   "player_id": "DEN",
+   "name": "DEN Defense",
+   "position": "DEF",
+   "vorp": -9.3
+  },
+  {
+   "player_id": "DET",
+   "name": "DET Defense",
+   "position": "DEF",
+   "vorp": -11.0
+  },
+  {
+   "player_id": "GB",
+   "name": "GB Defense",
+   "position": "DEF",
+   "vorp": -12.7
+  },
+  {
+   "player_id": "HOU",
+   "name": "HOU Defense",
+   "position": "DEF",
+   "vorp": -14.4
+  },
+  {
+   "player_id": "IND",
+   "name": "IND Defense",
+   "position": "DEF",
+   "vorp": -16.1
+  },
+  {
+   "player_id": "JAX",
+   "name": "JAX Defense",
+   "position": "DEF",
+   "vorp": -17.8
+  },
+  {
+   "player_id": "KC",
+   "name": "KC Defense",
+   "position": "DEF",
+   "vorp": -19.5
+  },
+  {
+   "player_id": "LAC",
+   "name": "LAC Defense",
+   "position": "DEF",
+   "vorp": -21.2
+  },
+  {
+   "player_id": "LAR",
+   "name": "LAR Defense",
+   "position": "DEF",
+   "vorp": -22.9
+  },
+  {
+   "player_id": "LV",
+   "name": "LV Defense",
+   "position": "DEF",
+   "vorp": -24.6
+  },
+  {
+   "player_id": "MIA",
+   "name": "MIA Defense",
+   "position": "DEF",
+   "vorp": -26.3
+  },
+  {
+   "player_id": "MIN",
+   "name": "MIN Defense",
+   "position": "DEF",
+   "vorp": -28.0
+  },
+  {
+   "player_id": "NE",
+   "name": "NE Defense",
+   "position": "DEF",
+   "vorp": -29.7
+  },
+  {
+   "player_id": "NO",
+   "name": "NO Defense",
+   "position": "DEF",
+   "vorp": -31.4
+  },
+  {
+   "player_id": "NYG",
+   "name": "NYG Defense",
+   "position": "DEF",
+   "vorp": -33.1
+  },
+  {
+   "player_id": "NYJ",
+   "name": "NYJ Defense",
+   "position": "DEF",
+   "vorp": -34.8
+  },
+  {
+   "player_id": "PHI",
+   "name": "PHI Defense",
+   "position": "DEF",
+   "vorp": -36.5
+  },
+  {
+   "player_id": "PIT",
+   "name": "PIT Defense",
+   "position": "DEF",
+   "vorp": -38.2
+  },
+  {
+   "player_id": "SEA",
+   "name": "SEA Defense",
+   "position": "DEF",
+   "vorp": -39.9
+  },
+  {
+   "player_id": "SF",
+   "name": "SF Defense",
+   "position": "DEF",
+   "vorp": -41.6
+  },
+  {
+   "player_id": "TB",
+   "name": "TB Defense",
+   "position": "DEF",
+   "vorp": -43.3
+  },
+  {
+   "player_id": "TEN",
+   "name": "TEN Defense",
+   "position": "DEF",
+   "vorp": -45.0
+  },
+  {
+   "player_id": "WAS",
+   "name": "WAS Defense",
+   "position": "DEF",
+   "vorp": -46.7
   }
  ],
  "keepers": [
