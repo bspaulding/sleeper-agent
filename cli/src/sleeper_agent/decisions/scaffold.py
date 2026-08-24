@@ -30,6 +30,7 @@ class DecisionKind(Enum):
     TRADE = "trade"
     WAIVER = "waiver"
     FREEAGENT = "freeagent"
+    BIGBOARD = "bigboard"
 
 
 class DecisionAlreadyExistsError(Exception):

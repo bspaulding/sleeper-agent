@@ -948,6 +948,16 @@ def test_cmd_decisions_new_and_index(
     assert (repo_root / "wiki" / "decisions.md").exists()
 
 
+def test_decisions_new_accepts_bigboard_kind() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(
+        ["decisions", "new", "--kind", "bigboard", "--slug", "test", "--season", "2026"]
+    )
+    assert args.kind == "bigboard"
+
+
 # --- value ---------------------------------------------------------------
 
 
