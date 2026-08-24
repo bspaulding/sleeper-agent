@@ -1845,7 +1845,7 @@ def test_cmd_draft_board_prints_available_players(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -1896,7 +1896,7 @@ def test_cmd_draft_board_exclude_players_drops_projected_keepers(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -1972,7 +1972,7 @@ def test_cmd_draft_board_tags_live_sleeper_injury_designations(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -2030,7 +2030,7 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -2125,7 +2125,7 @@ def test_cmd_draft_board_tags_triaged_role_changer(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -2178,7 +2178,7 @@ def test_cmd_draft_board_omits_moved_tag_when_no_stats_data(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -2230,7 +2230,7 @@ def test_cmd_draft_board_watch_threads_moved_tag_into_decision_log(
         draft_id=None,
         rounds=15,
         watch=True,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -2264,7 +2264,7 @@ def test_cmd_draft_board_reports_missing_bigboard(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
     )
     with mock_http_server(handler) as base_url:
@@ -2308,7 +2308,7 @@ def test_cmd_draft_board_reports_unresolved_bigboard_rows(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
     )
     with mock_http_server(handler) as base_url:
@@ -2395,7 +2395,7 @@ def test_cmd_draft_board_watch_writes_decision_log(
         draft_id=None,
         rounds=15,
         watch=True,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=None,
@@ -2512,7 +2512,7 @@ def test_cmd_draft_board_annotates_with_me_flag(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=True,
         roster_id=None,
@@ -2579,7 +2579,7 @@ def test_cmd_draft_board_annotates_with_roster_id_flag(
         draft_id=None,
         rounds=15,
         watch=False,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=False,
         roster_id=7,
@@ -2716,6 +2716,39 @@ def test_cmd_draft_board_with_draft_id_defaults_value_season(
     out = capsys.readouterr().out
     assert "--value-season not given with --draft-id; defaulting to" in out
     assert "not found" in out
+
+
+def test_cmd_draft_board_with_league_id_defaults_value_season_to_prior_year(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """No --value-season with --league-id defaults to league.season minus 1,
+    never league.season itself — that season's stats/VORP don't exist until
+    after it's played. `_league_payload()`'s season is "2025", so the
+    computed default is "2024"; this fake repo has no bigboard for 2024, so
+    the failure should be the bigboard-not-found message for 2024, not a
+    board built from the (wrong) 2025 default."""
+    repo_root = make_repo_root(tmp_path)
+
+    def handler(request: Request) -> Response:
+        return json_response(_league_payload())
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        watch=False,
+        value_season=None,
+        num_teams=12,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    assert exit_code == 1
+    out = capsys.readouterr().out
+    assert "--value-season not given with --league-id; defaulting to 2024" in out
+    assert "data/bigboard/2024.csv not found" in out
 
 
 def test_cmd_draft_watch_picks_streams_lines_and_renders_board_on_my_turn(
@@ -2857,7 +2890,7 @@ def test_cmd_draft_watch_picks_resolves_turn_slot_from_me_flag(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        value_season=None,
+        value_season="2025",
         num_teams=12,
         me=True,
         roster_id=None,

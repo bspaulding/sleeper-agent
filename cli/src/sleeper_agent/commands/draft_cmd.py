@@ -285,7 +285,16 @@ def _resolve_draft_context(
             print(f"league {args.league_id} has no draft_id")
             return None
         draft_id = league.draft_id
-        value_season = args.value_season or league.season
+        if args.value_season is None:
+            value_season = str(int(league.season) - 1)
+            print(
+                f"--value-season not given with --league-id; defaulting to {value_season} "
+                "(league season minus 1, the most recently completed season pre-season — "
+                f"never {league.season} itself, since that season's stats/VORP don't exist "
+                "until after it's played)"
+            )
+        else:
+            value_season = args.value_season
         num_teams = max(league.settings.num_teams, 1)
 
     try:
