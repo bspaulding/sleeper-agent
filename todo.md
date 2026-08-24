@@ -24,6 +24,16 @@ Mondays, trade scouting Wednesdays) were created in Phase H but have never had
 a genuine run — they no-op'd while implementation was unmerged. Everything is
 on `main` now; verify via next scheduled firing or manual `fire_trigger`.
 
+## Tooling ideas
+
+- **Live VORP board web app or TUI** for use alongside the drafting agent
+  during real drafts: shows available players only; picked players either
+  disappear or get annotated with the team that selected them; columns for
+  position, NFL team, VORP (plus tier/[INJ:]/[MOVED:] tags). Same data source
+  as `draft board --watch` but a persistent, glanceable view instead of log
+  lines. Web app (small local HTTP server + auto-refreshing page) or TUI both
+  acceptable; decide when built.
+
 ## In-season
 
 - Replace `KeeperEligibleUndraftedDefault`'s hard R15 fallback with the
