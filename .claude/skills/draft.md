@@ -32,19 +32,22 @@ ranking is mechanical, but the final call is not:
 This is close to a full startup draft each year (§0 of `IMPLEMENTATION_PLAN.md`), not a small
 supplemental round — treat it that way:
 
-1. Before the draft: review `value rank --top 50` (and by position) to build a mental tier list.
-   Check `wiki/team/roster-philosophy.md`, `wiki/team/draft-strategy.md`, `wiki/team/defense-strategy.md`,
-   `wiki/team/rookie-evaluation.md`, `wiki/team/role-changers.md`, and
-   `wiki/team/keeper-strategy.md` if they exist for standing strategy notes from prior seasons
-   and general drafting theory. Also run, if not already done for this season: `stats
-   draft-picks sync --season <year>` (feeds Rookie watch), `wiki scaffold rookies --season
-   <year>` and `wiki scaffold role-changers --season <prior-year>` (stub any missing pages for
-   the triaged lists), and `wiki sync-frontmatter` after any `sleeper players sync` (keeps
-   `nfl_team` current on already-scaffolded pages — it's only set once at scaffold time
-   otherwise). Rookie watch and the `MOVED` tag are silently absent from `draft board` if this
-   data hasn't been synced, not an error — check for them explicitly rather than assuming.
+1. Before the draft: check `wiki/team/roster-philosophy.md`, `wiki/team/draft-strategy.md`,
+   `wiki/team/defense-strategy.md`, `wiki/team/rookie-evaluation.md`, `wiki/team/role-changers.md`,
+   and `wiki/team/keeper-strategy.md` if they exist for standing strategy notes from prior
+   seasons and general drafting theory. Run, if not already done for this season: `stats
+   draft-picks sync --season <year>` (feeds the big board's rookie half), `wiki scaffold
+   rookies --season <year>` and `wiki scaffold role-changers --season <prior-year>` (stub any
+   missing pages for the triaged lists), and `wiki sync-frontmatter` after any `sleeper players
+   sync` (keeps `nfl_team` current on already-scaffolded pages — it's only set once at scaffold
+   time otherwise). Then run the **`bigboard` skill** to build/refresh
+   `data/bigboard/<year>.csv` — this is what replaced "review `value rank --top 50` to build a
+   mental tier list": the tier list is now a materialized, reviewed artifact, not something
+   reconstructed in your head every draft. `draft board`/`watch-picks` require this file to
+   exist and have zero rows flagged for review — see
+   `docs/superpowers/specs/2026-08-23-draft-bigboard-design.md`.
 2. During the draft: `draft board --league-id <id> --rounds 15 --me [--watch]` shows
-   best-available by value, already excluding every drafted and kept player. **Always pass
+   best-available by value, already excluding every drafted and kept player. The ranked order comes from the pre-draft big board (§1), not a live VORP sort — ties and rookie placement were already resolved during the `bigboard` skill's review, so there's nothing left to deliberate on the order itself at pick time; only the NEED/FLEX/SURPLUS tags and tier numbers (for VORP-sourced rows) are computed live, against your current roster. **Always pass
    `--me`** (or `--roster-id <id>` if not drafting from this team's usual roster_id) — without
    it, the board has no roster-need annotation at all (no "My roster so far" summary, no
    NEED/FLEX/SURPLUS tags, no per-position `tier=N` numbers), which is exactly the gap that let
@@ -52,11 +55,6 @@ supplemental round — treat it that way:
    semi-attended session — it polls and re-renders on every change, and mirrors the board to a
    decision-log entry (`decisions/<season>/<date>-draft-live.md`) so there's a record even if
    nobody's watching every pick.
-   - Given the pre-draft sync in step 1, the same output also carries a **Rookie watch** section
-     (triaged incoming rookies, unranked — no VORP number exists for them) and an inline
-     **`[MOVED: <old>→<new>]`** tag on any main-board row whose player changed team via
-     free agency/trade this offseason. Neither changes the main list's sort order or values —
-     see step 3 for how to actually weigh them.
    - For a **mock draft** (practice run before the real draft — no league object exists for it),
      use `draft board --draft-id <mock-draft-id> --value-season <year> --draft-slot <n>
      [--num-teams <n>] [--watch]` instead: it points straight at the draft's public picks
@@ -144,22 +142,12 @@ supplemental round — treat it that way:
      many players from the same bye week at a thin position, still matters).
    - A player who just became keeper-ineligible after 2 years (see above) may be a value target
      if their price has dropped relative to their real ability.
-   - **Weighing a Rookie watch entry against the main board.** There's no VORP number to compare
-     directly — that's deliberate (`docs/superpowers/specs/2026-08-22-rookie-and-new-outlook-
-     player-visibility.md`), not a gap to route around with a made-up number. The reasoning
-     chain: (1) presence in Rookie watch already means the position/round cleared
-     `wiki/team/rookie-evaluation.md`'s draft-capital hit-rate bar, so the question is "worth it
-     *now*," not "worth it at all"; (2) weight by how strong that specific round's hit rate is —
-     a round-1 TE/RB is a much stronger bet than a round-3 RB or round-2 WR, even though both
-     cleared triage; (3) check the main board's own `tier=N` at the position you'd otherwise
-     draft — take the sure VORP thing if there's still tier-1/2 depth there, lean toward the
-     rookie swing if the next option there drops a tier (a real cliff); (4) NEED beats SURPLUS
-     for a rookie the same as for any main-board pick; (5) this league's best-ball scoring
-     forgives a slow start (every week banks toward the season total, no start/sit to lose value
-     on), so shade a bit more aggressive toward the swing than non-best-ball advice would,
-     especially in bench/FLEX-adjacent rounds; (6) use the rookie's researched news line as the
-     tie-breaker, not the primary signal — has the draft-capital-implied opportunity actually
-     shown up in camp/depth-chart reports, or is it still murky.
+   - **Rookies are already placed in the main board** — the reasoning chain that used to run
+     live here (round-hit-rate weighting, tier-cliff comparison, best-ball-forgives-a-slow-start
+     shading, news-line tie-breaking) now runs during the `bigboard` skill's pre-draft review
+     instead, calmly and without a clock. If a rookie's board position ever looks wrong mid-draft,
+     that's a `bigboard` skill problem to fix after the draft (or before the next one), not
+     something to re-litigate live.
    - **A `[MOVED: <old>→<new>]` tag is a different kind of signal** — that player already has a
      real VORP number computed from last season; the tag just flags that the team/scheme context
      behind it may no longer hold. It's "trust this number more or less than face value," not a
