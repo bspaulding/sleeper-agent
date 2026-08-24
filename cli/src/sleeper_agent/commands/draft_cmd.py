@@ -83,7 +83,8 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         "--draft-id",
         help=(
             "Draft ID directly, bypassing league lookup — needed for a Sleeper mock "
-            "draft, which has no league of its own. Requires --value-season."
+            "draft, which has no league of its own. --value-season defaults to "
+            "current year minus 1 if not given."
         ),
     )
     board_parser.add_argument("--rounds", type=int, default=15)
@@ -129,7 +130,8 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         "--draft-id",
         help=(
             "Draft ID directly, bypassing league lookup — needed for a Sleeper mock "
-            "draft, which has no league of its own. Requires --value-season."
+            "draft, which has no league of its own. --value-season defaults to "
+            "current year minus 1 if not given."
         ),
     )
     watch_picks_parser.add_argument(
@@ -268,13 +270,14 @@ def _resolve_draft_context(
     """
     if args.draft_id is not None:
         if args.value_season is None:
+            value_season = str(date.today().year - 1)
             print(
-                "--value-season is required with --draft-id (e.g. for a Sleeper mock "
-                "draft, there's no league to infer a season from)"
+                f"--value-season not given with --draft-id; defaulting to {value_season} "
+                "(current year minus 1, the most recently completed season pre-season)"
             )
-            return None
+        else:
+            value_season = args.value_season
         draft_id = args.draft_id
-        value_season = args.value_season
         num_teams = args.num_teams
     else:
         league = fetch_league(args.league_id, base_url=base_url)

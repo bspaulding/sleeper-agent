@@ -2692,9 +2692,14 @@ def test_cmd_draft_board_reports_unresolvable_draft_slot(
     assert "[8]" in out
 
 
-def test_cmd_draft_board_with_draft_id_requires_value_season(
+def test_cmd_draft_board_with_draft_id_defaults_value_season(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """No --value-season with --draft-id defaults to current year minus 1
+    (the most recently completed season pre-season) instead of erroring —
+    still fails here since this fake repo has no bigboard for that year, but
+    the failure should be the bigboard-not-found message, not a missing-arg
+    error."""
     repo_root = make_repo_root(tmp_path)
 
     args = argparse.Namespace(
@@ -2708,7 +2713,9 @@ def test_cmd_draft_board_with_draft_id_requires_value_season(
     exit_code = draft_cmd.cmd_draft_board(args, repo_root=repo_root)
 
     assert exit_code == 1
-    assert "--value-season is required with --draft-id" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "--value-season not given with --draft-id; defaulting to" in out
+    assert "not found" in out
 
 
 def test_cmd_draft_watch_picks_streams_lines_and_renders_board_on_my_turn(
