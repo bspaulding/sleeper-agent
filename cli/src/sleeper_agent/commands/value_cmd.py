@@ -86,6 +86,18 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         "build", help="Mechanically merge new VORP/rookie data into the big board"
     )
     bigboard_build_parser.add_argument("--season", required=True)
+    bigboard_build_parser.add_argument(
+        "--rookie-season",
+        default=None,
+        help=(
+            "NFL draft class to triage for rookie rows. Defaults to "
+            "--season + 1 (VORP's value-season is always the season "
+            "immediately preceding the draft being prepped for, so the "
+            "upcoming rookie class is always one year ahead of it) — "
+            "override only for a non-standard --season use (backtesting, "
+            "historical analysis) where that relationship doesn't hold."
+        ),
+    )
     bigboard_build_parser.set_defaults(func=cmd_value_bigboard_build)
 
 
@@ -240,7 +252,8 @@ def cmd_value_bigboard_build(
     except BigboardMalformedError as exc:
         print(str(exc))
         return 1
-    triaged_rookies = load_triaged_rookies(root, args.season)
+    rookie_season = args.rookie_season or str(int(args.season) + 1)
+    triaged_rookies = load_triaged_rookies(root, rookie_season)
     merged = merge_bigboard(existing, vorp_df, triaged_rookies)
     save_bigboard(root, args.season, merged)
 

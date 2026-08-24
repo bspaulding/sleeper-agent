@@ -1406,7 +1406,7 @@ def test_cmd_value_bigboard_build_creates_file_from_scratch(
     )
     write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
 
-    args = argparse.Namespace(season="2026")
+    args = argparse.Namespace(season="2026", rookie_season=None)
     exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
 
     out = capsys.readouterr().out
@@ -1477,7 +1477,7 @@ def test_cmd_value_bigboard_build_prints_flagged_rookie_rows(
         schema_version=PLAYERS_SCHEMA_VERSION,
     )
 
-    args = argparse.Namespace(season="2026")
+    args = argparse.Namespace(season="2026", rookie_season="2026")
     exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
 
     out = capsys.readouterr().out
@@ -1529,7 +1529,7 @@ def test_cmd_value_bigboard_build_truncates_a_long_flagged_list(
         ],
     )
 
-    args = argparse.Namespace(season="2026")
+    args = argparse.Namespace(season="2026", rookie_season=None)
     exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
 
     out = capsys.readouterr().out
@@ -1543,7 +1543,7 @@ def test_cmd_value_bigboard_build_reports_missing_vorp(
 ) -> None:
     repo_root = make_repo_root(tmp_path)
 
-    args = argparse.Namespace(season="2026")
+    args = argparse.Namespace(season="2026", rookie_season=None)
     exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
 
     assert exit_code == 1
@@ -1586,7 +1586,7 @@ def test_cmd_value_bigboard_build_reports_malformed_existing_board(
         "1,7547,Amon-Ra St. Brown,WR,nonsense,145.0,,,\n"
     )
 
-    args = argparse.Namespace(season="2026")
+    args = argparse.Namespace(season="2026", rookie_season=None)
     exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
 
     out = capsys.readouterr().out
