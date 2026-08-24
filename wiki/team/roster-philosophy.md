@@ -6,7 +6,7 @@ source: decisions/2026/2026-08-22-draft-mock-draft-2-abandoned-retro.md
 # Team roster philosophy
 
 Standing strategy notes for our team's drafting, built up from mock/real draft retrospectives.
-Checked at the start of every draft per `.claude/skills/draft.md`.
+Checked at the start of every draft.
 
 ## Standing rules (read this first)
 
@@ -61,9 +61,10 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
    review (`.claude/skills/bigboard.md`), not something to re-derive live at the table anymore —
    if a rookie's position looks wrong mid-draft, that's a `bigboard` skill fix for after the
    draft, not a live judgment call. `MOVED`-tagged role-changers still work the old way: a correct
-   VORP row that may just no longer describe their situation (`wiki/team/role-changers.md`), no
-   synthetic adjustment, weighed live via the vacated-opportunity/scheme-continuity framework in
-   `.claude/skills/draft.md`'s "Draft-day judgment" section.
+   VORP row that may just no longer describe their situation, no synthetic adjustment — weigh it
+   live via `wiki/team/role-changers.md`'s vacated-opportunity/scheme-continuity framework: a
+   confirmed clean vacancy argues the raw VORP number is probably better than it looks, a muddied
+   committee/depth-chart situation argues worse.
 
 ## Roster grid (this league, 2026)
 

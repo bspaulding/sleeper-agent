@@ -17,8 +17,8 @@ from typing import Any
 
 import requests
 
-# Overridable for local wargaming against a mock Sleeper server (see
-# scripts/wargame_server.py). Read at import time — one process, one base URL.
+# Overridable for testing against a local mock Sleeper server. Read at import
+# time — one process, one base URL.
 SLEEPER_BASE_URL = os.environ.get(
     "SLEEPER_AGENT_BASE_URL", "https://api.sleeper.app/v1"
 )

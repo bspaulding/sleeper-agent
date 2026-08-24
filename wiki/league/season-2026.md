@@ -42,7 +42,7 @@ for the rules themselves.
 ## Prep plan before the deadline/draft
 
 - Run `draft keepers --me --season 2026` well before Aug 28 to settle the 2 keeper picks (see
-  `.claude/skills/draft.md`).
+  `.claude/skills/keepers.md`).
 - Do at least one or two Sleeper mock drafts before Aug 28-29 to rehearse tiers/pacing — run
   `draft board --draft-id <mock-draft-id> --value-season 2026 --draft-slot <n> --watch` alongside
   a mock draft room for a live best-available-by-value view (mock drafts have no league to

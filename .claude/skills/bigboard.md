@@ -13,7 +13,7 @@ the judgment half.
 
 ## When to run this
 
-- Before any draft (real or mock/wargame) — a required prerequisite, same footing as `stats vorp`.
+- Before any draft (real or mock) — a required prerequisite, same footing as `stats vorp`.
 - Any time news/injury/depth-chart signal changes enough that the current ranking might be
   stale (a manual trigger — there's no automated re-sweep schedule).
 
@@ -42,9 +42,9 @@ the judgment half.
    `wiki/team/rookie-evaluation.md` for rookie judgment, `wiki/team/roster-philosophy.md` for
    roster-construction framing) for anything flagged.
 3. For every row still carrying `[NEEDS REVIEW...]` or `[VORP CHANGED...]`: make the call.
-   - New rookie: place it using the same reasoning `draft.md` used to describe live (tier
-     cliffs at the position, the round's historical hit rate, `wiki/team/rookie-evaluation.md`'s
-     framework) — just done here, calmly, pre-draft, instead of live under a clock. Edit the
+   - New rookie: place it using tier cliffs at the position, the round's historical hit rate, and
+     `wiki/team/rookie-evaluation.md`'s framework — resolved here, calmly, pre-draft, instead of
+     live under a clock. Edit the
      row's `rank` directly (renumber neighbors if you're inserting between two adjacent ranks —
      open the CSV, it's a small hand-editable file) and replace the `[NEEDS REVIEW...]` marker
      in `rationale` with a one-line reason.
