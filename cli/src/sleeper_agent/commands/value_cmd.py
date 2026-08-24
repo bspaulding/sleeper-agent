@@ -8,6 +8,12 @@ from pathlib import Path
 import polars as pl
 
 from sleeper_agent.config import data_dir, find_repo_root, wiki_dir
+from sleeper_agent.draft_tools.bigboard import (
+    load_bigboard_for_build,
+    merge_bigboard,
+    save_bigboard,
+)
+from sleeper_agent.draft_tools.rookies import load_triaged_rookies
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
@@ -69,6 +75,16 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     roster_parser.add_argument("--roster-id", type=int, default=None)
     roster_parser.add_argument("--me", action="store_true")
     roster_parser.set_defaults(func=cmd_value_roster)
+
+    bigboard_parser = value_subparsers.add_parser(
+        "bigboard", help="Pre-draft big board (merged VORP + rookie ranking)"
+    )
+    bigboard_subparsers = bigboard_parser.add_subparsers(dest="bigboard_command")
+    bigboard_build_parser = bigboard_subparsers.add_parser(
+        "build", help="Mechanically merge new VORP/rookie data into the big board"
+    )
+    bigboard_build_parser.add_argument("--season", required=True)
+    bigboard_build_parser.set_defaults(func=cmd_value_bigboard_build)
 
 
 def _read_vorp(root: Path, season: str) -> pl.DataFrame:
@@ -204,6 +220,38 @@ def cmd_value_rank(args: argparse.Namespace, *, repo_root: Path | None = None) -
         if status is not None:
             line += f" [INJ: {status}]"
         print(line)
+    return 0
+
+
+def cmd_value_bigboard_build(
+    args: argparse.Namespace, *, repo_root: Path | None = None
+) -> int:
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    try:
+        vorp_df = _read_vorp(root, args.season)
+    except VorpNotComputedError as exc:
+        print(str(exc))
+        return 1
+
+    existing = load_bigboard_for_build(root, args.season)
+    triaged_rookies = load_triaged_rookies(root, args.season)
+    merged = merge_bigboard(existing, vorp_df, triaged_rookies)
+    save_bigboard(root, args.season, merged)
+
+    added = len(merged) - len(existing)
+    flagged = [
+        row
+        for row in merged
+        if "[NEEDS REVIEW" in row.rationale or "[VORP CHANGED" in row.rationale
+    ]
+    print(
+        f"data/bigboard/{args.season}.csv: {len(merged)} rows "
+        f"({added} added this run, {len(flagged)} flagged for review)"
+    )
+    for row in flagged[:20]:
+        print(f"  rank {row.rank}: {row.name} — {row.rationale}")
+    if len(flagged) > 20:
+        print(f"  ...and {len(flagged) - 20} more")
     return 0
 
 

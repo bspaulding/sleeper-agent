@@ -109,6 +109,16 @@ def test_wiki_sync_frontmatter_subcommand_is_registered() -> None:
     assert args.func is wiki_cmd.cmd_wiki_sync_frontmatter
 
 
+def test_value_bigboard_build_subcommand_is_registered() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(["value", "bigboard", "build", "--season", "2026"])
+
+    assert args.func is value_cmd.cmd_value_bigboard_build
+    assert args.season == "2026"
+
+
 # --- sleeper league resolve ----------------------------------------------
 
 
@@ -1362,6 +1372,50 @@ def test_cmd_value_rank_raises_clear_error_when_vorp_not_computed(
 
     with pytest.raises(value_cmd.VorpNotComputedError):
         value_cmd.cmd_value_rank(args, repo_root=repo_root)
+
+
+def test_cmd_value_bigboard_build_creates_file_from_scratch(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.draft_tools.bigboard import load_bigboard_for_build
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["Player One", "Player Two"],
+            "position": ["RB", "WR"],
+            "games_played": [10, 10],
+            "season_points": [100.0, 80.0],
+            "points_per_game": [10.0, 8.0],
+            "replacement_points": [10.0, 10.0],
+            "vorp_season": [100.0, 80.0],
+            "vorp_per_game": [10.0, 8.0],
+        }
+    )
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+
+    args = argparse.Namespace(season="2026")
+    exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    rows = load_bigboard_for_build(repo_root, "2026")
+    assert [r.player_id for r in rows] == ["1", "2"]
+    assert "data/bigboard/2026.csv: 2 rows (2 added this run, 0 flagged for review)" in out
+
+
+def test_cmd_value_bigboard_build_reports_missing_vorp(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    args = argparse.Namespace(season="2026")
+    exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "data/vorp/2026.parquet not found" in capsys.readouterr().out
 
 
 # --- draft -----------------------------------------------------------------
