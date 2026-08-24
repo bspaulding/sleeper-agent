@@ -15,11 +15,10 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
-import polars as pl
 from requests import RequestException
 
-from sleeper_agent.draft_tools.rookies import TriagedRookie
-from sleeper_agent.models.sleeper import Draft, DraftPick, Player
+from sleeper_agent.draft_tools.bigboard import BigboardRow
+from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client.draft import fetch_draft_picks
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL, SleeperHTTPError
 from sleeper_agent.value.team_changes import TeamChange
@@ -35,13 +34,6 @@ def _flush_print(s: str) -> None:
 class RosterRequirement:
     hard_min: dict[str, int]
     flex_capacity: int
-
-
-@dataclass(frozen=True)
-class RookieWatchRow:
-    player: Player
-    draft_round: int
-    news_excerpt: tuple[str, ...]
 
 
 def roster_requirement_from_draft(draft: Draft) -> RosterRequirement:
@@ -103,57 +95,33 @@ def my_roster_positions(
 DEFAULT_TOP_N = 30
 
 
-def board_view(
-    vorp_df: pl.DataFrame, drafted_picks: list[DraftPick], *, top_n: int = DEFAULT_TOP_N
-) -> pl.DataFrame:
-    drafted_ids = {pick.player_id for pick in drafted_picks}
-    available = vorp_df.filter(~pl.col("sleeper_id").is_in(list(drafted_ids)))
-    return available.sort("vorp_season", descending=True).head(top_n)
-
-
-def rookie_watch_rows(
-    triaged_rookies: Sequence[TriagedRookie],
-    drafted_picks: Sequence[DraftPick],
+def bigboard_view(
+    bigboard_rows: Sequence[BigboardRow],
+    drafted_picks: list[DraftPick],
     *,
-    news_by_sleeper_id: dict[str, list[str]] | None = None,
-) -> list[RookieWatchRow]:
-    """Available triaged rookies, cross-referenced against drafted picks.
-
-    Mirrors `board_view`'s drafted-player exclusion, but stays a separate
-    function/list rather than folding into `board_view`'s VORP-sorted
-    output — triaged rookies have no VORP number to sort by (inventing a
-    synthetic one would blend a qualitative triage judgment into a number
-    the rest of the board treats as directly comparable), so they render as
-    an unranked "Rookie watch" section instead (see `render_board`).
-    """
+    top_n: int = DEFAULT_TOP_N,
+) -> list[BigboardRow]:
     drafted_ids = {pick.player_id for pick in drafted_picks}
-    news_by_sleeper_id = news_by_sleeper_id or {}
-    return [
-        RookieWatchRow(
-            player=rookie.player,
-            draft_round=rookie.draft_round,
-            news_excerpt=tuple(news_by_sleeper_id.get(rookie.player.player_id, ())),
-        )
-        for rookie in triaged_rookies
-        if rookie.player.player_id not in drafted_ids
-    ]
+    available = [row for row in bigboard_rows if row.player_id not in drafted_ids]
+    return available[:top_n]
 
 
-def compute_tiers(board: pl.DataFrame) -> dict[str, int]:
+def compute_tiers(board: Sequence[BigboardRow]) -> dict[str, int]:
     tiers: dict[str, int] = {}
-    for position in sorted(set(board["position"].to_list())):
-        rows = (
-            board.filter(pl.col("position") == position)
-            .sort("vorp_season", descending=True)
-            .to_dicts()
-        )
+    by_position: dict[str, list[BigboardRow]] = {}
+    for row in board:
+        if row.source != "vorp":
+            continue
+        by_position.setdefault(row.position, []).append(row)
+    for rows in by_position.values():
+        rows.sort(key=lambda r: r.vorp or 0.0, reverse=True)
         tier = 1
         prev_vorp: float | None = None
         for row in rows:
-            if prev_vorp is not None and _is_tier_break(prev_vorp, row["vorp_season"]):
+            if prev_vorp is not None and _is_tier_break(prev_vorp, row.vorp or 0.0):
                 tier += 1
-            tiers[row["sleeper_id"]] = tier
-            prev_vorp = row["vorp_season"]
+            tiers[row.player_id] = tier
+            prev_vorp = row.vorp
     return tiers
 
 
@@ -187,11 +155,10 @@ def render_roster_summary(
 
 
 def render_board(
-    board: pl.DataFrame,
+    board: Sequence[BigboardRow],
     *,
     my_counts: dict[str, int] | None = None,
     requirement: RosterRequirement | None = None,
-    rookie_watch: Sequence[RookieWatchRow] | None = None,
     team_changes: dict[str, TeamChange] | None = None,
     injury_statuses: dict[str, str] | None = None,
 ) -> str:
@@ -209,80 +176,59 @@ def render_board(
     tiers = compute_tiers(board) if annotation is not None else {}
     team_changes = team_changes or {}
     injury_statuses = injury_statuses or {}
-    for rank, row in enumerate(board.to_dicts(), start=1):
-        line = (
-            f"{rank:2d}. {row['name']:<25} {row['position']:<3} "
-            f"vorp={row['vorp_season']:7.1f}"
-        )
+    for rank, row in enumerate(board, start=1):
+        if row.source == "rookie":
+            line = f"{rank:2d}. {row.name:<25} {row.position:<3} [ROOKIE R{row.draft_round}]"
+        else:
+            line = f"{rank:2d}. {row.name:<25} {row.position:<3} vorp={row.vorp:7.1f}"
         if annotation is not None:
             counts, req = annotation
-            tier = tiers.get(row["sleeper_id"], 1)
-            tag = position_tag(row["position"], counts.get(row["position"], 0), req)
-            line += f" tier={tier} [{tag}]"
-        change = team_changes.get(row["sleeper_id"])
+            tag = position_tag(row.position, counts.get(row.position, 0), req)
+            if row.source == "vorp":
+                tier = tiers.get(row.player_id, 1)
+                line += f" tier={tier} [{tag}]"
+            else:
+                line += f" [{tag}]"
+        change = team_changes.get(row.player_id)
         if change is not None:
             line += f" [MOVED: {change.old_team}→{change.new_team}]"
-        status = injury_statuses.get(row["sleeper_id"])
+        status = injury_statuses.get(row.player_id)
         if status is not None:
             line += f" [INJ: {status}]"
         lines.append(line)
-    if rookie_watch:
-        lines.append("")
-        lines.append(
-            "Rookie watch (triaged, not ranked against VORP — "
-            "see wiki/team/rookie-evaluation.md):"
-        )
-        for entry in rookie_watch:
-            line = (
-                f"    {entry.player.name:<25} {entry.player.position:<3} "
-                f"R{entry.draft_round}"
-            )
-            if entry.news_excerpt:
-                line += f"  {entry.news_excerpt[0]}"
-            lines.append(line)
     return "\n".join(lines)
 
 
 def render_board_for_picks(
-    vorp_df: pl.DataFrame,
+    bigboard_rows: Sequence[BigboardRow],
     picks: Sequence[DraftPick],
     *,
     top_n: int = DEFAULT_TOP_N,
     my_roster_id: int | None = None,
     my_draft_slot: int | None = None,
     requirement: RosterRequirement | None = None,
-    triaged_rookies: Sequence[TriagedRookie] = (),
-    rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
     team_changes: dict[str, TeamChange] | None = None,
     injury_statuses: dict[str, str] | None = None,
 ) -> str:
     """Assemble + render the full board for a given picks list.
 
-    The `board_view` -> `my_roster_positions` -> `rookie_watch_rows` ->
-    `render_board` sequence (including the "only annotate when we know who
-    'me' is" gating on `my_roster_id`) was independently duplicated in three
-    places — `watch_board`, `draft board`'s one-shot path, and `draft
-    watch-picks`' on-my-turn board. This is that sequence, once.
+    The `bigboard_view` -> `my_roster_positions` -> `render_board` sequence
+    (including the "only annotate when we know who 'me' is" gating on
+    `my_roster_id`) was independently duplicated in three places —
+    `watch_board`, `draft board`'s one-shot path, and `draft watch-picks`'
+    on-my-turn board. This is that sequence, once.
     """
     picks_list = list(picks)
-    board = board_view(vorp_df, picks_list, top_n=top_n)
+    board = bigboard_view(bigboard_rows, picks_list, top_n=top_n)
     my_counts = (
         my_roster_positions(picks_list, my_roster_id, my_draft_slot=my_draft_slot)
         if my_roster_id is not None
-        else None
-    )
-    rookie_watch: list[RookieWatchRow] | None = (
-        rookie_watch_rows(
-            triaged_rookies, picks_list, news_by_sleeper_id=rookie_news_by_sleeper_id
-        )
-        if triaged_rookies
         else None
     )
     return render_board(
         board,
         my_counts=my_counts,
         requirement=requirement if my_roster_id is not None else None,
-        rookie_watch=rookie_watch,
         team_changes=team_changes,
         injury_statuses=injury_statuses,
     )
@@ -304,7 +250,7 @@ def slot_for_pick(pick_no: int, num_teams: int) -> int:
 
 def watch_board(
     draft_id: str,
-    vorp_df: pl.DataFrame,
+    bigboard_rows: Sequence[BigboardRow],
     *,
     base_url: str = SLEEPER_BASE_URL,
     # Sleeper's documented limit is ~1000 req/min before risking an IP block; one GET per
@@ -323,8 +269,6 @@ def watch_board(
     my_roster_id: int | None = None,
     my_draft_slot: int | None = None,
     requirement: RosterRequirement | None = None,
-    triaged_rookies: Sequence[TriagedRookie] = (),
-    rookie_news_by_sleeper_id: dict[str, list[str]] | None = None,
     team_changes: dict[str, TeamChange] | None = None,
     injury_statuses: dict[str, str] | None = None,
 ) -> None:
@@ -335,13 +279,11 @@ def watch_board(
         drafted_ids = frozenset(pick.player_id for pick in picks)
         if drafted_ids != previous_drafted_ids:
             rendered = render_board_for_picks(
-                vorp_df,
+                bigboard_rows,
                 picks,
                 my_roster_id=my_roster_id,
                 my_draft_slot=my_draft_slot,
                 requirement=requirement,
-                triaged_rookies=triaged_rookies,
-                rookie_news_by_sleeper_id=rookie_news_by_sleeper_id,
                 team_changes=team_changes,
                 injury_statuses=injury_statuses,
             )

@@ -2,19 +2,18 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import polars as pl
 import pytest
 import requests
 
+from sleeper_agent.draft_tools.bigboard import BigboardRow
 from sleeper_agent.draft_tools.board import (
     RosterRequirement,
-    board_view,
+    bigboard_view,
     compute_tiers,
     my_roster_positions,
     position_tag,
     render_board,
     render_roster_summary,
-    rookie_watch_rows,
     roster_requirement_from_draft,
     slot_for_pick,
     watch_board,
@@ -27,8 +26,7 @@ from sleeper_agent.draft_tools.keepers import (
     rank_keeper_candidates,
     value_per_cost,
 )
-from sleeper_agent.draft_tools.rookies import TriagedRookie
-from sleeper_agent.models.sleeper import Draft, DraftPick, Player
+from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
     KeeperEligible,
@@ -322,36 +320,64 @@ def test_infer_total_rounds_falls_back_when_most_recent_season_has_no_picks() ->
 # --- draft board -----------------------------------------------------------
 
 
-def make_vorp_df() -> pl.DataFrame:
-    return pl.DataFrame(
-        {
-            "sleeper_id": ["1", "2", "3"],
-            "name": ["Player One", "Player Two", "Player Three"],
-            "position": ["RB", "WR", "QB"],
-            "vorp_season": [50.0, 30.0, 10.0],
-        }
+def _bigboard_row(
+    *,
+    rank: int,
+    player_id: str,
+    name: str | None = None,
+    position: str = "RB",
+    source: str = "vorp",
+    vorp: float | None = 0.0,
+    draft_round: int | None = None,
+    rationale: str = "",
+    log_ref: str | None = None,
+) -> BigboardRow:
+    return BigboardRow(
+        rank=rank,
+        player_id=player_id,
+        name=name or f"Player {player_id}",
+        position=position,
+        source=source,
+        vorp=vorp,
+        draft_round=draft_round,
+        rationale=rationale,
+        log_ref=log_ref,
     )
 
 
-def test_board_view_excludes_drafted_and_kept_players() -> None:
-    vorp_df = make_vorp_df()
+def make_bigboard() -> list[BigboardRow]:
+    return [
+        _bigboard_row(
+            rank=1, player_id="1", name="Player One", position="RB", vorp=50.0
+        ),
+        _bigboard_row(
+            rank=2, player_id="2", name="Player Two", position="WR", vorp=30.0
+        ),
+        _bigboard_row(
+            rank=3, player_id="3", name="Player Three", position="QB", vorp=10.0
+        ),
+    ]
+
+
+def test_bigboard_view_excludes_drafted_and_kept_players() -> None:
+    board = make_bigboard()
     picks = [make_pick(1, player_id="1"), make_pick(2, player_id="2", is_keeper=True)]
 
-    board = board_view(vorp_df, picks)
+    result = bigboard_view(board, picks)
 
-    assert board["sleeper_id"].to_list() == ["3"]
+    assert [row.player_id for row in result] == ["3"]
 
 
-def test_board_view_respects_top_n() -> None:
-    vorp_df = make_vorp_df()
+def test_bigboard_view_respects_top_n() -> None:
+    board = make_bigboard()
 
-    board = board_view(vorp_df, [], top_n=1)
+    result = bigboard_view(board, [], top_n=1)
 
-    assert board["sleeper_id"].to_list() == ["1"]
+    assert [row.player_id for row in result] == ["1"]
 
 
 def test_render_board_formats_ranked_lines() -> None:
-    board = make_vorp_df().head(1)
+    board = make_bigboard()[:1]
 
     rendered = render_board(board)
 
@@ -360,7 +386,7 @@ def test_render_board_formats_ranked_lines() -> None:
 
 
 def test_render_board_without_annotation_is_unchanged() -> None:
-    board = make_vorp_df().head(1)
+    board = make_bigboard()[:1]
 
     rendered = render_board(board)
 
@@ -370,7 +396,7 @@ def test_render_board_without_annotation_is_unchanged() -> None:
 
 
 def test_render_board_with_annotation_adds_summary_tags_and_tiers() -> None:
-    board = make_vorp_df()  # RB=50.0, WR=30.0, QB=10.0 — one player each
+    board = make_bigboard()  # RB=50.0, WR=30.0, QB=10.0 — one player each
     requirement = RosterRequirement(
         hard_min={"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}, flex_capacity=2
     )
@@ -398,7 +424,7 @@ def test_render_roster_summary_omits_flex_note_when_no_flex_capacity() -> None:
 
 
 def test_render_board_annotation_requires_both_counts_and_requirement() -> None:
-    board = make_vorp_df().head(1)
+    board = make_bigboard()[:1]
     requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
 
     # my_counts given without requirement (or vice versa) is treated as "no annotation",
@@ -411,8 +437,37 @@ def test_render_board_annotation_requires_both_counts_and_requirement() -> None:
     assert "My roster so far" not in rendered_other_way
 
 
+def test_render_board_renders_rookie_row_with_rookie_tag_not_vorp() -> None:
+    board = [
+        _bigboard_row(rank=1, player_id="1", source="rookie", vorp=None, draft_round=2),
+    ]
+    rendered = render_board(board)
+    assert "[ROOKIE R2]" in rendered
+    assert "vorp=" not in rendered
+
+
+def test_render_board_rookie_row_gets_need_tag_but_no_tier() -> None:
+    board = [
+        _bigboard_row(
+            rank=1,
+            player_id="1",
+            position="RB",
+            source="rookie",
+            vorp=None,
+            draft_round=1,
+        ),
+    ]
+    rendered = render_board(
+        board,
+        my_counts={},
+        requirement=RosterRequirement(hard_min={"RB": 2}, flex_capacity=0),
+    )
+    assert "[NEED]" in rendered
+    assert "tier=" not in rendered
+
+
 def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> None:
-    vorp_df = make_vorp_df()
+    board = make_bigboard()
     call_log: list[list[DraftPick]] = [
         [],
         [],  # unchanged from previous iteration - should not re-render
@@ -427,7 +482,7 @@ def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> N
 
     watch_board(
         "did",
-        vorp_df,
+        board,
         sleep=sleeps.append,
         max_iterations=3,
         render=rendered_calls.append,
@@ -442,7 +497,7 @@ def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> N
 
 
 def test_watch_board_works_without_a_log_path() -> None:
-    vorp_df = make_vorp_df()
+    board = make_bigboard()
     rendered_calls: list[str] = []
 
     def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
@@ -450,7 +505,7 @@ def test_watch_board_works_without_a_log_path() -> None:
 
     watch_board(
         "did",
-        vorp_df,
+        board,
         sleep=lambda _seconds: None,
         max_iterations=1,
         render=rendered_calls.append,
@@ -461,7 +516,7 @@ def test_watch_board_works_without_a_log_path() -> None:
 
 
 def test_watch_board_annotates_when_my_roster_id_given(tmp_path: Path) -> None:
-    vorp_df = make_vorp_df()
+    board = make_bigboard()
     requirement = RosterRequirement(
         hard_min={"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}, flex_capacity=2
     )
@@ -472,7 +527,7 @@ def test_watch_board_annotates_when_my_roster_id_given(tmp_path: Path) -> None:
 
     watch_board(
         "did",
-        vorp_df,
+        board,
         sleep=lambda _seconds: None,
         max_iterations=1,
         render=rendered_calls.append,
@@ -487,12 +542,12 @@ def test_watch_board_annotates_when_my_roster_id_given(tmp_path: Path) -> None:
 
 
 def test_watch_board_without_my_roster_id_is_unannotated(tmp_path: Path) -> None:
-    vorp_df = make_vorp_df()
+    board = make_bigboard()
     rendered_calls: list[str] = []
 
     watch_board(
         "did",
-        vorp_df,
+        board,
         sleep=lambda _seconds: None,
         max_iterations=1,
         render=rendered_calls.append,
@@ -502,53 +557,13 @@ def test_watch_board_without_my_roster_id_is_unannotated(tmp_path: Path) -> None
     assert "My roster so far" not in rendered_calls[0]
 
 
-def test_watch_board_threads_rookie_watch_through_and_excludes_drafted_ones() -> None:
-    vorp_df = make_vorp_df()
-    available_rookie = make_rookie(player_id="9001")
-    drafted_rookie = make_rookie(player_id="9002", name="Drafted Rookie")
-    rendered_calls: list[str] = []
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return [make_pick(1, player_id="9002", player_name="Drafted Rookie")]
-
-    watch_board(
-        "did",
-        vorp_df,
-        sleep=lambda _seconds: None,
-        max_iterations=1,
-        render=rendered_calls.append,
-        fetch_picks=fake_fetch,
-        triaged_rookies=[available_rookie, drafted_rookie],
-    )
-
-    assert "Rookie watch" in rendered_calls[0]
-    assert "Rookie One" in rendered_calls[0]
-    assert "Drafted Rookie" not in rendered_calls[0]
-
-
-def test_watch_board_without_triaged_rookies_omits_rookie_watch() -> None:
-    vorp_df = make_vorp_df()
-    rendered_calls: list[str] = []
-
-    watch_board(
-        "did",
-        vorp_df,
-        sleep=lambda _seconds: None,
-        max_iterations=1,
-        render=rendered_calls.append,
-        fetch_picks=lambda draft_id, *, base_url: [],
-    )
-
-    assert "Rookie watch" not in rendered_calls[0]
-
-
 def test_watch_board_threads_team_changes_through_to_render_board() -> None:
-    vorp_df = make_vorp_df()  # sleeper_id "1" is RB/50.0
+    board = make_bigboard()  # player_id "1" is RB/50.0
     rendered_calls: list[str] = []
 
     watch_board(
         "did",
-        vorp_df,
+        board,
         sleep=lambda _seconds: None,
         max_iterations=1,
         render=rendered_calls.append,
@@ -569,12 +584,12 @@ def test_watch_board_threads_team_changes_through_to_render_board() -> None:
 
 
 def test_watch_board_without_team_changes_omits_moved_tag() -> None:
-    vorp_df = make_vorp_df()
+    board = make_bigboard()
     rendered_calls: list[str] = []
 
     watch_board(
         "did",
-        vorp_df,
+        board,
         sleep=lambda _seconds: None,
         max_iterations=1,
         render=rendered_calls.append,
@@ -585,7 +600,7 @@ def test_watch_board_without_team_changes_omits_moved_tag() -> None:
 
 
 def test_render_board_injury_status_tags_only_flagged_players() -> None:
-    board = make_vorp_df()
+    board = make_bigboard()
 
     rendered = render_board(board, injury_statuses={"2": "PUP"})
 
@@ -598,7 +613,7 @@ def test_render_board_injury_status_tags_only_flagged_players() -> None:
 
 
 def test_render_board_injury_tag_combines_with_moved_tag() -> None:
-    board = make_vorp_df()
+    board = make_bigboard()
     change = TeamChange(
         sleeper_id="1",
         name="Player One",
@@ -616,7 +631,7 @@ def test_render_board_injury_tag_combines_with_moved_tag() -> None:
 
 
 def test_render_board_without_injury_statuses_is_unchanged() -> None:
-    board = make_vorp_df().head(1)
+    board = make_bigboard()[:1]
 
     rendered = render_board(board, injury_statuses=None)
 
@@ -624,12 +639,12 @@ def test_render_board_without_injury_statuses_is_unchanged() -> None:
 
 
 def test_watch_board_threads_injury_statuses_through_to_render_board() -> None:
-    vorp_df = make_vorp_df()  # sleeper_id "1" is RB/50.0
+    board = make_bigboard()  # player_id "1" is RB/50.0
     rendered_calls: list[str] = []
 
     watch_board(
         "did",
-        vorp_df,
+        board,
         sleep=lambda _seconds: None,
         max_iterations=1,
         render=rendered_calls.append,
@@ -770,15 +785,13 @@ def test_my_roster_positions_matches_by_draft_slot_when_roster_id_is_null() -> N
 
 
 def test_compute_tiers_increments_only_past_a_big_gap() -> None:
-    board = pl.DataFrame(
-        {
-            "sleeper_id": ["1", "2", "3", "4"],
-            "name": ["A", "B", "C", "D"],
-            "position": ["RB", "RB", "RB", "RB"],
-            # 100 -> 90 is a 10% drop (no break); 90 -> 50 is a ~44% drop (break)
-            "vorp_season": [100.0, 90.0, 50.0, 45.0],
-        }
-    )
+    # 100 -> 90 is a 10% drop (no break); 90 -> 50 is a ~44% drop (break)
+    board = [
+        _bigboard_row(rank=1, player_id="1", name="A", position="RB", vorp=100.0),
+        _bigboard_row(rank=2, player_id="2", name="B", position="RB", vorp=90.0),
+        _bigboard_row(rank=3, player_id="3", name="C", position="RB", vorp=50.0),
+        _bigboard_row(rank=4, player_id="4", name="D", position="RB", vorp=45.0),
+    ]
 
     tiers = compute_tiers(board)
 
@@ -786,14 +799,10 @@ def test_compute_tiers_increments_only_past_a_big_gap() -> None:
 
 
 def test_compute_tiers_is_independent_per_position() -> None:
-    board = pl.DataFrame(
-        {
-            "sleeper_id": ["1", "2"],
-            "name": ["RB One", "WR One"],
-            "position": ["RB", "WR"],
-            "vorp_season": [100.0, 5.0],
-        }
-    )
+    board = [
+        _bigboard_row(rank=1, player_id="1", name="RB One", position="RB", vorp=100.0),
+        _bigboard_row(rank=2, player_id="2", name="WR One", position="WR", vorp=5.0),
+    ]
 
     tiers = compute_tiers(board)
 
@@ -803,18 +812,25 @@ def test_compute_tiers_is_independent_per_position() -> None:
 
 
 def test_compute_tiers_treats_non_positive_vorp_as_always_a_break() -> None:
-    board = pl.DataFrame(
-        {
-            "sleeper_id": ["1", "2", "3"],
-            "name": ["A", "B", "C"],
-            "position": ["RB", "RB", "RB"],
-            "vorp_season": [10.0, 0.0, -5.0],
-        }
-    )
+    board = [
+        _bigboard_row(rank=1, player_id="1", name="A", position="RB", vorp=10.0),
+        _bigboard_row(rank=2, player_id="2", name="B", position="RB", vorp=0.0),
+        _bigboard_row(rank=3, player_id="3", name="C", position="RB", vorp=-5.0),
+    ]
 
     tiers = compute_tiers(board)
 
     assert tiers == {"1": 1, "2": 2, "3": 3}
+
+
+def test_compute_tiers_skips_rookie_rows() -> None:
+    board = [
+        _bigboard_row(rank=1, player_id="1", position="RB", source="vorp", vorp=100.0),
+        _bigboard_row(rank=2, player_id="2", position="RB", source="rookie", vorp=None),
+    ]
+    tiers = compute_tiers(board)
+    assert "2" not in tiers
+    assert tiers["1"] == 1
 
 
 # --- slot_for_pick -------------------------------------------------------
@@ -846,101 +862,6 @@ def test_slot_for_pick_with_odd_num_teams() -> None:
     assert slot_for_pick(21, 10) == 1
 
 
-# --- rookie watch -----------------------------------------------------------
-
-
-def make_rookie(
-    player_id: str = "9001",
-    name: str = "Rookie One",
-    position: str = "WR",
-    draft_round: int = 1,
-) -> TriagedRookie:
-    return TriagedRookie(
-        player=Player(
-            player_id=player_id,
-            name=name,
-            position=position,
-            team="KC",
-            status="Active",
-            injury_status=None,
-            fantasy_positions=(position,),
-            years_exp=0,
-        ),
-        draft_round=draft_round,
-    )
-
-
-def test_rookie_watch_rows_excludes_already_drafted_triaged_rookies() -> None:
-    available = make_rookie(player_id="1")
-    drafted = make_rookie(player_id="2")
-    picks = [make_pick(1, player_id="2", player_name="Drafted Rookie")]
-
-    rows = rookie_watch_rows([available, drafted], picks)
-
-    assert [row.player.player_id for row in rows] == ["1"]
-
-
-def test_rookie_watch_rows_attaches_news_excerpt_by_sleeper_id() -> None:
-    rookie = make_rookie(player_id="1")
-
-    rows = rookie_watch_rows(
-        [rookie], [], news_by_sleeper_id={"1": ["- broke out in camp"]}
-    )
-
-    assert rows[0].news_excerpt == ("- broke out in camp",)
-
-
-def test_rookie_watch_rows_empty_news_when_no_lookup_given() -> None:
-    rookie = make_rookie(player_id="1")
-
-    rows = rookie_watch_rows([rookie], [])
-
-    assert rows[0].news_excerpt == ()
-
-
-def test_render_board_rookie_watch_section_present_only_when_supplied() -> None:
-    board = make_vorp_df().head(1)
-
-    without = render_board(board)
-    assert "Rookie watch" not in without
-
-    rows = rookie_watch_rows([make_rookie()], [])
-    with_watch = render_board(board, rookie_watch=rows)
-    assert "Rookie watch" in with_watch
-    assert "Rookie One" in with_watch
-
-
-def test_render_board_rookie_watch_section_omitted_for_empty_list() -> None:
-    board = make_vorp_df().head(1)
-
-    rendered = render_board(board, rookie_watch=[])
-
-    assert "Rookie watch" not in rendered
-
-
-def test_render_board_rookie_watch_rows_have_no_vorp_or_tier_fields() -> None:
-    board = make_vorp_df().head(1)
-    rows = rookie_watch_rows([make_rookie(draft_round=2)], [])
-
-    rendered = render_board(board, rookie_watch=rows)
-
-    watch_section = rendered.split("Rookie watch")[1]
-    assert "vorp=" not in watch_section
-    assert "tier=" not in watch_section
-    assert "R2" in watch_section
-
-
-def test_render_board_rookie_watch_includes_news_excerpt_when_present() -> None:
-    board = make_vorp_df().head(1)
-    rows = rookie_watch_rows(
-        [make_rookie()], [], news_by_sleeper_id={"9001": ["- fast start in camp"]}
-    )
-
-    rendered = render_board(board, rookie_watch=rows)
-
-    assert "- fast start in camp" in rendered
-
-
 def test_load_triaged_rookies_best_effort_empty_when_draft_picks_missing(
     tmp_path: Path,
 ) -> None:
@@ -966,7 +887,7 @@ def make_team_change(
 
 
 def test_render_board_without_team_changes_is_unchanged() -> None:
-    board = make_vorp_df().head(1)
+    board = make_bigboard()[:1]
 
     rendered = render_board(board)
 
@@ -976,7 +897,7 @@ def test_render_board_without_team_changes_is_unchanged() -> None:
 
 
 def test_render_board_tags_only_the_matching_player() -> None:
-    board = make_vorp_df()  # sleeper_id 1, 2, 3
+    board = make_bigboard()  # player_id 1, 2, 3
     team_changes = {"1": make_team_change(sleeper_id="1")}
 
     rendered = render_board(board, team_changes=team_changes)
@@ -989,7 +910,7 @@ def test_render_board_tags_only_the_matching_player() -> None:
 
 
 def test_render_board_moved_tag_does_not_change_sort_order_or_vorp_values() -> None:
-    board = make_vorp_df()
+    board = make_bigboard()
     team_changes = {"3": make_team_change(sleeper_id="3")}  # lowest-vorp player
 
     rendered = render_board(board, team_changes=team_changes)
@@ -1008,7 +929,7 @@ def test_render_board_moved_tag_does_not_change_sort_order_or_vorp_values() -> N
 
 
 def test_render_board_moved_tag_combines_with_roster_need_annotation() -> None:
-    board = make_vorp_df()
+    board = make_bigboard()
     requirement = RosterRequirement(
         hard_min={"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}, flex_capacity=2
     )
@@ -1025,7 +946,7 @@ def test_render_board_moved_tag_combines_with_roster_need_annotation() -> None:
 
 
 def test_render_board_omits_moved_tag_when_no_team_changes_given() -> None:
-    board = make_vorp_df().head(1)
+    board = make_bigboard()[:1]
 
     rendered = render_board(board)
 
