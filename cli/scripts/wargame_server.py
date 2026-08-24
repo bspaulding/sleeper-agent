@@ -38,6 +38,7 @@ LOCK = threading.Lock()
 HUMAN_ROSTER_ID = 5
 PICK_CLOCK_SECONDS = 60.0
 _on_clock_since: float | None = None
+STARTED = False
 
 
 def build_state(seed: dict) -> DraftState:
@@ -97,7 +98,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # http.server API
         with LOCK:
             assert STATE is not None
-            status = "voided_pick_clock" if STATE.void_reason else "drafting"
+            if STATE.void_reason:
+                status = "voided_pick_clock"
+            elif not STARTED:
+                status = "pre_draft"
+            else:
+                status = "drafting"
             if self.path == f"/v1/league/{STATE.config.league_id}":
                 self._json(
                     200,
@@ -163,12 +169,10 @@ class Handler(BaseHTTPRequestHandler):
                     },
                 )
             elif self.path == f"/v1/draft/{STATE.config.draft_id}/picks":
+                visible = STATE.picks if STARTED else []
                 self._json(
                     200,
-                    [
-                        pick_payload(p)
-                        for p in sorted(STATE.picks, key=lambda p: p.pick_no)
-                    ],
+                    [pick_payload(p) for p in sorted(visible, key=lambda p: p.pick_no)],
                 )
             else:
                 self._json(404, {"error": f"unknown path {self.path}"})
@@ -178,9 +182,27 @@ class Handler(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(length) or b"{}")
         with LOCK:
             assert STATE is not None
+            if self.path == f"/v1/draft/{STATE.config.draft_id}/start":
+                global STARTED
+                if STARTED:
+                    self._json(200, {"ok": True, "note": "already started"})
+                else:
+                    STARTED = True
+                    print("[draft] STARTED — keeper picks inserted", flush=True)
+                self._json(200, {"ok": True})
+                return
             expected_path = f"/v1/draft/{STATE.config.draft_id}/picks"
             if self.path != expected_path:
                 self._json(404, {"error": f"unknown path {self.path}"})
+                return
+            if not STARTED:
+                self._json(
+                    409,
+                    {
+                        "error": "DraftNotStarted",
+                        "detail": "draft has not been started",
+                    },
+                )
                 return
             result = STATE.make_selection(
                 int(body["roster_id"]), str(body["player_id"])
@@ -243,6 +265,8 @@ def ticker(poll_seconds: float, grace_seconds: float) -> None:
             assert STATE is not None
             if STATE.void_reason is not None:
                 return
+            if not STARTED:
+                continue
             on_clock = STATE.on_clock_roster_id()
             if on_clock is not None and on_clock in STATE.personas:
                 STATE._run_bots()
