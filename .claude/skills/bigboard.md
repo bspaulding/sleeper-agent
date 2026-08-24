@@ -19,12 +19,23 @@ the judgment half.
 
 ## Process
 
-1. Run `sleeper-agent value bigboard build --season <year>` (from `cli/`). This mechanically
-   merges in anything new — a VORP-ranked veteran not yet on the board gets inserted by value
-   order (no judgment needed), a newly-triaged rookie gets inserted at a rough starting slot and
-   flagged `[NEEDS REVIEW: new rookie placement]`, and any existing row whose VORP changed since
-   last build gets `[VORP CHANGED: <old> -> <new>]` appended to its rationale — without moving
-   it. The command prints every flagged row.
+1. Run `sleeper-agent value bigboard build --season <value-season>` (from `cli/`). This
+   mechanically merges in anything new — a VORP-ranked veteran not yet on the board gets inserted
+   by value order (no judgment needed), a newly-triaged rookie gets inserted at a rough starting
+   slot and flagged `[NEEDS REVIEW: new rookie placement]`, and any existing row whose VORP
+   changed since last build gets `[VORP CHANGED: <old> -> <new>]` appended to its rationale —
+   without moving it. The command prints every flagged row.
+   - `--season` here is the **VORP value-season** (the most recently completed real season), not
+     the season you're drafting for — it defaults `--rookie-season` to `--season + 1`, since a
+     rookie draft class is always dated to the *upcoming* season, one year after the completed
+     season VORP is computed from (same directional relationship `draft keepers` already defaults
+     the other way, `value_season = season - 1`). This isn't cosmetic: the first real run of this
+     skill (2026-08-24) silently triaged **zero** rookies before this was a flag at all, because
+     `--season` was being used for both concepts at once and `data/nfl/draft_picks.parquet` only
+     had rows for the season *after* the one passed. If a build reports 0 rookies flagged and
+     that seems surprising, check `--rookie-season` resolved to the right year before assuming
+     there are none to triage — pass it explicitly if the default (`--season + 1`) isn't right for
+     a non-standard `--season` use (backtesting, historical analysis).
 2. Read the most recent `--kind bigboard` decision-log entries for this season
    (`decisions/<season>/`) — continuity matters: don't re-litigate a call that was already
    deliberately reconsidered and kept. Check current news/injury/wiki context (especially

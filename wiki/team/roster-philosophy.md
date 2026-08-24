@@ -32,8 +32,13 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
    `--value-season 2025`.)* This retro's source draft ran on 2024 VORP because `stats sync --season
    2025` failed at the time — not because the data doesn't exist. nflverse had renamed its release
    from `player_stats` to `stats_player`; the installed `nfl_data_py` (0.3.3) hardcoded the old
-   name. Kept here as a reminder to re-check this rule stays true (i.e. `data/vorp/<current
-   season>.parquet` actually exists) before every draft, not just this one.
+   name. **Updated 2026-08-24:** `draft board`/`watch-picks` no longer read VORP directly — they
+   require `data/bigboard/<value-season>.csv` to exist with zero rows flagged for review (see
+   `.claude/skills/bigboard.md`), a materialized ranking built *from* VORP plus triaged rookies,
+   not VORP itself. The check before every draft is now "does that bigboard file exist and pass
+   `value bigboard build` with 0 flagged" (VORP existing is just an upstream prerequisite for
+   building it, same footing as `stats draft-picks sync`), not "does `data/vorp/<season>.parquet`
+   exist" on its own.
 9. **`draft board`'s "My roster so far" / NEED-FLEX-SURPLUS annotation only works in a mock draft
    if `pick.draft_slot` (not `pick.roster_id`) is used for ownership matching.** Sleeper's picks
    endpoint returns `roster_id: null` for every pick in every mock draft — confirmed directly
@@ -49,17 +54,16 @@ Checked at the start of every draft per `.claude/skills/draft.md`.
    best-ball positional-allocation reasoning) that motivated rule 1 and the `draft board`
    annotation above — this file stays scoped to this team's own retrospectives and specific
    rules.
-8. **A Rookie watch entry or a `MOVED`-tagged player never compares to the main board on a
-   shared number — weigh them by reasoning instead.** Rookies have no VORP row at all by
-   construction (`wiki/team/rookie-evaluation.md`'s structural-gap section); role-changers have a
-   correct VORP row that may just no longer describe their situation
-   (`wiki/team/role-changers.md`). Neither gets a synthetic score bolted on to make it
-   directly comparable — that was a deliberate design choice, not a gap. The actual decision
-   chain (draft-capital hit rate for the round, the main board's own `tier=N`/NEED cliff at that
-   position, best-ball's tolerance for a slow-starting rookie, the researched news as
-   tie-breaker for a rookie; vacated-opportunity/scheme-continuity research as the trust-more-
-   or-less read for a role-changer) is spelled out in `.claude/skills/draft.md`'s "Draft-day
-   judgment" section — read it there, not re-derived at the table.
+8. **Updated 2026-08-24 — superseded by the big board for rookies, unchanged for role-changers.**
+   Rookies now sit inline in the main ranked board (an ordinal `rank`, no VORP number — see
+   `wiki/team/rookie-evaluation.md`'s structural-gap section for why no synthetic score gets
+   bolted on) with their placement already resolved during the `bigboard` skill's pre-draft
+   review (`.claude/skills/bigboard.md`), not something to re-derive live at the table anymore —
+   if a rookie's position looks wrong mid-draft, that's a `bigboard` skill fix for after the
+   draft, not a live judgment call. `MOVED`-tagged role-changers still work the old way: a correct
+   VORP row that may just no longer describe their situation (`wiki/team/role-changers.md`), no
+   synthetic adjustment, weighed live via the vacated-opportunity/scheme-continuity framework in
+   `.claude/skills/draft.md`'s "Draft-day judgment" section.
 
 ## Roster grid (this league, 2026)
 
