@@ -495,7 +495,7 @@ def test_render_board_rookie_row_gets_need_tag_but_no_tier() -> None:
     assert "tier=" not in rendered
 
 
-def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> None:
+def test_watch_board_only_rerenders_when_drafted_ids_change() -> None:
     board = make_bigboard()
     call_log: list[list[DraftPick]] = [
         [],
@@ -504,7 +504,6 @@ def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> N
     ]
     rendered_calls: list[str] = []
     sleeps: list[float] = []
-    log_path = tmp_path / "draft-live.md"
 
     def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
         return call_log.pop(0)
@@ -516,32 +515,10 @@ def test_watch_board_only_rerenders_when_drafted_ids_change(tmp_path: Path) -> N
         max_iterations=3,
         render=rendered_calls.append,
         fetch_picks=fake_fetch,
-        log_path=log_path,
     )
 
     assert len(rendered_calls) == 2
     assert sleeps == [5.0, 5.0]
-    assert log_path.exists()
-    assert "Player Two" in log_path.read_text()
-
-
-def test_watch_board_works_without_a_log_path() -> None:
-    board = make_bigboard()
-    rendered_calls: list[str] = []
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return []
-
-    watch_board(
-        "did",
-        board,
-        sleep=lambda _seconds: None,
-        max_iterations=1,
-        render=rendered_calls.append,
-        fetch_picks=fake_fetch,
-    )
-
-    assert len(rendered_calls) == 1
 
 
 def test_watch_board_annotates_when_my_roster_id_given(tmp_path: Path) -> None:

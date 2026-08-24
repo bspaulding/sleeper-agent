@@ -18,7 +18,6 @@ from __future__ import annotations
 import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from pathlib import Path
 
 from requests import RequestException
 
@@ -276,7 +275,6 @@ def watch_board(
     # specifically to be consumed live, so flush every render explicitly.
     render: Callable[[str], None] = _flush_print,
     fetch_picks: Callable[..., list[DraftPick]] = fetch_draft_picks,
-    log_path: Path | None = None,
     my_roster_id: int | None = None,
     my_draft_slot: int | None = None,
     requirement: RosterRequirement | None = None,
@@ -299,9 +297,6 @@ def watch_board(
                 injury_statuses=injury_statuses,
             )
             render(rendered)
-            if log_path is not None:
-                log_path.parent.mkdir(parents=True, exist_ok=True)
-                log_path.write_text(f"# Draft board — live\n\n{rendered}\n")
             previous_drafted_ids = drafted_ids
         iteration += 1
         if max_iterations is None or iteration < max_iterations:

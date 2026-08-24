@@ -10,7 +10,7 @@ from pathlib import Path
 
 import polars as pl
 
-from sleeper_agent.config import data_dir, decisions_dir, find_repo_root
+from sleeper_agent.config import data_dir, find_repo_root
 from sleeper_agent.draft_tools.bigboard import (
     BigboardMalformedError,
     BigboardNotBuiltError,
@@ -260,7 +260,11 @@ def _injury_statuses_by_sleeper_id(
 
 
 def _resolve_draft_context(
-    args: argparse.Namespace, root: Path, *, base_url: str
+    args: argparse.Namespace,
+    root: Path,
+    *,
+    base_url: str,
+    today: Callable[[], date] = date.today,
 ) -> DraftContext | None:
     """Shared setup for `draft board` and `draft watch-picks`: resolve the
     draft/value-season/num-teams (from --league-id or --draft-id), resolve
@@ -270,7 +274,7 @@ def _resolve_draft_context(
     """
     if args.draft_id is not None:
         if args.value_season is None:
-            value_season = str(date.today().year - 1)
+            value_season = str(today().year - 1)
             print(
                 f"--value-season not given with --draft-id; defaulting to {value_season} "
                 "(current year minus 1, the most recently completed season pre-season)"
@@ -450,23 +454,17 @@ def cmd_draft_board(
     max_watch_iterations: int | None = None,
 ) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
-    context = _resolve_draft_context(args, root, base_url=base_url)
+    context = _resolve_draft_context(args, root, base_url=base_url, today=today)
     if context is None:
         return 1
 
     top_n = args.rounds * context.num_teams
 
     if args.watch:
-        log_path = (
-            decisions_dir(root)
-            / context.value_season
-            / f"{today().isoformat()}-draft-live.md"
-        )
         watch_board(
             context.draft_id,
             context.bigboard_rows,
             base_url=base_url,
-            log_path=log_path,
             max_iterations=max_watch_iterations,
             my_roster_id=context.my_roster_id,
             my_draft_slot=context.my_draft_slot,
@@ -503,13 +501,14 @@ def cmd_draft_watch_picks(
     *,
     repo_root: Path | None = None,
     base_url: str = SLEEPER_BASE_URL,
+    today: Callable[[], date] = date.today,
     max_iterations: int | None = None,
 ) -> int:
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
     if args.poll_seconds < 0:
         print(f"--poll-seconds must be >= 0 (got {args.poll_seconds})")
         return 1
-    context = _resolve_draft_context(args, root, base_url=base_url)
+    context = _resolve_draft_context(args, root, base_url=base_url, today=today)
     if context is None:
         return 1
 

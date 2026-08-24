@@ -2194,12 +2194,10 @@ def test_cmd_draft_board_omits_moved_tag_when_no_stats_data(
     assert "[MOVED" not in out
 
 
-def test_cmd_draft_board_watch_threads_moved_tag_into_decision_log(
+def test_cmd_draft_board_watch_renders_to_stdout(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     repo_root = make_repo_root(tmp_path)
-    from sleeper_agent.storage.parquet_store import write_table
-
     vorp_df = pl.DataFrame(
         {
             "sleeper_id": ["1"],
@@ -2208,13 +2206,10 @@ def test_cmd_draft_board_watch_threads_moved_tag_into_decision_log(
             "vorp_season": [50.0],
         }
     )
-    write_table(
-        vorp_df,
-        repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
-    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
     _write_bigboard(repo_root, "2025", vorp_df)
-    _write_team_change_fixtures(repo_root)
 
     def handler(request: Request) -> Response:
         if request.path == "/league/lid1":
@@ -2238,16 +2233,13 @@ def test_cmd_draft_board_watch_threads_moved_tag_into_decision_log(
     )
     with mock_http_server(handler) as base_url:
         exit_code = draft_cmd.cmd_draft_board(
-            args,
-            repo_root=repo_root,
-            base_url=base_url,
-            today=lambda: date(2026, 7, 26),
-            max_watch_iterations=1,
+            args, repo_root=repo_root, base_url=base_url, max_watch_iterations=1
         )
 
+    out = capsys.readouterr().out
     assert exit_code == 0
-    log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
-    assert "[MOVED: CAR" in log_path.read_text()
+    assert "Best available by value:" in out
+    assert "A" in out
 
 
 def test_cmd_draft_board_reports_missing_bigboard(
@@ -2358,61 +2350,6 @@ def test_cmd_draft_board_reports_missing_draft_id(
 
     assert exit_code == 1
     assert "has no draft_id" in capsys.readouterr().out
-
-
-def test_cmd_draft_board_watch_writes_decision_log(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    from sleeper_agent.storage.parquet_store import write_table
-
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["1"],
-            "name": ["A"],
-            "position": ["RB"],
-            "vorp_season": [1.0],
-        }
-    )
-    write_table(
-        vorp_df,
-        repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
-    )
-    _write_bigboard(repo_root, "2025", vorp_df)
-
-    def handler(request: Request) -> Response:
-        if request.path == "/league/lid1":
-            return json_response(_league_payload())
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload())
-        if request.path == "/draft/did1/picks":
-            return json_response([])
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id="lid1",
-        draft_id=None,
-        rounds=15,
-        watch=True,
-        value_season="2025",
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=None,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_board(
-            args,
-            repo_root=repo_root,
-            base_url=base_url,
-            today=lambda: date(2026, 7, 26),
-            max_watch_iterations=1,
-        )
-
-    assert exit_code == 0
-    log_path = repo_root / "decisions" / "2025" / "2026-07-26-draft-live.md"
-    assert log_path.exists()
 
 
 def test_cmd_draft_board_with_draft_id_skips_league_lookup(
@@ -2710,12 +2647,14 @@ def test_cmd_draft_board_with_draft_id_defaults_value_season(
         value_season=None,
         num_teams=12,
     )
-    exit_code = draft_cmd.cmd_draft_board(args, repo_root=repo_root)
+    exit_code = draft_cmd.cmd_draft_board(
+        args, repo_root=repo_root, today=lambda: date(2026, 8, 24)
+    )
 
     assert exit_code == 1
     out = capsys.readouterr().out
-    assert "--value-season not given with --draft-id; defaulting to" in out
-    assert "not found" in out
+    assert "--value-season not given with --draft-id; defaulting to 2025" in out
+    assert "data/bigboard/2025.csv not found" in out
 
 
 def test_cmd_draft_board_with_league_id_defaults_value_season_to_prior_year(
