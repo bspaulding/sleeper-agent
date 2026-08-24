@@ -24,7 +24,7 @@ from sleeper_agent.draft_tools.keepers import (
     infer_total_rounds,
     rank_keeper_candidates,
 )
-from sleeper_agent.draft_tools.rookies import TriagedRookie, triage_rookies
+from sleeper_agent.draft_tools.rookies import TriagedRookie, load_triaged_rookies
 from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
@@ -39,7 +39,6 @@ from sleeper_agent.sleeper_client.draft import (
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
 from sleeper_agent.sleeper_client.league import fetch_league
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
-from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
 from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
 from sleeper_agent.value.scoring import (
@@ -192,29 +191,6 @@ def _read_players(root: Path) -> pl.DataFrame | None:
     return read_table(path, expected_schema_version=PLAYERS_SCHEMA_VERSION)
 
 
-def _read_draft_picks(root: Path) -> pl.DataFrame | None:
-    path = data_dir(root) / "nfl" / "draft_picks.parquet"
-    if not path.exists():
-        return None
-    return read_table(path, expected_schema_version=DRAFT_PICKS_SCHEMA_VERSION)
-
-
-def _triaged_rookies(
-    root: Path, players_df: pl.DataFrame | None
-) -> list[TriagedRookie]:
-    """Best-effort rookie triage list for `draft board`'s "Rookie watch" section.
-
-    Absent `data/nfl/draft_picks.parquet` (not yet synced via `stats
-    draft-picks sync`) or `data/sleeper/players.parquet`, this is just an
-    empty list — the board renders exactly as it does today, same
-    no-annotation-by-default convention as `--me`/`--roster-id`.
-    """
-    draft_picks_df = _read_draft_picks(root)
-    if draft_picks_df is None or players_df is None:
-        return []
-    return triage_rookies(draft_picks_df, players_df)
-
-
 def _rookie_news_by_sleeper_id(
     root: Path, rookies: list[TriagedRookie]
 ) -> dict[str, list[str]]:
@@ -346,7 +322,7 @@ def _resolve_draft_context(
         my_roster_id = args.roster_id
 
     players_df = _read_players(root)
-    triaged_rookies = _triaged_rookies(root, players_df)
+    triaged_rookies = load_triaged_rookies(root, value_season)
     rookie_news = _rookie_news_by_sleeper_id(root, triaged_rookies)
     team_changes = _team_changes_by_sleeper_id(root, value_season, players_df)
     if players_df is not None:

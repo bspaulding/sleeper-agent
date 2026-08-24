@@ -15,10 +15,14 @@ docs/superpowers/specs/2026-08-22-rookie-and-new-outlook-player-visibility.md
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 import polars as pl
 
+from sleeper_agent.config import data_dir
 from sleeper_agent.models.sleeper import Player, parse_player
+from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+from sleeper_agent.storage.parquet_store import read_table
 
 # Position -> highest NFL-draft round (inclusive) worth surfacing, per
 # wiki/team/rookie-evaluation.md's draft-capital table.
@@ -111,3 +115,29 @@ def triage_rookies(
         )
         rookies.append(TriagedRookie(player=player, draft_round=pick["round"]))
     return rookies
+
+
+def load_triaged_rookies(root: Path, season: str) -> list[TriagedRookie]:
+    """Load + triage rookies for `season`, best-effort empty (not an error)
+    when `data/nfl/draft_picks.parquet` or `data/sleeper/players.parquet`
+    hasn't been synced yet — shared by `value bigboard build` and (legacy)
+    `draft board`'s Rookie watch rendering.
+
+    `DRAFT_PICKS_SCHEMA_VERSION` is imported locally, not at module level:
+    `stats.draft_picks_sync` already imports
+    `crosswalk_draft_picks_to_sleeper_ids` from this module at import time,
+    so a top-level import here would form an import cycle.
+    """
+    from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+
+    draft_picks_path = data_dir(root) / "nfl" / "draft_picks.parquet"
+    players_path = data_dir(root) / "sleeper" / "players.parquet"
+    if not draft_picks_path.exists() or not players_path.exists():
+        return []
+    draft_picks_df = read_table(
+        draft_picks_path, expected_schema_version=DRAFT_PICKS_SCHEMA_VERSION
+    ).filter(pl.col("season") == int(season))
+    players_df = read_table(
+        players_path, expected_schema_version=PLAYERS_SCHEMA_VERSION
+    )
+    return triage_rookies(draft_picks_df, players_df)

@@ -941,6 +941,14 @@ def test_render_board_rookie_watch_includes_news_excerpt_when_present() -> None:
     assert "- fast start in camp" in rendered
 
 
+def test_load_triaged_rookies_best_effort_empty_when_draft_picks_missing(
+    tmp_path: Path,
+) -> None:
+    from sleeper_agent.draft_tools.rookies import load_triaged_rookies
+
+    assert load_triaged_rookies(tmp_path, "2026") == []
+
+
 # --- role-changer (FA/trade) [MOVED] tag -------------------------------------
 
 
