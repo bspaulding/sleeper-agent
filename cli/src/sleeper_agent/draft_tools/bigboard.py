@@ -163,10 +163,11 @@ def _validate_ranks(season: str, rows: Sequence[BigboardRow]) -> None:
     counts = Counter(row.rank for row in rows)
     duplicates = sorted(rank for rank, n in counts.items() if n > 1)
     if duplicates:
-        names = {
-            rank: [row.name for row in rows if row.rank == rank] for rank in duplicates
-        }
-        problems.append(f"duplicate rank(s) {names}")
+        formatted = ", ".join(
+            f"rank {rank} ({', '.join(row.name for row in rows if row.rank == rank)})"
+            for rank in duplicates
+        )
+        problems.append(f"duplicate rank(s): {formatted}")
     off_sequence = sorted(set(counts) ^ set(range(1, len(rows) + 1)))
     if off_sequence:
         problems.append(
@@ -308,8 +309,12 @@ def merge_bigboard(
         if position is None:
             # `Player.position` is nullable and the board is positional —
             # there's no group to place a position-less player relative to.
-            # `triage_rookies` already skips these (no TRIAGE_CUTOFFS entry
-            # for None), so this only guards a hand-built caller.
+            # Unreachable via the real pipeline: `rookies.triage_rookies`
+            # coalesces a player's position with its draft pick's position,
+            # which is guaranteed non-null for anything that survives
+            # triage (its own `cutoff`/`continue` check requires it) — so
+            # this only guards a directly hand-built `TriagedRookie` caller
+            # (e.g. a test) bypassing that function.
             continue
         insert_at = _rookie_insert_index(rows, rookie, position)
         rows.insert(

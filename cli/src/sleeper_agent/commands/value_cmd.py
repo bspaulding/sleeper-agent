@@ -9,6 +9,7 @@ import polars as pl
 
 from sleeper_agent.config import data_dir, find_repo_root, wiki_dir
 from sleeper_agent.draft_tools.bigboard import (
+    BigboardMalformedError,
     is_unresolved,
     load_bigboard_for_build,
     merge_bigboard,
@@ -234,7 +235,11 @@ def cmd_value_bigboard_build(
         print(str(exc))
         return 1
 
-    existing = load_bigboard_for_build(root, args.season)
+    try:
+        existing = load_bigboard_for_build(root, args.season)
+    except BigboardMalformedError as exc:
+        print(str(exc))
+        return 1
     triaged_rookies = load_triaged_rookies(root, args.season)
     merged = merge_bigboard(existing, vorp_df, triaged_rookies)
     save_bigboard(root, args.season, merged)

@@ -105,7 +105,13 @@ def triage_rookies(
             {
                 "player_id": sleeper_id,
                 "full_name": player_row["name"],
-                "position": player_row["position"],
+                # Coalesce with the draft pick's own position: a row only
+                # survives the `cutoff`/`continue` check above when
+                # `pick["position"]` is non-null (line 94), so this fallback
+                # guarantees a triaged rookie's `Player.position` is never
+                # None even when the Sleeper player dictionary hasn't been
+                # assigned one yet for a very recently drafted rookie.
+                "position": player_row["position"] or pick.get("position"),
                 "team": player_row["team"],
                 "status": player_row.get("status"),
                 "injury_status": player_row.get("injury_status"),

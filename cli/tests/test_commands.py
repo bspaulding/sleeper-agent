@@ -1550,6 +1550,51 @@ def test_cmd_value_bigboard_build_reports_missing_vorp(
     assert "data/vorp/2026.parquet not found" in capsys.readouterr().out
 
 
+def test_cmd_value_bigboard_build_reports_malformed_existing_board(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["1"],
+                "name": ["Player One"],
+                "position": ["RB"],
+                "games_played": [10],
+                "season_points": [100.0],
+                "points_per_game": [10.0],
+                "replacement_points": [10.0],
+                "vorp_season": [100.0],
+                "vorp_per_game": [10.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2026.parquet",
+        schema_version=1,
+    )
+    # A hand-corrupted `source` value: not something `save_bigboard` could
+    # ever write, but something a hand-edit of the CSV during review could
+    # introduce — this is `load_bigboard_for_build`'s own hard-stop (it
+    # tolerates non-ordinal ranks mid-review, but not an unparseable
+    # source), and `cmd_value_bigboard_build` must report it cleanly rather
+    # than let it traceback.
+    bigboard_path = repo_root / "data" / "bigboard" / "2026.csv"
+    bigboard_path.parent.mkdir(parents=True, exist_ok=True)
+    bigboard_path.write_text(
+        "rank,player_id,name,position,source,vorp,draft_round,rationale,log_ref\n"
+        "1,7547,Amon-Ra St. Brown,WR,nonsense,145.0,,,\n"
+    )
+
+    args = argparse.Namespace(season="2026")
+    exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "data/bigboard/2026.csv is malformed" in out
+    assert "unknown source 'nonsense'" in out
+
+
 # --- draft -----------------------------------------------------------------
 
 
