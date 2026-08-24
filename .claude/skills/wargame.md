@@ -105,14 +105,37 @@ terminal/tool calls, or the exercise stops testing the handoff):
   .../picks` call, that's a contract violation — the pick clock is a Human-only surface here, same
   as production.
 
+**Running both roles from one Claude Code session, via the `Agent` tool:** when there's no second
+human-driven session available and the coordinator session spawns the Drafter itself, spawn it as a
+**fresh, zero-context agent** (default/`general-purpose` — omit `subagent_type`, or pass
+`"general-purpose"` explicitly). **Never use `subagent_type: "fork"` for the Drafter role.** A fork
+inherits the coordinator's *entire* conversation context, which includes the coordinator's own
+Human-role planning ("I am now waiting/polling as Human for a rec..."). A forked Drafter can (and,
+in run #15, did) echo that inherited framing back as its own status instead of doing the job —
+120s and 35 tool calls burned on a non-answer that quoted the coordinator's own words rather than
+running `watch-picks` or publishing anything (see
+`decisions/2026/2026-08-23-draft-mock-draft-wargame-slot8-run15.md`). This isn't just wasted time:
+it structurally defeats the entire point of splitting Drafter/Human, which is a blind handoff — a
+Drafter that can see the Human's side of the conversation isn't being tested the same way the real
+draft-day split-brain setup works. Fork's one advantage (backgrounded execution, so the coordinator
+can keep acting as Human concurrently instead of blocking) is not actually exclusive to fork in this
+harness — a fresh, non-fork `Agent` call also runs as a background task with its own completion
+notification, so there is no concurrency reason to prefer fork here, only the context-leak downside.
+Because a fresh agent starts with zero memory of this conversation, its prompt must be fully
+self-contained: repo path, `SLEEPER_AGENT_BASE_URL`, `--draft-id`/`--draft-slot`/`--value-season`,
+the exact `wargame_publish_rec.py` invocation, and the run #14 pick-number-hallucination warning all
+need to be spelled out explicitly, not assumed inherited. Spawn it immediately after (re)starting
+the server, before calling `/start` — same "don't leave a gap" reasoning as above.
+
 ## Ending a run and cleanup
 
 - Terminal states: all `total_picks` filled, or the server logs `HARD FAIL ... voided_pick_clock`
   and the league status flips to `voided_pick_clock`. Either way, stop and file a decision-log
-  entry — `decisions/2026/2026-08-23-mock-draft-wargame-slot8.md` is the bar to match (timeline
-  table, pick-by-pick table, failure attribution, a "cheapest fixes before the next run" list).
-  A voided run is exactly as worth logging as a completed one; some of the most useful entries so
-  far are failures.
+  entry — `decisions/2026/2026-08-23-mock-draft-wargame-slot8.md` and
+  `decisions/2026/2026-08-23-draft-mock-draft-wargame-slot8-run15.md` are the bar to match
+  (timeline table, pick-by-pick table, failure attribution, a "cheapest fixes before the next run"
+  list). A voided run is exactly as worth logging as a completed one; some of the most useful
+  entries so far are failures.
 - Before the next run: kill the server and every watcher/monitor process, `rm -rf /tmp/wargame`
   again, and restart the server fresh from the seed (per-run setup above). There is no in-process
   reset — reusing a running server between runs will replay the previous run's picks.
@@ -127,3 +150,12 @@ terminal/tool calls, or the exercise stops testing the handoff):
 - `HUMAN_ROSTER_ID = 5` is hardcoded in `wargame_server.py` and only works because the seed leaves
   exactly roster 5 without a bot persona. If you edit `personas`/`slot_to_roster_id` in the seed,
   keep that invariant or the ticker will silently stall with no error.
+- `wargame_publish_rec.py` does not validate `--player` against the seed's board — a fabricated or
+  misremembered id (e.g. a guessed name-slug instead of the real numeric Sleeper id) is accepted and
+  written to `current_rec.json` without error. The Human-side `on_clock_pick_no` check does **not**
+  catch this (the pick number can be correct while the id is fake); it would only surface as a 409
+  ("not on the draft board") if actually submitted. `watch-picks`'s board render also never prints a
+  player's id (only name/position/vorp/tier/tags), so the Drafter has no in-band way to get it right
+  besides trusting its own memory — a real gap, not something to route around by reading
+  `wargame_seed.json` directly mid-clock. See run #15's retro for the incident; fixing either side
+  (id validation in the publish script, or an id column in `watch-picks`'s output) is still open.
