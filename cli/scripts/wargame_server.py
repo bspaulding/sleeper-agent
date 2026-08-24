@@ -27,6 +27,8 @@ from sleeper_agent.wargame.state import (
     DraftConfig,
     DraftState,
     DraftVoided,
+    NotYourTurn,
+    PlayerUnavailable,
     SelectionMade,
     WargamePlayer,
 )
@@ -185,15 +187,42 @@ class Handler(BaseHTTPRequestHandler):
             )
             if isinstance(result, SelectionMade):
                 _reset_human_clock()
+                pick = result.pick
+                print(
+                    f"[pick] #{pick.pick_no} (R{pick.round}) roster "
+                    f"{pick.roster_id}: {pick.player_name} ({pick.position})",
+                    flush=True,
+                )
                 self._json(200, {"ok": True, "pick": pick_payload(result.pick)})
             elif isinstance(result, DraftVoided):
                 self._json(410, {"error": "DraftVoided", "detail": result.reason})
             else:
+                # Rich rejection payloads so a stale-retrying client can tell
+                # whether its earlier click actually landed.
                 kind = type(result).__name__
-                detail = getattr(result, "on_clock_roster_id", None) or getattr(
-                    result, "player_id", ""
+                detail: dict[str, Any] = {
+                    "next_pick_no": STATE.next_pick_no(),
+                    "on_clock_roster_id": STATE.on_clock_roster_id(),
+                }
+                if isinstance(result, NotYourTurn):
+                    detail["on_clock_roster_id"] = result.on_clock_roster_id
+                if isinstance(result, PlayerUnavailable):
+                    prior = next(
+                        (p for p in STATE.picks if p.player_id == result.player_id),
+                        None,
+                    )
+                    detail["player_id"] = result.player_id
+                    if prior is not None:
+                        detail["taken_by_pick_no"] = prior.pick_no
+                        detail["taken_by_roster_id"] = prior.roster_id
+                    else:
+                        detail["reason"] = "not on the draft board"
+                print(
+                    f"[reject] roster {body.get('roster_id')} -> player "
+                    f"{body.get('player_id')}: {kind} {detail}",
+                    flush=True,
                 )
-                self._json(409, {"error": kind, "detail": str(detail)})
+                self._json(409, {"error": kind, "detail": detail})
 
 
 def _reset_human_clock() -> None:
