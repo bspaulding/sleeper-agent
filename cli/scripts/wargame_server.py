@@ -64,6 +64,12 @@ def build_state(seed: dict) -> DraftState:
     return state
 
 
+def _now() -> str:
+    import datetime
+
+    return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
+
+
 def pick_payload(pick) -> dict:
     first, _, *rest = pick.player_name.partition(" ")
     return {
@@ -211,7 +217,7 @@ class Handler(BaseHTTPRequestHandler):
                 _reset_human_clock()
                 pick = result.pick
                 print(
-                    f"[pick] #{pick.pick_no} (R{pick.round}) roster "
+                    f"[pick] ts={_now()} #{pick.pick_no} (R{pick.round}) roster "
                     f"{pick.roster_id}: {pick.player_name} ({pick.position})",
                     flush=True,
                 )
@@ -240,7 +246,7 @@ class Handler(BaseHTTPRequestHandler):
                     else:
                         detail["reason"] = "not on the draft board"
                 print(
-                    f"[reject] roster {body.get('roster_id')} -> player "
+                    f"[reject] ts={_now()} roster {body.get('roster_id')} -> player "
                     f"{body.get('player_id')}: {kind} {detail}",
                     flush=True,
                 )
@@ -284,7 +290,7 @@ def ticker(poll_seconds: float, grace_seconds: float) -> None:
                         f"before roster {HUMAN_ROSTER_ID} selection at pick "
                         f"{STATE.next_pick_no()}"
                     )
-                    print(f"HARD FAIL: {reason}", flush=True)
+                    print(f"HARD FAIL ts={_now()}: {reason}", flush=True)
                     STATE.void_reason = reason
                     return
 
