@@ -9,6 +9,7 @@ import polars as pl
 
 from sleeper_agent.config import data_dir, find_repo_root, wiki_dir
 from sleeper_agent.draft_tools.bigboard import (
+    is_unresolved,
     load_bigboard_for_build,
     merge_bigboard,
     save_bigboard,
@@ -239,11 +240,11 @@ def cmd_value_bigboard_build(
     save_bigboard(root, args.season, merged)
 
     added = len(merged) - len(existing)
-    flagged = [
-        row
-        for row in merged
-        if "[NEEDS REVIEW" in row.rationale or "[VORP CHANGED" in row.rationale
-    ]
+    # Same predicate `load_bigboard` hard-stops on, deliberately shared: if
+    # this printout and that hard stop ever drifted apart, the bigboard
+    # skill's "re-run build, should report 0 flagged" self-check could pass
+    # while `draft board` still refused to start (or vice versa).
+    flagged = [row for row in merged if is_unresolved(row)]
     print(
         f"data/bigboard/{args.season}.csv: {len(merged)} rows "
         f"({added} added this run, {len(flagged)} flagged for review)"

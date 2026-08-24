@@ -49,8 +49,22 @@ the judgment half.
    Summary/Reasoning/Data: what changed, why, and what was explicitly reconsidered-and-kept.
 5. Update every row you touched this pass to set `log_ref` to this entry's date/slug.
 6. Re-run `sleeper-agent value bigboard build --season <year>` once more as a final check — it
-   should report 0 flagged rows. If it doesn't, you missed one; go back to step 3.
+   should report 0 flagged rows. If it doesn't, you missed one; go back to step 3. Then run
+   `sleeper-agent draft board` (or just let it be the next thing that reads the file): it
+   refuses to load a board whose `rank` column isn't a strict 1..N with no duplicates or gaps,
+   which is what catches a neighbor you forgot to renumber in step 3.
 
 ## Known sharp edges
 
-(none yet — fill in as real usage surfaces issues, same convention as `wargame.md`)
+- **A hand-reordered board can silently absorb a new row in the wrong place.** `bigboard
+  build` inserts a new VORP-ranked player with a top-down first-match scan that assumes the
+  board is still VORP-monotonic — but breaking that monotonicity is the whole point of the
+  review pass (promoting a lower-VORP player above where raw VORP would put them). Once you've
+  promoted someone, any *later*-added player whose VORP is higher than the promoted player's
+  will be inserted **above** them, silently and with no review marker, undoing the deliberate
+  placement. After every `bigboard build`, re-check the position of any row you moved by hand.
+- **Nothing removes a stale row.** A player who drops off `vorp_df` entirely (retired, or no
+  longer computable) stays on the big board indefinitely, keeping a stale `vorp` and carrying
+  no flag. `filter_off_roster` catches players with no current NFL team, but that's not every
+  removal reason. Periodically scan the board for players no longer present in the current VORP
+  data and delete those rows by hand.

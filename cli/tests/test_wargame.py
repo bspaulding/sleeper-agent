@@ -7,6 +7,7 @@ from sleeper_agent.wargame.state import (
     DraftComplete,
     DraftConfig,
     DraftState,
+    DraftVoided,
     NotYourTurn,
     PlayerUnavailable,
     SelectionMade,
@@ -104,6 +105,21 @@ def test_make_selection_success_then_bots_fill_until_human_turn() -> None:
     after = state.on_clock_roster_id()
     assert after not in personas
     assert all(pick.roster_id != 8 for pick in result.subsequent_bot_picks)
+
+
+def test_make_selection_rejects_once_the_draft_is_voided() -> None:
+    # `wargame_server.py` sets `void_reason` when a turn blows its clock;
+    # every later selection must bounce instead of quietly landing a pick.
+    state = make_state()
+    on_clock = state.on_clock_roster_id()
+    assert on_clock is not None
+    state.void_reason = "slot 8 exceeded the 60s clock"
+
+    result = state.make_selection(on_clock, "0")
+
+    assert isinstance(result, DraftVoided)
+    assert result.reason == "slot 8 exceeded the 60s clock"
+    assert state.picks == []
 
 
 def test_make_selection_rejects_when_not_on_clock() -> None:

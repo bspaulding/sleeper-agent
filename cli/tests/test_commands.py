@@ -1413,7 +1413,129 @@ def test_cmd_value_bigboard_build_creates_file_from_scratch(
     assert exit_code == 0
     rows = load_bigboard_for_build(repo_root, "2026")
     assert [r.player_id for r in rows] == ["1", "2"]
-    assert "data/bigboard/2026.csv: 2 rows (2 added this run, 0 flagged for review)" in out
+    assert (
+        "data/bigboard/2026.csv: 2 rows (2 added this run, 0 flagged for review)" in out
+    )
+
+
+def test_cmd_value_bigboard_build_prints_flagged_rookie_rows(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """End-to-end merge/flag path: a triaged rookie with no VORP row of its
+    own gets inserted, flagged `[NEEDS REVIEW]`, and printed out so the
+    `bigboard` skill's reviewer can see what still needs a judgment call."""
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["Vet One", "Vet Two"],
+            "position": ["RB", "RB"],
+            "games_played": [10, 10],
+            "season_points": [100.0, 80.0],
+            "points_per_game": [10.0, 8.0],
+            "replacement_points": [10.0, 10.0],
+            "vorp_season": [100.0, 80.0],
+            "vorp_per_game": [10.0, 8.0],
+        }
+    )
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    write_table(
+        pl.DataFrame(
+            [
+                {
+                    "season": 2026,
+                    "round": 1,
+                    "pick": 4,
+                    "position": "RB",
+                    "pfr_player_name": "Rookie Back",
+                    "gsis_id": "X4",
+                    "sleeper_id": "99",
+                }
+            ]
+        ),
+        repo_root / "data" / "nfl" / "draft_picks.parquet",
+        schema_version=DRAFT_PICKS_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            {
+                "player_id": ["99"],
+                "name": ["Rookie Back"],
+                "position": ["RB"],
+                "team": ["KC"],
+                "status": ["Active"],
+                "injury_status": [""],
+                "fantasy_positions": [["RB"]],
+                "years_exp": [0],
+            }
+        ),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season="2026")
+    exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "3 rows (3 added this run, 1 flagged for review)" in out
+    assert "rank 1: Rookie Back — [NEEDS REVIEW: new rookie placement]" in out
+
+
+def test_cmd_value_bigboard_build_truncates_a_long_flagged_list(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.draft_tools.bigboard import BigboardRow, save_bigboard
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    ids = [str(i) for i in range(1, 23)]
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ids,
+            "name": [f"Player {i}" for i in ids],
+            "position": ["RB"] * len(ids),
+            "games_played": [10] * len(ids),
+            "season_points": [100.0] * len(ids),
+            "points_per_game": [10.0] * len(ids),
+            "replacement_points": [10.0] * len(ids),
+            # Every row's VORP differs from what's already on the board, so
+            # all 22 get a [VORP CHANGED] flag -- past the 20-row printout cap.
+            "vorp_season": [float(100 - i) for i, _ in enumerate(ids)],
+            "vorp_per_game": [10.0] * len(ids),
+        }
+    )
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    save_bigboard(
+        repo_root,
+        "2026",
+        [
+            BigboardRow(
+                rank=rank,
+                player_id=sleeper_id,
+                name=f"Player {sleeper_id}",
+                position="RB",
+                source="vorp",
+                vorp=1.0,
+                draft_round=None,
+                rationale="",
+                log_ref=None,
+            )
+            for rank, sleeper_id in enumerate(ids, start=1)
+        ],
+    )
+
+    args = argparse.Namespace(season="2026")
+    exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "22 rows (0 added this run, 22 flagged for review)" in out
+    assert "...and 2 more" in out
 
 
 def test_cmd_value_bigboard_build_reports_missing_vorp(

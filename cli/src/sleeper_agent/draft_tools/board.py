@@ -1,11 +1,16 @@
 """`draft board` — live best-available-by-value view across the draft.
 
-Cross-references `data/vorp` against the draft's public picks endpoint (no
-auth needed), excluding every player who's already been picked — live or
-pre-filled `is_keeper: true` — from the "available" list. `--watch` polls
-and re-renders only when the picked-player set actually changes, and
-(optionally) mirrors the current board to a decision-log-style file so an
-unattended Routine run leaves a record.
+Cross-references the pre-draft big board (`data/bigboard/<season>.csv`,
+built and hand-reviewed ahead of the draft — see
+docs/superpowers/specs/2026-08-23-draft-bigboard-design.md) against the
+draft's public picks endpoint (no auth needed), excluding every player
+who's already been picked — live or pre-filled `is_keeper: true` — from the
+"available" list. The big board supplies the ranking order (rookies inline,
+ties pre-broken); NEED/FLEX/SURPLUS and tier annotation are still computed
+live against the current roster. `--watch` polls and re-renders only when
+the picked-player set actually changes, and (optionally) mirrors the current
+board to a decision-log-style file so an unattended Routine run leaves a
+record.
 """
 
 from __future__ import annotations

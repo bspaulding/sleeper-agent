@@ -47,7 +47,13 @@ supplemental round — treat it that way:
    exist and have zero rows flagged for review — see
    `docs/superpowers/specs/2026-08-23-draft-bigboard-design.md`.
 2. During the draft: `draft board --league-id <id> --rounds 15 --me [--watch]` shows
-   best-available by value, already excluding every drafted and kept player. The ranked order comes from the pre-draft big board (§1), not a live VORP sort — ties and rookie placement were already resolved during the `bigboard` skill's review, so there's nothing left to deliberate on the order itself at pick time; only the NEED/FLEX/SURPLUS tags and tier numbers (for VORP-sourced rows) are computed live, against your current roster. The output also carries an inline `[MOVED: <old>→<new>]` tag on rows where a player changed teams via free agency/trade this offseason — see step 3 for how to weigh this signal. **Always pass
+   best-available by value, already excluding every drafted and kept player. The ranked order
+   comes from the pre-draft big board (§1), not a live VORP sort — ties and rookie placement
+   were already resolved during the `bigboard` skill's review, so there's nothing left to
+   deliberate on the order itself at pick time; only the NEED/FLEX/SURPLUS tags and tier
+   numbers (for VORP-sourced rows) are computed live, against your current roster. The output
+   also carries an inline `[MOVED: <old>→<new>]` tag on rows where a player changed teams via
+   free agency/trade this offseason — see step 3 for how to weigh this signal. **Always pass
    `--me`** (or `--roster-id <id>` if not drafting from this team's usual roster_id) — without
    it, the board has no roster-need annotation at all (no "My roster so far" summary, no
    NEED/FLEX/SURPLUS tags, no per-position `tier=N` numbers), which is exactly the gap that let

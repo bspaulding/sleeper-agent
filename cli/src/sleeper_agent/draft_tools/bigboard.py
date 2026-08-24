@@ -10,6 +10,7 @@ needs to stay plain-text and git-diffable.
 from __future__ import annotations
 
 import csv
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
@@ -73,55 +74,130 @@ class BigboardUnresolvedRowError(Exception):
         )
 
 
+class BigboardMalformedError(Exception):
+    """A loaded CSV violates one of spec §1's schema invariants: `rank`
+    strictly ordinal 1..N (no duplicates, no gaps) and `source` one of
+    `"vorp"`/`"rookie"`.
+
+    This exists because the intended workflow has the `bigboard` skill
+    hand-edit the CSV — "renumber the neighbors" is the single most likely
+    hand-edit mistake, and silently mis-ordering the live board is exactly
+    the failure class the big board exists to remove.
+    """
+
+    def __init__(self, season: str, problems: Sequence[str]) -> None:
+        self.season = season
+        self.problems = list(problems)
+        shown = "; ".join(self.problems[:5])
+        more = f"; and {len(self.problems) - 5} more" if len(self.problems) > 5 else ""
+        super().__init__(
+            f"data/bigboard/{season}.csv is malformed: {shown}{more} — `rank` "
+            "must be strictly ordinal 1..N (no duplicates, no gaps) and "
+            '`source` must be "vorp" or "rookie"'
+        )
+
+
 def _bigboard_path(root: Path, season: str) -> Path:
     return data_dir(root) / "bigboard" / f"{season}.csv"
 
 
-def _is_unresolved(row: BigboardRow) -> bool:
+def is_unresolved(row: BigboardRow) -> bool:
+    """Whether a row still carries a review marker. Public so that every
+    caller that needs the "is this row still an unreviewed judgment gap?"
+    predicate — the live-consumption hard stop here, `bigboard build`'s
+    flagged-row printout in `commands/value_cmd.py` — shares one definition
+    and can't drift out of lockstep with `REVIEW_MARKERS`.
+    """
     return any(marker in row.rationale for marker in REVIEW_MARKERS)
 
 
-def _read_rows(path: Path) -> list[BigboardRow]:
+def _parse_source(raw: str) -> Literal["vorp", "rookie"] | None:
+    """Narrow a CSV `source` cell to the literal type, or `None` if it isn't
+    one of the two valid values."""
+    if raw == "vorp":
+        return "vorp"
+    if raw == "rookie":
+        return "rookie"
+    return None
+
+
+def _read_rows(path: Path, season: str) -> list[BigboardRow]:
+    """Parse the CSV. An unparseable `source` raises unconditionally (both
+    loaders): unlike a mid-renumber `rank`, there is no valid row to hand
+    back for an unknown population, and `merge_bigboard` would silently
+    re-add such a player as a duplicate `source="vorp"` row.
+    """
     rows: list[BigboardRow] = []
+    problems: list[str] = []
     with path.open(newline="") as fh:
-        for raw in csv.DictReader(fh):
+        # start=2: line 1 is the CSV header, so the first data row is line 2.
+        for line_no, raw in enumerate(csv.DictReader(fh), start=2):
+            source = _parse_source(raw["source"])
+            if source is None:
+                problems.append(
+                    f"line {line_no} ({raw['name']}): unknown source {raw['source']!r}"
+                )
+                continue
             rows.append(
                 BigboardRow(
                     rank=int(raw["rank"]),
                     player_id=raw["player_id"],
                     name=raw["name"],
                     position=raw["position"],
-                    source=raw["source"],  # type: ignore[arg-type]
+                    source=source,
                     vorp=float(raw["vorp"]) if raw["vorp"] else None,
-                    draft_round=int(raw["draft_round"])
-                    if raw["draft_round"]
-                    else None,
+                    draft_round=int(raw["draft_round"]) if raw["draft_round"] else None,
                     rationale=raw["rationale"],
                     log_ref=raw["log_ref"] or None,
                 )
             )
+    if problems:
+        raise BigboardMalformedError(season, problems)
     rows.sort(key=lambda r: r.rank)
     return rows
 
 
+def _validate_ranks(season: str, rows: Sequence[BigboardRow]) -> None:
+    """Enforce spec §1's "strictly ordinal 1..N, no ties" on `rank`."""
+    problems: list[str] = []
+    counts = Counter(row.rank for row in rows)
+    duplicates = sorted(rank for rank, n in counts.items() if n > 1)
+    if duplicates:
+        names = {
+            rank: [row.name for row in rows if row.rank == rank] for rank in duplicates
+        }
+        problems.append(f"duplicate rank(s) {names}")
+    off_sequence = sorted(set(counts) ^ set(range(1, len(rows) + 1)))
+    if off_sequence:
+        problems.append(
+            f"rank(s) {off_sequence} break the contiguous 1..{len(rows)} sequence "
+            "(a gap usually means a neighbor wasn't renumbered after a hand edit)"
+        )
+    if problems:
+        raise BigboardMalformedError(season, problems)
+
+
 def load_bigboard_for_build(root: Path, season: str) -> list[BigboardRow]:
     """Raw load for `bigboard build`: empty (not an error) when no file
-    exists yet (first-ever build), and never raises on unresolved rows —
-    the whole point of a build run is to work with rows still flagged."""
+    exists yet (first-ever build), and never raises on unresolved rows or on
+    a non-ordinal `rank` column — the whole point of a build run is to work
+    with a file mid-review, which can transiently carry both."""
     path = _bigboard_path(root, season)
     if not path.exists():
         return []
-    return _read_rows(path)
+    return _read_rows(path, season)
 
 
 def load_bigboard(root: Path, season: str) -> list[BigboardRow]:
     """Load for live consumption (`draft board`/`watch-picks`): hard-stops
-    on a missing file or any unresolved row anywhere in it."""
+    on a missing file, on a file violating spec §1's schema invariants, or
+    on any unresolved row anywhere in it."""
     path = _bigboard_path(root, season)
     if not path.exists():
         raise BigboardNotBuiltError(season)
-    rows = _read_rows(path)
-    unresolved = [row for row in rows if _is_unresolved(row)]
+    rows = _read_rows(path, season)
+    _validate_ranks(season, rows)
+    unresolved = [row for row in rows if is_unresolved(row)]
     if unresolved:
         raise BigboardUnresolvedRowError(season, unresolved)
     return rows
@@ -157,11 +233,13 @@ def _insert_index_by_vorp(rows: list[BigboardRow], vorp: float) -> int:
     return len(rows)
 
 
-def _rookie_insert_index(rows: list[BigboardRow], rookie: TriagedRookie) -> int:
+def _rookie_insert_index(
+    rows: list[BigboardRow], rookie: TriagedRookie, position: str
+) -> int:
     position_indices = [
         i
         for i, row in enumerate(rows)
-        if row.source == "vorp" and row.position == rookie.player.position
+        if row.source == "vorp" and row.position == position
     ]
     if not position_indices:
         return len(rows)
@@ -226,14 +304,21 @@ def merge_bigboard(
     for rookie in triaged_rookies:
         if rookie.player.player_id in existing_ids:
             continue
-        insert_at = _rookie_insert_index(rows, rookie)
+        position = rookie.player.position
+        if position is None:
+            # `Player.position` is nullable and the board is positional —
+            # there's no group to place a position-less player relative to.
+            # `triage_rookies` already skips these (no TRIAGE_CUTOFFS entry
+            # for None), so this only guards a hand-built caller.
+            continue
+        insert_at = _rookie_insert_index(rows, rookie, position)
         rows.insert(
             insert_at,
             BigboardRow(
                 rank=0,
                 player_id=rookie.player.player_id,
                 name=rookie.player.name,
-                position=rookie.player.position,
+                position=position,
                 source="rookie",
                 vorp=None,
                 draft_round=rookie.draft_round,

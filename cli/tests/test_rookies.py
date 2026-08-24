@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import polars as pl
 
 from sleeper_agent.draft_tools.rookies import (
@@ -283,3 +285,58 @@ def test_triage_rookies_sorted_by_overall_pick() -> None:
     rookies = triage_rookies(draft_picks, players_df)
 
     assert [r.player.player_id for r in rookies] == ["1", "2"]
+
+
+# --- load_triaged_rookies (reads the synced parquet tables) ----------------
+
+
+def test_load_triaged_rookies_reads_parquets_and_filters_to_the_given_season(
+    tmp_path: Path,
+) -> None:
+    from sleeper_agent.draft_tools.rookies import load_triaged_rookies
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    # data/nfl/draft_picks.parquet is synced per-season but accumulates
+    # classes, so the season filter is the only thing keeping last year's
+    # rookies off this year's big board.
+    draft_picks = pl.DataFrame(
+        [
+            {**_pick(1, "TE", pick=5, sleeper_id="1"), "season": 2026},
+            {**_pick(1, "QB", pick=7, sleeper_id="2"), "season": 2025},
+        ]
+    )
+    write_table(
+        draft_picks,
+        tmp_path / "data" / "nfl" / "draft_picks.parquet",
+        schema_version=DRAFT_PICKS_SCHEMA_VERSION,
+    )
+    write_table(
+        _players_df(["1", "2"], ["TE", "QB"]),
+        tmp_path / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    rookies = load_triaged_rookies(tmp_path, "2026")
+
+    assert [r.player.player_id for r in rookies] == ["1"]
+    assert rookies[0].player.name == "Name 1"
+    assert rookies[0].player.position == "TE"
+    assert rookies[0].draft_round == 1
+
+
+def test_load_triaged_rookies_best_effort_empty_when_players_table_missing(
+    tmp_path: Path,
+) -> None:
+    from sleeper_agent.draft_tools.rookies import load_triaged_rookies
+    from sleeper_agent.stats.draft_picks_sync import DRAFT_PICKS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(
+        pl.DataFrame([_pick(1, "TE", pick=5, sleeper_id="1")]),
+        tmp_path / "data" / "nfl" / "draft_picks.parquet",
+        schema_version=DRAFT_PICKS_SCHEMA_VERSION,
+    )
+
+    assert load_triaged_rookies(tmp_path, "2026") == []

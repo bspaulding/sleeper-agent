@@ -120,8 +120,10 @@ def triage_rookies(
 def load_triaged_rookies(root: Path, season: str) -> list[TriagedRookie]:
     """Load + triage rookies for `season`, best-effort empty (not an error)
     when `data/nfl/draft_picks.parquet` or `data/sleeper/players.parquet`
-    hasn't been synced yet — shared by `value bigboard build` and (legacy)
-    `draft board`'s Rookie watch rendering.
+    hasn't been synced yet — the sole caller is `value bigboard build`,
+    which folds these rookies into the big board. (`draft board`'s old
+    "Rookie watch" section was the other caller; it was removed once rookies
+    started appearing inline in the big board's ranked order.)
 
     `DRAFT_PICKS_SCHEMA_VERSION` is imported locally, not at module level:
     `stats.draft_picks_sync` already imports

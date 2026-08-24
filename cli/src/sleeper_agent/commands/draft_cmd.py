@@ -12,6 +12,7 @@ import polars as pl
 
 from sleeper_agent.config import data_dir, decisions_dir, find_repo_root
 from sleeper_agent.draft_tools.bigboard import (
+    BigboardMalformedError,
     BigboardNotBuiltError,
     BigboardRow,
     BigboardUnresolvedRowError,
@@ -286,7 +287,11 @@ def _resolve_draft_context(
 
     try:
         bigboard_rows = load_bigboard(root, value_season)
-    except (BigboardNotBuiltError, BigboardUnresolvedRowError) as exc:
+    except (
+        BigboardNotBuiltError,
+        BigboardUnresolvedRowError,
+        BigboardMalformedError,
+    ) as exc:
         print(str(exc))
         return None
 

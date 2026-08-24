@@ -35,10 +35,13 @@ Do this once per season, not once per run — it doesn't depend on wargame state
 
 - VORP must exist for whatever `--value-season` you'll pass the Drafter (normally the most
   recently *completed* real season — the mock draft's nominal "2026" label has no stats behind it
-  yet). If `draft watch-picks`/`draft board` prints `no VORP data for season <Y> — run stats vorp
-  --season <Y> first`, run `sleeper-agent stats sync --season <Y>` then `sleeper-agent stats vorp
-  --season <Y>`. Skipping this was the root cause of run #14's failure (see the retro) — the board
-  render died, which took the Drafter's live view and every monitor/alarm path down with it.
+  yet). Run `sleeper-agent stats sync --season <Y>` then `sleeper-agent stats vorp --season <Y>`
+  if you haven't. Skipping this was the root cause of run #14's failure (see the retro) — the
+  board render died, which took the Drafter's live view and every monitor/alarm path down with it.
+- If `draft watch-picks`/`draft board` prints `data/bigboard/<season>.csv not found`, a real big
+  board needs to exist for the value-season first — see
+  `docs/superpowers/specs/2026-08-23-draft-bigboard-design.md`. Wargame-specific big board tooling
+  is not yet wired up (tracked as follow-up work).
 
 ## Per-run setup
 
