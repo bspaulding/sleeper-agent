@@ -13,7 +13,7 @@ the linked decision entries for full reasoning and the verbatim keeper-rule conf
 
 - **NFL week 1 opener:** Wednesday, Sept 9, 2026 — first Wednesday opener since 2012, which is
   why the draft moved to Labor Day weekend instead of the usual late-August weekday evening.
-- **Draft:** Saturday, August 29, 2026, afternoon (exact time still TBD as of this writing).
+- **Draft:** Saturday, August 29, 2026, 3:00pm PT (confirmed 2026-08-27).
   Backup date: Monday, August 31 (Labor Day), used only if enough owners object to Saturday.
 - **Keeper deadline:** Friday, August 28, 2026 — the night before the draft, enforced directly by
   Sleeper.
