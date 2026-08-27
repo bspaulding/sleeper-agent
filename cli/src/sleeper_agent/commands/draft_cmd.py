@@ -1,8 +1,16 @@
-"""`draft` command group: keeper eligibility/cost, live best-available board."""
+"""`draft` command group: keeper eligibility/cost, live best-available board.
+
+`draft board` defaults to a live Textual TUI (`draft_tools.board_app`):
+board clear/redraws on every new pick, with a toggleable picks-stream
+panel (`p`/`Tab`). `--once` gives the old one-shot plain print. When stdout
+isn't a tty (piped, logged, unattended Monitor runs) the TUI can't attach,
+so it falls back to the plain line-based `watch_board` loop.
+"""
 
 from __future__ import annotations
 
 import argparse
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
@@ -24,8 +32,8 @@ from sleeper_agent.draft_tools.board import (
     render_board_for_picks,
     roster_requirement_from_draft,
     watch_board,
-    watch_picks,
 )
+from sleeper_agent.draft_tools.board_app import DraftBoardApp, DraftBoardModel
 from sleeper_agent.draft_tools.keepers import (
     KeeperCandidate,
     build_season_chain,
@@ -75,7 +83,8 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     keepers_parser.set_defaults(func=cmd_draft_keepers)
 
     board_parser = draft_subparsers.add_parser(
-        "board", help="Live best-available-by-value board"
+        "board",
+        help="Live best-available-by-value draft board (Textual TUI; --once for a one-shot print)",
     )
     board_source = board_parser.add_mutually_exclusive_group(required=True)
     board_source.add_argument("--league-id")
@@ -87,8 +96,28 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
             "current year minus 1 if not given."
         ),
     )
-    board_parser.add_argument("--rounds", type=int, default=15)
-    board_parser.add_argument("--watch", action="store_true")
+    board_parser.add_argument(
+        "--once",
+        action="store_true",
+        help="One-shot plain render (no TUI, no polling). Default is the live TUI.",
+    )
+    board_parser.add_argument(
+        "--poll-seconds",
+        type=float,
+        default=1.0,
+        help="TUI picks-endpoint poll interval (seconds). Default 1.0 — ~60 req/min, well under Sleeper's ~1000 req/min budget.",
+    )
+    board_parser.add_argument(
+        "--show-picks",
+        action="store_true",
+        help="Start with the picks stream panel visible (toggleable with p/Tab).",
+    )
+    board_parser.add_argument(
+        "--rounds",
+        type=int,
+        default=15,
+        help="Board display depth only (rounds x teams rows). Draft *length* comes from the draft object's own settings.rounds, not this.",
+    )
     board_parser.add_argument("--value-season", default=None)
     board_parser.add_argument(
         "--num-teams",
@@ -119,67 +148,6 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     board_parser.set_defaults(func=cmd_draft_board)
-
-    watch_picks_parser = draft_subparsers.add_parser(
-        "watch-picks",
-        help="Live pick-by-pick tracker; auto-fetches the board the instant it's your turn",
-    )
-    watch_picks_source = watch_picks_parser.add_mutually_exclusive_group(required=True)
-    watch_picks_source.add_argument("--league-id")
-    watch_picks_source.add_argument(
-        "--draft-id",
-        help=(
-            "Draft ID directly, bypassing league lookup — needed for a Sleeper mock "
-            "draft, which has no league of its own. --value-season defaults to "
-            "current year minus 1 if not given."
-        ),
-    )
-    watch_picks_parser.add_argument(
-        "--rounds",
-        type=int,
-        default=15,
-        help=(
-            "Board display depth only (rounds x teams rows). Draft *length* comes "
-            "from the draft object's own settings.rounds, not this."
-        ),
-    )
-    watch_picks_parser.add_argument("--value-season", default=None)
-    watch_picks_parser.add_argument(
-        "--num-teams",
-        type=int,
-        default=12,
-        help=(
-            "Ignored here: turn-detection geometry is read from the draft object's "
-            "own settings.teams. Accepted for symmetry with `draft board`."
-        ),
-    )
-    watch_picks_parser.add_argument("--me", action="store_true")
-    watch_picks_parser.add_argument("--roster-id", type=int, default=None)
-    watch_picks_parser.add_argument(
-        "--draft-slot",
-        type=int,
-        default=None,
-        help=(
-            "Resolve my roster_id from this draft's slot_to_roster_id map — needed for "
-            "a mock draft (no stable roster_id across seasons), or as an alternative to "
-            "--me/--roster-id in league mode."
-        ),
-    )
-    watch_picks_parser.add_argument(
-        "--poll-seconds",
-        type=float,
-        default=1.0,
-        help="Picks-endpoint poll interval — cheap enough to poll faster than draft board --watch's 5s default.",
-    )
-    watch_picks_parser.add_argument(
-        "--exclude-players",
-        default=None,
-        help=(
-            "Comma-separated sleeper_ids to drop from the board (e.g. projected "
-            "league keepers for a mock draft). Real drafts don't need this."
-        ),
-    )
-    watch_picks_parser.set_defaults(func=cmd_draft_watch_picks)
 
 
 def _read_vorp(root: Path, season: str) -> pl.DataFrame | None:
@@ -235,7 +203,7 @@ def parse_excluded_players(raw: str | None) -> list[str]:
     """Parse `--exclude-players "2449,4943"` into a clean sleeper_id list.
 
     Tolerates whitespace and trailing commas; empty/None input means no
-    exclusions. Used by `draft board`/`draft watch-picks` to drop projected
+    exclusions. Used by `draft board` to drop projected
     league keepers when practicing against a mock draft (which carries no
     keeper data of its own).
     """
@@ -266,7 +234,7 @@ def _resolve_draft_context(
     base_url: str,
     today: Callable[[], date] = date.today,
 ) -> DraftContext | None:
-    """Shared setup for `draft board` and `draft watch-picks`: resolve the
+    """Shared setup for `draft board` (TUI, --once, and non-tty fallback):
     draft/value-season/num-teams (from --league-id or --draft-id), resolve
     "me" (--me/--roster-id/--draft-slot), and load the big board + team-
     changes data. Prints its own error message and returns None on failure,
@@ -452,15 +420,32 @@ def cmd_draft_board(
     base_url: str = SLEEPER_BASE_URL,
     today: Callable[[], date] = date.today,
     max_watch_iterations: int | None = None,
+    is_tty: Callable[[], bool] | None = None,
+    run_board_tui: Callable[..., int] | None = None,
 ) -> int:
+    """Live draft board. Modes, in dispatch order:
+
+    1. `--once` — one-shot plain print (the pre-TUI default).
+    2. non-tty stdout — plain line-based `watch_board` loop (piped/logged/
+       unattended Monitor runs; the TUI can't attach to a pipe).
+    3. tty stdout — the Textual TUI (`_run_board_tui`), which is the default.
+    """
     root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    if not args.once and args.poll_seconds < 0:
+        print(f"--poll-seconds must be >= 0 (got {args.poll_seconds})")
+        return 1
     context = _resolve_draft_context(args, root, base_url=base_url, today=today)
     if context is None:
         return 1
 
-    top_n = args.rounds * context.num_teams
+    if args.once:
+        picks = fetch_draft_picks(context.draft_id, base_url=base_url)
+        top_n = args.rounds * context.num_teams
+        print(_render_context_board(context, picks, top_n=top_n))
+        return 0
 
-    if args.watch:
+    tty = is_tty() if is_tty is not None else sys.stdout.isatty()
+    if not tty:
         watch_board(
             context.draft_id,
             context.bigboard_rows,
@@ -476,42 +461,14 @@ def cmd_draft_board(
         )
         return 0
 
-    picks = fetch_draft_picks(context.draft_id, base_url=base_url)
-    print(_render_context_board(context, picks, top_n=top_n))
-    return 0
+    if run_board_tui is not None:
+        return run_board_tui(context, args, base_url=base_url)
+    return _run_board_tui(context, args, base_url=base_url)
 
 
-def _render_context_board(
-    context: DraftContext, picks: list[DraftPick], *, top_n: int
-) -> str:
-    return render_board_for_picks(
-        context.bigboard_rows,
-        picks,
-        top_n=top_n,
-        my_roster_id=context.my_roster_id,
-        my_draft_slot=context.my_draft_slot,
-        requirement=context.requirement,
-        team_changes=context.team_changes,
-        injury_statuses=context.injury_statuses,
-    )
-
-
-def cmd_draft_watch_picks(
-    args: argparse.Namespace,
-    *,
-    repo_root: Path | None = None,
-    base_url: str = SLEEPER_BASE_URL,
-    today: Callable[[], date] = date.today,
-    max_iterations: int | None = None,
+def _run_board_tui(
+    context: DraftContext, args: argparse.Namespace, *, base_url: str
 ) -> int:
-    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
-    if args.poll_seconds < 0:
-        print(f"--poll-seconds must be >= 0 (got {args.poll_seconds})")
-        return 1
-    context = _resolve_draft_context(args, root, base_url=base_url, today=today)
-    if context is None:
-        return 1
-
     # Draft geometry comes from the Draft object Sleeper itself returned, not
     # from --num-teams/--rounds. Those flags default to 12/15 and are silently
     # wrong for any other league shape — and a wrong num_teams makes
@@ -541,24 +498,45 @@ def cmd_draft_watch_picks(
                 f"warning: roster_id {context.my_roster_id} is not in this draft's "
                 f"slot_to_roster_id (mapped slots: "
                 f"{sorted(context.draft.slot_to_roster_id)}) — streaming picks "
-                "without turn detection (no MY PICK markers, no board on your "
-                "turn). Pass --draft-slot to fix."
+                "without turn detection (no MY PICK markers, no your-turn "
+                "banner). Pass --draft-slot to fix."
             )
 
-    top_n = args.rounds * draft_num_teams
-
-    def render_full_board(picks: list[DraftPick]) -> str:
-        return _render_context_board(context, picks, top_n=top_n)
-
-    watch_picks(
-        context.draft_id,
+    model = DraftBoardModel(
+        context.bigboard_rows,
+        top_n=args.rounds * draft_num_teams,
         num_teams=draft_num_teams,
         draft_type=context.draft.draft_type,
-        my_draft_slot=turn_detection_slot,
         total_picks=draft_rounds * draft_num_teams,
-        render_full_board=render_full_board,
-        base_url=base_url,
-        poll_seconds=args.poll_seconds,
-        max_iterations=max_iterations,
+        my_roster_id=context.my_roster_id,
+        my_draft_slot=turn_detection_slot,
+        requirement=context.requirement,
+        team_changes=context.team_changes,
+        injury_statuses=context.injury_statuses,
     )
+    app = DraftBoardApp(
+        model,
+        draft_id=context.draft_id,
+        poll_seconds=args.poll_seconds,
+        show_picks=args.show_picks,
+        base_url=base_url,
+    )
+    app.run()
     return 0
+
+
+def _render_context_board(
+    context: DraftContext, picks: list[DraftPick], *, top_n: int
+) -> str:
+    return render_board_for_picks(
+        context.bigboard_rows,
+        picks,
+        top_n=top_n,
+        my_roster_id=context.my_roster_id,
+        my_draft_slot=context.my_draft_slot,
+        requirement=context.requirement,
+        team_changes=context.team_changes,
+        injury_statuses=context.injury_statuses,
+    )
+
+

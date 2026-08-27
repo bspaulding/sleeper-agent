@@ -190,7 +190,7 @@ def load_bigboard_for_build(root: Path, season: str) -> list[BigboardRow]:
 
 
 def load_bigboard(root: Path, season: str) -> list[BigboardRow]:
-    """Load for live consumption (`draft board`/`watch-picks`): hard-stops
+    """Load for live consumption (`draft board`): hard-stops
     on a missing file, on a file violating spec §1's schema invariants, or
     on any unresolved row anywhere in it."""
     path = _bigboard_path(root, season)

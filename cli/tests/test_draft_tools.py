@@ -3,9 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
-import pytest
-import requests
-
 from sleeper_agent.draft_tools.bigboard import BigboardRow
 from sleeper_agent.draft_tools.board import (
     RosterRequirement,
@@ -18,7 +15,6 @@ from sleeper_agent.draft_tools.board import (
     roster_requirement_from_draft,
     slot_for_pick,
     watch_board,
-    watch_picks,
 )
 from sleeper_agent.draft_tools.keepers import (
     KeeperCandidate,
@@ -36,7 +32,6 @@ from sleeper_agent.sleeper_client.draft import (
     KeeperIneligibleMaxYearsReached,
     keeper_history,
 )
-from sleeper_agent.sleeper_client.http import SleeperHTTPError
 from sleeper_agent.storage.parquet_store import write_table
 from sleeper_agent.value.team_changes import TeamChange
 
@@ -958,8 +953,7 @@ def test_render_board_omits_moved_tag_when_no_team_changes_given() -> None:
 
     assert "[MOVED" not in rendered
 
-
-# --- watch_picks -------------------------------------------------------
+# --- DraftBoardModel (TUI pick-merge + board derivation) -----------------
 
 
 def _wp(
@@ -969,6 +963,7 @@ def _wp(
     name: str = "Player",
     position: str = "RB",
     is_keeper: bool = False,
+    player_id: str | None = None,
 ) -> DraftPick:
     return DraftPick(
         draft_id="did",
@@ -976,7 +971,7 @@ def _wp(
         pick_no=pick_no,
         draft_slot=draft_slot,
         roster_id=draft_slot,
-        player_id=str(pick_no),
+        player_id=player_id or str(pick_no),
         is_keeper=is_keeper,
         picked_by=f"u{draft_slot}",
         player_name=name,
@@ -985,411 +980,211 @@ def _wp(
     )
 
 
-def test_watch_picks_prints_one_line_per_new_pick() -> None:
-    call_log: list[list[DraftPick]] = [
-        [_wp(1, 1, name="Alpha")],
-        [_wp(1, 1, name="Alpha"), _wp(2, 2, name="Beta")],
-    ]
-    rendered: list[str] = []
+def _model(
+    bigboard: list[BigboardRow],
+    *,
+    my_draft_slot: int | None = None,
+    my_roster_id: int | None = None,
+    requirement: RosterRequirement | None = None,
+    draft_type: str = "snake",
+    total_picks: int = 180,
+    team_changes: dict[str, TeamChange] | None = None,
+    injury_statuses: dict[str, str] | None = None,
+):
+    from sleeper_agent.draft_tools.board_app import DraftBoardModel
 
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    watch_picks(
-        "did",
+    return DraftBoardModel(
+        bigboard,
+        top_n=3,
         num_teams=12,
-        draft_type="snake",
-        my_draft_slot=None,
-        total_picks=180,
-        render_full_board=lambda picks: "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=2,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
+        draft_type=draft_type,
+        total_picks=total_picks,
+        my_roster_id=my_roster_id,
+        my_draft_slot=my_draft_slot,
+        requirement=requirement,
+        team_changes=team_changes,
+        injury_statuses=injury_statuses,
     )
 
-    assert rendered == [
+
+def test_model_feed_emits_one_line_per_new_pick() -> None:
+    model = _model(make_bigboard())
+
+    first = model.feed([_wp(1, 1, name="Alpha")])
+    second = model.feed([_wp(1, 1, name="Alpha"), _wp(2, 2, name="Beta")])
+
+    assert first.new_pick_lines == ("Pick 1 (slot 1): Alpha (RB, SF)",)
+    # pick 1 was already seen on the first feed — only pick 2 is new
+    assert second.new_pick_lines == ("Pick 2 (slot 2): Beta (RB, SF)",)
+    assert second.picks_seen == 2
+
+
+def test_model_feed_marks_my_pick() -> None:
+    model = _model(make_bigboard(), my_draft_slot=8)
+
+    state = model.feed([_wp(1, 1, name="Alpha"), _wp(2, 8, name="Beta")])
+
+    assert state.new_pick_lines == (
+        "Pick 1 (slot 1): Alpha (RB, SF)",
+        "Pick 2 (slot 8): Beta (RB, SF) <== MY PICK",
+    )
+
+
+def test_model_feed_ignores_transiently_shorter_response() -> None:
+    # Simulate a network blip: 2 picks, then transiently 1, then 3.
+    model = _model(make_bigboard())
+    two = [_wp(1, 1, name="Alpha"), _wp(2, 2, name="Beta")]
+
+    first = model.feed(two)
+    blip = model.feed([two[0]])
+    third = model.feed(two + [_wp(3, 3, name="Gamma")])
+
+    assert first.new_pick_lines == (
         "Pick 1 (slot 1): Alpha (RB, SF)",
         "Pick 2 (slot 2): Beta (RB, SF)",
-    ]
-
-
-def test_watch_picks_marks_my_pick() -> None:
-    call_log: list[list[DraftPick]] = [
-        [_wp(1, 1, name="Alpha"), _wp(2, 8, name="Beta")],
-    ]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    rendered: list[str] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=8,
-        total_picks=180,
-        render_full_board=lambda picks: "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=1,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
     )
-
-    assert len(rendered) == 2
-    assert rendered[0] == "Pick 1 (slot 1): Alpha (RB, SF)"
-    assert rendered[1] == "Pick 2 (slot 8): Beta (RB, SF) <== MY PICK"
-
-
-def test_watch_picks_renders_board_once_when_next_pick_is_mine() -> None:
-    # 7 picks made (slots 1-7); pick 8 (slot 8, my slot) is next.
-    seven_picks = [_wp(n, n, name=f"Player{n}") for n in range(1, 8)]
-    call_log: list[list[DraftPick]] = [
-        seven_picks,  # my turn is next -> board should render
-        seven_picks,  # unchanged - still my turn, already announced -> no re-render
-        seven_picks + [_wp(8, 8, name="Mine")],  # my pick lands
-    ]
-    board_calls: list[list[DraftPick]] = []
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    def fake_render_full_board(picks: list[DraftPick]) -> str:
-        board_calls.append(picks)
-        return "BOARD"
-
-    rendered: list[str] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=8,
-        total_picks=180,
-        render_full_board=fake_render_full_board,
-        sleep=lambda seconds: None,
-        max_iterations=3,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
-    )
-
-    assert len(board_calls) == 1
-    assert rendered.count("BOARD") == 1
-    assert "Pick 8 (slot 8): Mine (RB, SF) <== MY PICK" in rendered
+    assert blip.new_pick_lines == ()
+    assert blip.picks_seen == 2
+    assert third.new_pick_lines == ("Pick 3 (slot 3): Gamma (RB, SF)",)
+    assert third.picks_seen == 3
 
 
-def test_watch_picks_stops_when_draft_is_complete() -> None:
-    call_log: list[list[DraftPick]] = [
-        [_wp(1, 1)],
-        [_wp(1, 1), _wp(2, 2)],
-    ]
+def test_model_board_rows_exclude_drafted_players_and_respect_top_n() -> None:
+    bigboard = make_bigboard()  # ids 1, 2, 3
+    model = _model(bigboard)
 
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
+    state = model.feed([_wp(1, 1)])  # drafts player_id "1"
 
-    sleeps: list[float] = []
-    watch_picks(
-        "did",
-        num_teams=2,
-        draft_type="snake",
-        my_draft_slot=None,
-        total_picks=2,
-        render_full_board=lambda picks: "BOARD",
-        sleep=sleeps.append,
-        max_iterations=None,  # would loop forever without the completion check
-        render=lambda line: None,
-        fetch_picks=fake_fetch,
-    )
-
-    assert call_log == []  # exactly 2 fetches happened, then it returned
+    names = [row.name for row in state.rows]
+    assert names == ["Player Two", "Player Three"]
+    assert [row.rank for row in state.rows] == [1, 2]  # ranks renumber 1..n
+    assert state.rows[0].detail == "30.0"
 
 
-def test_watch_picks_skips_board_for_non_snake_draft_type() -> None:
-    call_log: list[list[DraftPick]] = [[], [_wp(1, 8)]]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    board_calls: list[list[DraftPick]] = []
-    rendered: list[str] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="linear",
-        my_draft_slot=8,
-        total_picks=180,
-        render_full_board=lambda picks: board_calls.append(picks) or "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=2,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
-    )
-
-    assert board_calls == []
-    assert len(rendered) == 1  # per-pick line still rendered
-    assert "Pick 1 (slot 8): Player (RB, SF)" in rendered[0]
-
-
-def test_watch_picks_without_my_draft_slot_never_renders_board() -> None:
-    call_log: list[list[DraftPick]] = [[], [_wp(1, 1)]]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    board_calls: list[list[DraftPick]] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=None,
-        total_picks=180,
-        render_full_board=lambda picks: board_calls.append(picks) or "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=2,
-        render=lambda line: None,
-        fetch_picks=fake_fetch,
-    )
-
-    assert board_calls == []
-
-
-def test_watch_picks_ignores_transiently_shorter_response() -> None:
-    # Simulate a network blip: fetch 2 picks, then transiently return only 1,
-    # then return 3 (2 original + 1 new). The transiently shorter response
-    # should not cause a duplicate print or state change.
-    two_picks = [_wp(1, 1, name="Alpha"), _wp(2, 2, name="Beta")]
-    call_log: list[list[DraftPick]] = [
-        two_picks,  # fetch 1: 2 picks
-        [two_picks[0]],  # fetch 2: network blip, only 1 pick (should be ignored)
-        two_picks + [_wp(3, 3, name="Gamma")],  # fetch 3: back to normal, 3 picks
-    ]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    rendered: list[str] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=None,
-        total_picks=180,
-        render_full_board=lambda picks: "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=3,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
-    )
-
-    # Should have exactly 3 picks rendered (Alpha, Beta, Gamma), no duplicates
-    assert len(rendered) == 3
-    assert rendered[0] == "Pick 1 (slot 1): Alpha (RB, SF)"
-    assert rendered[1] == "Pick 2 (slot 2): Beta (RB, SF)"
-    assert rendered[2] == "Pick 3 (slot 3): Gamma (RB, SF)"
-
-
-# Shaped like the real captured fixture tests/fixtures/sleeper/draft_picks.json:
-# live picks at pick_no 1/2/3 alongside pre-filled `is_keeper: true` picks at
-# pick_no 47/48, all present in the very first response. 4 rounds x 12 teams =
-# 48 total picks, so 47/48 are the last two picks of the (even, reversed)
-# round 4: slot_for_pick(47, 12) == 2 and slot_for_pick(48, 12) == 1.
-def _keeper_league_first_fetch() -> list[DraftPick]:
-    # Deliberately NOT in pick_no order — Sleeper makes no ordering promise, and
-    # printing must still come out ascending.
-    return [
-        _wp(47, 2, name="KeeperA", is_keeper=True),
-        _wp(2, 2, name="Beta"),
-        _wp(48, 1, name="KeeperB", is_keeper=True),
-        _wp(1, 1, name="Alpha"),
-        _wp(3, 3, name="Gamma"),
-    ]
-
-
-def test_watch_picks_handles_prefilled_keeper_picks() -> None:
-    first = _keeper_league_first_fetch()
-    fourth = _wp(4, 4, name="Delta")
-    call_log: list[list[DraftPick]] = [
-        list(first),  # keepers + picks 1-3; next live pick is 4 (mine)
-        list(first),  # unchanged poll -> no reprints, no re-render
-        [*first, fourth],  # pick 4 lands
-    ]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    board_calls: list[list[DraftPick]] = []
-    rendered: list[str] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=4,  # slot_for_pick(4, 12) == 4
-        total_picks=48,
-        render_full_board=lambda picks: board_calls.append(picks) or "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=3,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
-    )
-
-    # (a) every pick, keepers included, printed exactly once, in ascending
-    # pick_no order regardless of the order the fetch returned them in.
-    assert rendered == [
-        "Pick 1 (slot 1): Alpha (RB, SF)",
-        "Pick 2 (slot 2): Beta (RB, SF)",
-        "Pick 3 (slot 3): Gamma (RB, SF)",
-        "Pick 47 (slot 2): KeeperA (RB, SF)",
-        "Pick 48 (slot 1): KeeperB (RB, SF)",
-        # (b)/(c) next live pick is 4 (not 6 = len+1, not 49 = max+1), and 4 is
-        # my slot -> board renders exactly here.
-        "BOARD",
-        "Pick 4 (slot 4): Delta (RB, SF) <== MY PICK",
-    ]
-    # ...and does not re-render on the unchanged second poll.
-    assert len(board_calls) == 1
-    # The board sees every pick known so far, keepers included, in pick order —
-    # so both keepers are already excluded from "available" while I'm on the
-    # clock for pick 4.
-    assert [pick.pick_no for pick in board_calls[0]] == [1, 2, 3, 47, 48]
-
-
-def test_watch_picks_keeper_gap_does_not_shift_turn_detection() -> None:
-    # Same 5-pick keeper-league state, but "my" slot is 6 — the slot the old
-    # positional `printed_count + 1` logic would have wrongly called next
-    # (5 picks seen -> next_pick_no 6). Nothing should render.
-    call_log: list[list[DraftPick]] = [_keeper_league_first_fetch()]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    board_calls: list[list[DraftPick]] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=6,
-        total_picks=48,
-        render_full_board=lambda picks: board_calls.append(picks) or "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=1,
-        render=lambda line: None,
-        fetch_picks=fake_fetch,
-    )
-
-    assert board_calls == []
-
-
-def test_watch_picks_shorter_response_is_a_no_op_for_turn_detection() -> None:
-    # A transiently short/partial response can only fail to add picks; it must
-    # never drop, re-print, or shift `next_pick_no` back onto an already-made
-    # pick. Here fetch 2 returns only pick 1 while picks 1-3 are already known:
-    # `next_pick_no` must stay 4 (my slot) and the board must render once, not
-    # snap back to 2 (slot 2) and render nothing / render again later.
-    three = [_wp(1, 1, name="Alpha"), _wp(2, 2, name="Beta"), _wp(3, 3, name="Gamma")]
-    call_log: list[list[DraftPick]] = [
-        list(three),
-        [three[0]],  # blip: partial response
-        list(three),
-    ]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    board_calls: list[list[DraftPick]] = []
-    rendered: list[str] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=4,
-        total_picks=48,
-        render_full_board=lambda picks: board_calls.append(picks) or "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=3,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
-    )
-
-    assert rendered == [
-        "Pick 1 (slot 1): Alpha (RB, SF)",
-        "Pick 2 (slot 2): Beta (RB, SF)",
-        "Pick 3 (slot 3): Gamma (RB, SF)",
-        "BOARD",
-    ]
-    assert len(board_calls) == 1
-    # The board was built from the full accumulated set, not the 1-pick blip —
-    # otherwise Beta/Gamma would look available again.
-    assert [pick.pick_no for pick in board_calls[0]] == [1, 2, 3]
-
-
-@pytest.mark.parametrize(
-    ("error", "expected_fragment"),
-    [
-        (requests.ConnectionError("connection reset"), "connection reset"),
-        (SleeperHTTPError("https://x/draft/did/picks", 503), "status 503"),
-    ],
-)
-def test_watch_picks_survives_transient_fetch_failure(
-    error: Exception, expected_fragment: str
-) -> None:
-    call_log: list[list[DraftPick] | Exception] = [
-        [_wp(1, 1, name="Alpha")],
-        error,
-        [_wp(1, 1, name="Alpha"), _wp(2, 2, name="Beta")],
-    ]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        item = call_log.pop(0)
-        if isinstance(item, Exception):
-            raise item
-        return item
-
-    sleeps: list[float] = []
-    rendered: list[str] = []
-    watch_picks(
-        "did",
-        num_teams=12,
-        draft_type="snake",
-        my_draft_slot=None,
-        total_picks=48,
-        render_full_board=lambda picks: "BOARD",
-        poll_seconds=2.5,
-        sleep=sleeps.append,
-        max_iterations=3,
-        render=rendered.append,
-        fetch_picks=fake_fetch,
-    )
-
-    assert len(rendered) == 3
-    assert rendered[0] == "Pick 1 (slot 1): Alpha (RB, SF)"
-    assert rendered[1].startswith("fetch failed, retrying: ")
-    assert expected_fragment in rendered[1]
-    # Recovered cleanly: Alpha is not re-printed, Beta still arrives.
-    assert rendered[2] == "Pick 2 (slot 2): Beta (RB, SF)"
-    # The failed iteration still waited out the normal poll interval.
-    assert sleeps == [2.5, 2.5]
-
-
-def test_watch_picks_stops_on_completion_with_turn_detection_on() -> None:
-    # Draft runs to its last pick while my_draft_slot is set: there is no
-    # "next" pick left, so turn detection must simply not fire.
-    call_log: list[list[DraftPick]] = [[_wp(1, 1), _wp(2, 2)]]
-
-    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
-        return call_log.pop(0)
-
-    board_calls: list[list[DraftPick]] = []
-    watch_picks(
-        "did",
-        num_teams=2,
-        draft_type="snake",
+def test_model_board_rows_carry_annotation_and_flags() -> None:
+    model = _model(
+        make_bigboard(),
+        my_roster_id=5,
         my_draft_slot=1,
-        total_picks=2,
-        render_full_board=lambda picks: board_calls.append(picks) or "BOARD",
-        sleep=lambda seconds: None,
-        max_iterations=None,  # would loop forever without the completion check
-        render=lambda line: None,
-        fetch_picks=fake_fetch,
+        requirement=RosterRequirement(
+            hard_min={"QB": 1, "RB": 2, "WR": 2, "TE": 1, "DEF": 1}, flex_capacity=2
+        ),
+        team_changes={"1": make_team_change(sleeper_id="1")},
+        injury_statuses={"2": "Questionable"},
     )
 
-    assert call_log == []
-    assert board_calls == []
+    state = model.feed([_wp(1, 1, player_id="99")])  # I draft an off-board RB
+
+    assert state.roster_summary is not None
+    assert "RB 1/2" in state.roster_summary
+    by_name = {row.name: row for row in state.rows}
+    # I'm one RB short of the 2 minimum -> Player One is a NEED; the
+    # triaged role-changer + injury tags still surface as flags
+    one = by_name["Player One"]
+    assert one.tag == "NEED"
+    assert "[MOVED: CAR→PIT]" in one.flags
+    two = by_name["Player Two"]
+    assert "[INJ: Questionable]" in two.flags
+    assert one.tier is not None
+
+
+def test_model_board_rows_unannotated_without_my_roster() -> None:
+    model = _model(make_bigboard())
+
+    state = model.feed([_wp(1, 1)])
+
+    assert state.roster_summary is None
+    assert all(row.tag is None for row in state.rows)
+    assert all(row.tier is None for row in state.rows)
+
+
+def test_model_turn_detection_snake() -> None:
+    model = _model(make_bigboard(), my_draft_slot=8, total_picks=180)
+
+    seven = model.feed([_wp(n, n) for n in range(1, 8)])
+    assert seven.next_pick_no == 8
+    assert seven.my_turn is True
+
+    eight = model.feed([_wp(n, n) for n in range(1, 9)])
+    assert eight.next_pick_no == 9
+    assert eight.my_turn is False
+    # my pick 8 counts toward my roster positions via my_draft_slot
+    assert eight.roster_summary is None  # no my_roster_id -> no summary
+
+
+def test_model_turn_detection_without_my_draft_slot_never_fires() -> None:
+    model = _model(make_bigboard(), total_picks=180)
+
+    state = model.feed([_wp(n, n) for n in range(1, 8)])
+
+    assert state.my_turn is False
+    assert state.next_pick_no is None
+
+
+def test_model_turn_detection_skips_non_snake_draft_type() -> None:
+    model = _model(make_bigboard(), my_draft_slot=8, draft_type="linear")
+
+    state = model.feed([_wp(n, n) for n in range(1, 8)])
+
+    assert state.my_turn is False
+    assert state.next_pick_no is None
+
+
+def test_model_turn_detection_uses_draft_geometry_not_flag() -> None:
+    # 10-team draft: 11 picks in, next is pick 12 = round 2, reversed
+    # position 2 -> slot 9. Under a 12-team assumption pick 12 would be
+    # round 1 slot 12 — so my_turn firing at slot 9 proves the real geometry
+    # (num_teams=10) drove the snake math.
+    model = _model_with_num_teams(make_bigboard(), num_teams=10, my_draft_slot=9)
+    state = model.feed([_wp(n, ((n - 1) % 10) + 1) for n in range(1, 12)])
+
+    assert state.next_pick_no == 12
+    assert state.my_turn is True
+
+
+def _model_with_num_teams(
+    bigboard: list[BigboardRow], *, num_teams: int, my_draft_slot: int
+):
+    from sleeper_agent.draft_tools.board_app import DraftBoardModel
+
+    return DraftBoardModel(
+        bigboard,
+        top_n=3,
+        num_teams=num_teams,
+        draft_type="snake",
+        total_picks=num_teams * 15,
+        my_draft_slot=my_draft_slot,
+    )
+
+
+def test_model_completed_flag_fires_at_total_picks() -> None:
+    model = _model(make_bigboard(), total_picks=2)
+
+    half = model.feed([_wp(1, 1)])
+    done = model.feed([_wp(1, 1), _wp(2, 2)])
+
+    assert half.completed is False
+    assert done.completed is True
+    assert done.next_pick_no is None
+
+
+def test_model_handles_prefilled_keeper_picks() -> None:
+    # Shaped like tests/fixtures/sleeper/draft_picks.json: live picks 1-3 sit
+    # alongside pre-filled keepers at 47/48 from the first poll. "Next" must
+    # be 4, not 49 — count-based tracking would jump straight past the gap.
+    model = _model(make_bigboard(), my_draft_slot=4, total_picks=180)
+
+    state = model.feed(
+        [
+            _wp(1, 1),
+            _wp(2, 2),
+            _wp(3, 3),
+            _wp(47, 11, is_keeper=True),
+            _wp(48, 12, is_keeper=True),
+        ]
+    )
+
+    assert state.picks_seen == 5
+    assert state.next_pick_no == 4
+    assert state.my_turn is True
+    assert state.completed is False

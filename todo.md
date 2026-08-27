@@ -5,9 +5,26 @@
 - ~~Keeper decision~~ — Diggs (R7) + Darnold (R14) locked 2026-08-23; see
   `decisions/2026/2026-08-23-keeper-diggs-r7-darnold-r14.md` and
   `wiki/team/keeper-strategy.md`.
+- ~~Live VORP board TUI~~ — `draft board` now defaults to a Textual TUI
+  (`draft_tools/board_app.py`): clears/redraws the best-available board on
+  every new pick instead of scrolling log lines, with a toggleable (`p`/
+  `Tab`) picks-stream panel. `draft watch-picks` (the old line-mode
+  streamer) is removed; `--once` still gives a one-shot plain print, and a
+  non-tty stdout (piped/logged/unattended `Monitor` runs) falls back to the
+  plain `watch_board` loop since the TUI can't attach to a pipe. 2026-08-24.
 
 ## Before the draft (Saturday, Aug 29)
 
+- bigboard evals currently include special placings for rookies, but do not (i think?)
+  take into account injury statuses and other news about a player, like a reduced role
+  for role changers. We should make sure this is taken into account and that the bigboard
+  has notes for those players that were moved out of their vorp slot for a some reason.
+- Easter Egg / Fun Draft reviewer: Yahoo Fantasy Used to have these draft grade
+  reports they would email out after the draft. It would be fun to have a tongue-in-cheek
+  reviewer for the whole league, driven by an llm skill. We would want it to look at each
+  resulting roster post draft, and use our own rankings + some LLM persona to write a quick
+  graded (A-F) review of each drafter. It could also grant some superlative "trophies"
+  to certain players.
 - Verify our `is_keeper` flags (Diggs/Darnold) once they appear on the draft
   object's `/picks` endpoint (not visible pre-lock as of Aug 23), and diff
   `wiki/league/projected-keepers-2026.md` against the real inserted set.
@@ -23,16 +40,6 @@ The three recurring Routines (weekly stats/VORP Tuesdays, waiver reminder
 Mondays, trade scouting Wednesdays) were created in Phase H but have never had
 a genuine run — they no-op'd while implementation was unmerged. Everything is
 on `main` now; verify via next scheduled firing or manual `fire_trigger`.
-
-## Tooling ideas
-
-- **Live VORP board web app or TUI** for use alongside the drafting agent
-  during real drafts: shows available players only; picked players either
-  disappear or get annotated with the team that selected them; columns for
-  position, NFL team, VORP (plus tier/[INJ:]/[MOVED:] tags). Same data source
-  as `draft board --watch` but a persistent, glanceable view instead of log
-  lines. Web app (small local HTTP server + auto-refreshing page) or TUI both
-  acceptable; decide when built.
 
 ## In-season
 

@@ -5,8 +5,8 @@ description: Build or refresh the pre-draft big board (data/bigboard/<season>.cs
 
 # bigboard
 
-Builds/refreshes `data/bigboard/<season>.csv`, the single ordinal ranking `draft board`/
-`watch-picks` require at draft time (see
+Builds/refreshes `data/bigboard/<season>.csv`, the single ordinal ranking `draft board`
+requires at draft time (see
 `docs/superpowers/specs/2026-08-23-draft-bigboard-design.md`). Splits mechanical work (adding
 new players, flagging changes) from judgment work (placement, tie-breaking) — this skill drives
 the judgment half.

@@ -9,7 +9,7 @@ not a one-time authoring exercise.
 Note: `draft.md` (keeper selection + live-draft judgment) and `wargame.md` (a live-draft
 rehearsal runbook) were removed 2026-08-24 — the live-draft portion of both existed to let an
 LLM narrate pick-by-pick recommendations, but the big board (`bigboard.md`) now resolves that
-judgment pre-draft, so live drafting is just running `draft board`/`draft watch-picks` and
+judgment pre-draft, so live drafting is just running `draft board` and
 reading it directly, no skill required. Keeper selection (still a real judgment call, not
 time-pressured) moved to its own file, `keepers.md`.
 

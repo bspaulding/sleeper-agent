@@ -107,7 +107,7 @@ CIN, NYJ, WAS, ARI, MIA, ATL, TB, SF, CHI, IND, NO. Notable: DAL's hype addition
 don't offset a 31st-ranked unit from last year; TEN spent $191M + Saleh/Bradley hires — possible
 mid-season streamer emergence, not a draft-day target.
 
-## Draft-day checklist (fold into `draft board`/`draft watch-picks` usage)
+## Draft-day checklist (fold into `draft board` usage)
 
 1. Track whether a D/ST run has started; if yes, defer.
 2. From round 12, check the remaining board against this page's tier table + each candidate's

@@ -119,6 +119,23 @@ def test_value_bigboard_build_subcommand_is_registered() -> None:
     assert args.season == "2026"
 
 
+def test_draft_board_subcommand_is_registered_defaulting_to_tui_watch() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(["draft", "board", "--league-id", "lid1"])
+
+    assert args.func is draft_cmd.cmd_draft_board
+    # Default is the live TUI (watch); --once opts into the one-shot print.
+    assert args.once is False
+    assert args.poll_seconds == 1.0
+    assert args.show_picks is False
+    assert not hasattr(args, "watch")
+
+    args = parser.parse_args(["draft", "board", "--league-id", "lid1", "--once"])
+    assert args.once is True
+
+
 # --- sleeper league resolve ----------------------------------------------
 
 
@@ -1844,7 +1861,7 @@ def test_cmd_draft_board_prints_available_players(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -1895,7 +1912,7 @@ def test_cmd_draft_board_exclude_players_drops_projected_keepers(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -1971,7 +1988,7 @@ def test_cmd_draft_board_tags_live_sleeper_injury_designations(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -2029,7 +2046,7 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -2124,7 +2141,7 @@ def test_cmd_draft_board_tags_triaged_role_changer(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -2177,7 +2194,7 @@ def test_cmd_draft_board_omits_moved_tag_when_no_stats_data(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -2194,9 +2211,11 @@ def test_cmd_draft_board_omits_moved_tag_when_no_stats_data(
     assert "[MOVED" not in out
 
 
-def test_cmd_draft_board_watch_renders_to_stdout(
+def test_cmd_draft_board_non_tty_defaults_to_line_watch_loop(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
+    """stdout is not a tty under pytest, so `draft board` (without --once)
+    takes the plain line-based watch_board fallback, not the Textual TUI."""
     repo_root = make_repo_root(tmp_path)
     vorp_df = pl.DataFrame(
         {
@@ -2224,7 +2243,9 @@ def test_cmd_draft_board_watch_renders_to_stdout(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=True,
+        once=False,
+        poll_seconds=1.0,
+        show_picks=False,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -2242,6 +2263,90 @@ def test_cmd_draft_board_watch_renders_to_stdout(
     assert "A" in out
 
 
+def test_cmd_draft_board_tty_dispatches_to_tui(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """With a tty, `draft board` must hand off to the Textual TUI (here stubbed
+    via run_board_tui) and not render anything itself."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        once=False,
+        poll_seconds=1.0,
+        show_picks=False,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    calls: list[object] = []
+
+    def fake_tui(context, tui_args, *, base_url: str) -> int:
+        calls.append((context.draft_id, tui_args.rounds))
+        return 0
+
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args,
+            repo_root=repo_root,
+            base_url=base_url,
+            is_tty=lambda: True,
+            run_board_tui=fake_tui,
+        )
+
+    assert exit_code == 0
+    assert calls == [("did1", 15)]
+    assert capsys.readouterr().out == ""  # TUI rendered, nothing printed
+
+
+def test_cmd_draft_board_rejects_negative_poll_seconds(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    args = argparse.Namespace(
+        league_id=None,
+        draft_id="did1",
+        rounds=15,
+        once=False,
+        poll_seconds=-1.0,
+        show_picks=False,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+
+    # No base_url/mock server: the guard must fire before any network call.
+    exit_code = draft_cmd.cmd_draft_board(args, repo_root=repo_root)
+
+    assert exit_code == 1
+    assert "--poll-seconds must be >= 0 (got -1.0)" in capsys.readouterr().out
+
+
 def test_cmd_draft_board_reports_missing_bigboard(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -2255,7 +2360,7 @@ def test_cmd_draft_board_reports_missing_bigboard(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
     )
@@ -2299,7 +2404,7 @@ def test_cmd_draft_board_reports_unresolved_bigboard_rows(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
     )
@@ -2339,7 +2444,7 @@ def test_cmd_draft_board_reports_missing_draft_id(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season=None,
         num_teams=12,
     )
@@ -2381,7 +2486,7 @@ def test_cmd_draft_board_with_draft_id_skips_league_lookup(
         league_id=None,
         draft_id="mockdid1",
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2026",
         num_teams=12,
         me=False,
@@ -2448,7 +2553,7 @@ def test_cmd_draft_board_annotates_with_me_flag(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=True,
@@ -2515,7 +2620,7 @@ def test_cmd_draft_board_annotates_with_roster_id_flag(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2025",
         num_teams=12,
         me=False,
@@ -2564,7 +2669,7 @@ def test_cmd_draft_board_annotates_with_draft_slot_in_mock_mode(
         league_id=None,
         draft_id="mockdid1",
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2026",
         num_teams=12,
         me=False,
@@ -2611,7 +2716,7 @@ def test_cmd_draft_board_reports_unresolvable_draft_slot(
         league_id=None,
         draft_id="mockdid1",
         rounds=15,
-        watch=False,
+        once=True,
         value_season="2026",
         num_teams=12,
         me=False,
@@ -2643,7 +2748,7 @@ def test_cmd_draft_board_with_draft_id_defaults_value_season(
         league_id=None,
         draft_id="mockdid1",
         rounds=15,
-        watch=False,
+        once=True,
         value_season=None,
         num_teams=12,
     )
@@ -2675,7 +2780,7 @@ def test_cmd_draft_board_with_league_id_defaults_value_season_to_prior_year(
         league_id="lid1",
         draft_id=None,
         rounds=15,
-        watch=False,
+        once=True,
         value_season=None,
         num_teams=12,
     )
@@ -2688,423 +2793,6 @@ def test_cmd_draft_board_with_league_id_defaults_value_season_to_prior_year(
     out = capsys.readouterr().out
     assert "--value-season not given with --league-id; defaulting to 2024" in out
     assert "data/bigboard/2024.csv not found" in out
-
-
-def test_cmd_draft_watch_picks_streams_lines_and_renders_board_on_my_turn(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    from sleeper_agent.storage.parquet_store import write_table
-
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["9"],
-            "name": ["Available Player"],
-            "position": ["RB"],
-            "vorp_season": [10.0],
-        }
-    )
-    write_table(
-        vorp_df,
-        repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
-    )
-    _write_bigboard(repo_root, "2025", vorp_df)
-
-    seven_picks = [
-        {
-            "draft_id": "did1",
-            "round": 1,
-            "pick_no": n,
-            "draft_slot": n,
-            "roster_id": n,
-            "player_id": str(n),
-            "is_keeper": False,
-            "picked_by": f"u{n}",
-            "metadata": {
-                "first_name": f"Player{n}",
-                "last_name": "Test",
-                "position": "RB",
-                "team": "SF",
-            },
-        }
-        for n in range(1, 8)
-    ]
-    eighth_pick = {
-        "draft_id": "did1",
-        "round": 1,
-        "pick_no": 8,
-        "draft_slot": 8,
-        "roster_id": 5,
-        "player_id": "8",
-        "is_keeper": False,
-        "picked_by": "u5",
-        "metadata": {
-            "first_name": "Mine",
-            "last_name": "Guy",
-            "position": "RB",
-            "team": "SF",
-        },
-    }
-    call_log = [seven_picks, seven_picks, seven_picks + [eighth_pick]]
-
-    def handler(request: Request) -> Response:
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload(slot_to_roster_id={"8": 5}))
-        if request.path == "/draft/did1/picks":
-            return json_response(call_log.pop(0))
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id=None,
-        draft_id="did1",
-        rounds=15,
-        value_season="2025",
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=8,
-        poll_seconds=0.0,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_watch_picks(
-            args, repo_root=repo_root, base_url=base_url, max_iterations=3
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0
-    assert "Pick 1 (slot 1): Player1 Test (RB, SF)" in out
-    assert "Pick 8 (slot 8): Mine Guy (RB, SF) <== MY PICK" in out
-    assert out.count("Best available by value:") == 1
-
-
-def test_cmd_draft_watch_picks_resolves_turn_slot_from_me_flag(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    from sleeper_agent.storage.parquet_store import write_table
-
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["9"],
-            "name": ["Available Player"],
-            "position": ["RB"],
-            "vorp_season": [10.0],
-        }
-    )
-    write_table(
-        vorp_df,
-        repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
-    )
-    _write_bigboard(repo_root, "2025", vorp_df)
-    my_pick = {
-        "draft_id": "did1",
-        "round": 1,
-        "pick_no": 1,
-        "draft_slot": 1,
-        "roster_id": 5,  # ME_ROSTER_ID
-        "player_id": "1",
-        "is_keeper": False,
-        "picked_by": "u5",
-        "metadata": {
-            "first_name": "Mine",
-            "last_name": "Guy",
-            "position": "RB",
-            "team": "SF",
-        },
-    }
-    call_log = [[], [my_pick]]
-
-    def handler(request: Request) -> Response:
-        if request.path == "/league/lid1":
-            return json_response(_league_payload())
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload(slot_to_roster_id={"1": 5}))
-        if request.path == "/draft/did1/picks":
-            return json_response(call_log.pop(0))
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id="lid1",
-        draft_id=None,
-        rounds=15,
-        value_season="2025",
-        num_teams=12,
-        me=True,
-        roster_id=None,
-        draft_slot=None,
-        poll_seconds=0.0,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_watch_picks(
-            args, repo_root=repo_root, base_url=base_url, max_iterations=2
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0
-    assert (
-        out.count("Best available by value:") == 1
-    )  # rendered before any picks existed
-    assert "Pick 1 (slot 1): Mine Guy (RB, SF) <== MY PICK" in out
-
-
-def test_cmd_draft_watch_picks_skips_board_for_non_snake_draft(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    from sleeper_agent.storage.parquet_store import write_table
-
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["9"],
-            "name": ["Available Player"],
-            "position": ["RB"],
-            "vorp_season": [10.0],
-        }
-    )
-    write_table(
-        vorp_df,
-        repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
-    )
-    _write_bigboard(repo_root, "2025", vorp_df)
-
-    def handler(request: Request) -> Response:
-        if request.path == "/draft/did1":
-            payload = _draft_object_payload(slot_to_roster_id={"8": 5})
-            payload["type"] = "linear"
-            return json_response(payload)
-        if request.path == "/draft/did1/picks":
-            return json_response([])
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = argparse.Namespace(
-        league_id=None,
-        draft_id="did1",
-        rounds=15,
-        value_season="2025",
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=8,
-        poll_seconds=0.0,
-    )
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_watch_picks(
-            args, repo_root=repo_root, base_url=base_url, max_iterations=1
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0
-    assert "Best available by value:" not in out
-
-
-def test_cmd_draft_watch_picks_reports_missing_bigboard(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    # No data/bigboard/2025.csv written.
-    args = argparse.Namespace(
-        league_id=None,
-        draft_id="did1",
-        rounds=15,
-        value_season="2025",
-        num_teams=12,
-        me=False,
-        roster_id=None,
-        draft_slot=None,
-        poll_seconds=0.0,
-    )
-
-    exit_code = draft_cmd.cmd_draft_watch_picks(args, repo_root=repo_root)
-
-    assert exit_code == 1
-    assert "data/bigboard/2025.csv not found" in capsys.readouterr().out
-
-
-def _watch_picks_args(**overrides: object) -> argparse.Namespace:
-    defaults: dict[str, object] = {
-        "league_id": None,
-        "draft_id": "did1",
-        "rounds": 15,
-        "value_season": "2025",
-        "num_teams": 12,
-        "me": False,
-        "roster_id": None,
-        "draft_slot": None,
-        "poll_seconds": 0.0,
-    }
-    defaults.update(overrides)
-    return argparse.Namespace(**defaults)
-
-
-def _write_watch_picks_vorp(repo_root: Path) -> None:
-    from sleeper_agent.storage.parquet_store import write_table
-
-    vorp_df = pl.DataFrame(
-        {
-            "sleeper_id": ["999"],
-            "name": ["Available Player"],
-            "position": ["RB"],
-            "vorp_season": [10.0],
-        }
-    )
-    write_table(
-        vorp_df,
-        repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
-    )
-    _write_bigboard(repo_root, "2025", vorp_df)
-
-
-def _pick_payload(pick_no: int, draft_slot: int) -> dict[str, object]:
-    return {
-        "draft_id": "did1",
-        "round": (pick_no - 1) // 10 + 1,
-        "pick_no": pick_no,
-        "draft_slot": draft_slot,
-        "roster_id": draft_slot,
-        "player_id": str(pick_no),
-        "is_keeper": False,
-        "picked_by": f"u{draft_slot}",
-        "metadata": {
-            "first_name": f"Player{pick_no}",
-            "last_name": "Test",
-            "position": "RB",
-            "team": "SF",
-        },
-    }
-
-
-def test_cmd_draft_watch_picks_uses_draft_object_num_teams_not_flag(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    # The draft object says 10 teams; --num-teams says 12. 11 picks are in, so
-    # the next pick is #12. Under the draft's real geometry (10 teams) pick 12
-    # is round 2, position 2 of a reversed round -> slot 9, which is my slot.
-    # Under the --num-teams=12 flag it would be round 1 slot 12, not mine.
-    # So the board rendering at all proves the Draft object's value won.
-    repo_root = make_repo_root(tmp_path)
-    _write_watch_picks_vorp(repo_root)
-    eleven_picks = [_pick_payload(n, ((n - 1) % 10) + 1) for n in range(1, 12)]
-
-    def handler(request: Request) -> Response:
-        if request.path == "/draft/did1":
-            return json_response(
-                _draft_object_payload(slot_to_roster_id={"9": 5}, teams=10, rounds=15)
-            )
-        if request.path == "/draft/did1/picks":
-            return json_response(eleven_picks)
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = _watch_picks_args(num_teams=12, draft_slot=9)
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_watch_picks(
-            args, repo_root=repo_root, base_url=base_url, max_iterations=1
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0
-    assert out.count("Best available by value:") == 1
-
-
-def test_cmd_draft_watch_picks_uses_draft_object_rounds_for_total_picks(
-    tmp_path: Path,
-) -> None:
-    # The draft object says 1 round x 10 teams = 10 total picks; --rounds says
-    # 15. Feeding exactly 10 picks must end the watch immediately. If
-    # total_picks had come from --rounds (150) the loop would poll again and
-    # pop from an empty call_log.
-    repo_root = make_repo_root(tmp_path)
-    _write_watch_picks_vorp(repo_root)
-    call_log: list[list[dict[str, object]]] = [
-        [_pick_payload(n, ((n - 1) % 10) + 1) for n in range(1, 11)]
-    ]
-
-    def handler(request: Request) -> Response:
-        if request.path == "/draft/did1":
-            return json_response(
-                _draft_object_payload(slot_to_roster_id={"1": 5}, teams=10, rounds=1)
-            )
-        if request.path == "/draft/did1/picks":
-            return json_response(call_log.pop(0))
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = _watch_picks_args(rounds=15, num_teams=12, draft_slot=1)
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_watch_picks(
-            args, repo_root=repo_root, base_url=base_url, max_iterations=5
-        )
-
-    assert exit_code == 0
-    assert call_log == []  # exactly one fetch, then the completion check fired
-
-
-def test_cmd_draft_watch_picks_reports_unusable_draft_geometry(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    _write_watch_picks_vorp(repo_root)
-
-    def handler(request: Request) -> Response:
-        if request.path == "/draft/did1":
-            payload = _draft_object_payload()
-            payload["settings"] = {}  # Sleeper occasionally returns no settings
-            return json_response(payload)
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = _watch_picks_args(draft_slot=None)
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_watch_picks(
-            args, repo_root=repo_root, base_url=base_url, max_iterations=1
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 1
-    assert "no usable geometry" in out
-    assert "settings.teams=0" in out
-
-
-def test_cmd_draft_watch_picks_warns_when_roster_id_has_no_draft_slot(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    _write_watch_picks_vorp(repo_root)
-
-    def handler(request: Request) -> Response:
-        if request.path == "/draft/did1":
-            return json_response(_draft_object_payload(slot_to_roster_id={"1": 5}))
-        if request.path == "/draft/did1/picks":
-            return json_response([_pick_payload(1, 1)])
-        raise AssertionError(f"unexpected path {request.path}")
-
-    args = _watch_picks_args(roster_id=99)
-    with mock_http_server(handler) as base_url:
-        exit_code = draft_cmd.cmd_draft_watch_picks(
-            args, repo_root=repo_root, base_url=base_url, max_iterations=1
-        )
-
-    out = capsys.readouterr().out
-    assert exit_code == 0  # degraded, not fatal: picks still stream
-    assert "roster_id 99 is not in this draft's slot_to_roster_id" in out
-    assert "mapped slots: [1]" in out
-    assert "Pick 1 (slot 1): Player1 Test (RB, SF)" in out
-    assert "<== MY PICK" not in out
-    assert "Best available by value:" not in out
-
-
-def test_cmd_draft_watch_picks_rejects_negative_poll_seconds(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
-    repo_root = make_repo_root(tmp_path)
-    args = _watch_picks_args(poll_seconds=-1.0)
-
-    # No base_url/mock server: the guard must fire before any network call.
-    exit_code = draft_cmd.cmd_draft_watch_picks(args, repo_root=repo_root)
-
-    assert exit_code == 1
-    assert "--poll-seconds must be >= 0 (got -1.0)" in capsys.readouterr().out
 
 
 # --- waiver / freeagent ------------------------------------------------

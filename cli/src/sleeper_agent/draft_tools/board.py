@@ -7,10 +7,12 @@ draft's public picks endpoint (no auth needed), excluding every player
 who's already been picked — live or pre-filled `is_keeper: true` — from the
 "available" list. The big board supplies the ranking order (rookies inline,
 ties pre-broken); NEED/FLEX/SURPLUS and tier annotation are still computed
-live against the current roster. `--watch` polls and re-renders only when
-the picked-player set actually changes, and (optionally) mirrors the current
-board to a decision-log-style file so an unattended Routine run leaves a
-record.
+live against the current roster. The live mode defaults to a Textual TUI
+(`board_app.DraftBoardApp`, clear/redraw on every new pick, toggleable picks
+stream panel); `watch_board` below is the plain line-based loop the TUI
+falls back to when stdout isn't a tty (piped/logged, unattended Monitor
+runs), polling and re-rendering only when the picked-player set actually
+changes.
 """
 
 from __future__ import annotations
@@ -19,12 +21,10 @@ import time
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-from requests import RequestException
-
 from sleeper_agent.draft_tools.bigboard import BigboardRow
 from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client.draft import fetch_draft_picks
-from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL, SleeperHTTPError
+from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
 from sleeper_agent.value.team_changes import TeamChange
 
 FLEX_ELIGIBLE_POSITIONS = frozenset({"RB", "WR", "TE"})
@@ -224,9 +224,9 @@ def render_board_for_picks(
 
     The `bigboard_view` -> `my_roster_positions` -> `render_board` sequence
     (including the "only annotate when we know who 'me' is" gating on
-    `my_roster_id`) was independently duplicated in three places —
-    `watch_board`, `draft board`'s one-shot path, and `draft watch-picks`'
-    on-my-turn board. This is that sequence, once.
+    `my_roster_id`) was independently duplicated across `watch_board` and
+    `draft board`'s one-shot path (and formerly the now-removed `draft
+    watch-picks`'s on-my-turn board). This is that sequence, once.
     """
     picks_list = list(picks)
     board = bigboard_view(bigboard_rows, picks_list, top_n=top_n)
@@ -303,7 +303,7 @@ def watch_board(
             sleep(poll_seconds)
 
 
-def _render_pick_line(pick: DraftPick, my_draft_slot: int | None) -> str:
+def render_pick_line(pick: DraftPick, my_draft_slot: int | None) -> str:
     name = pick.player_name or pick.player_id
     position = pick.player_position or "?"
     team = pick.player_team or "?"
@@ -313,7 +313,7 @@ def _render_pick_line(pick: DraftPick, my_draft_slot: int | None) -> str:
     return line
 
 
-def _next_unmade_pick_no(
+def next_unmade_pick_no(
     picks_by_no: dict[int, DraftPick], total_picks: int
 ) -> int | None:
     """Smallest pick_no <= total_picks that hasn't happened yet, or None if the
@@ -332,75 +332,7 @@ def _next_unmade_pick_no(
     return None
 
 
-def _picks_in_order(picks_by_no: dict[int, DraftPick]) -> list[DraftPick]:
+def picks_in_order(picks_by_no: dict[int, DraftPick]) -> list[DraftPick]:
     return [picks_by_no[pick_no] for pick_no in sorted(picks_by_no)]
 
 
-def watch_picks(
-    draft_id: str,
-    *,
-    num_teams: int,
-    draft_type: str,
-    my_draft_slot: int | None,
-    total_picks: int,
-    render_full_board: Callable[[list[DraftPick]], str],
-    base_url: str = SLEEPER_BASE_URL,
-    poll_seconds: float = 1.0,
-    sleep: Callable[[float], None] = time.sleep,
-    max_iterations: int | None = None,
-    render: Callable[[str], None] = _flush_print,
-    fetch_picks: Callable[..., list[DraftPick]] = fetch_draft_picks,
-) -> None:
-    """Stream one line per new pick; auto-render the full board the instant
-    the next pick is mine.
-
-    Deliberately lighter-weight than `watch_board`: it never reprints the
-    whole board for picks that aren't mine, and only fetches/renders the
-    board once per "my turn" (not on every poll while the human is still on
-    the clock) — see `.claude/skills/draft.md`'s "Preferred live setup".
-
-    Progress is tracked as an accumulated `pick_no -> DraftPick` map, merged
-    into (never replaced) from each fetch, rather than as a count of picks
-    seen. Counting assumes the picks endpoint is a contiguous prefix ordered
-    by `pick_no`, which is false in this league: keeper picks arrive
-    pre-filled at their real `pick_no` (47, 48, ...) from the first poll, so
-    a count-based "next pick" jumps clean over every live pick still to come
-    below them. Keying by `pick_no` also makes a transiently short/partial
-    response a structural no-op — it can only fail to add entries, never drop
-    or re-print ones already seen — so no separate shrinking-response guard
-    is needed.
-    """
-    picks_by_no: dict[int, DraftPick] = {}
-    announced_pick_no: int | None = None
-    iteration = 0
-    while max_iterations is None or iteration < max_iterations:
-        try:
-            picks = fetch_picks(draft_id, base_url=base_url)
-        except (SleeperHTTPError, RequestException) as exc:
-            # This command is built to run unattended under `Monitor` for the
-            # hours a real draft takes; a single timeout/DNS blip/reset must not
-            # end live tracking. Warn and retry on the next poll instead.
-            render(f"fetch failed, retrying: {exc}")
-        else:
-            for pick in sorted(picks, key=lambda p: p.pick_no):
-                is_new = pick.pick_no not in picks_by_no
-                picks_by_no[pick.pick_no] = pick
-                if is_new:
-                    render(_render_pick_line(pick, my_draft_slot))
-
-            if draft_type == "snake" and my_draft_slot is not None:
-                next_pick_no = _next_unmade_pick_no(picks_by_no, total_picks)
-                if (
-                    next_pick_no is not None
-                    and slot_for_pick(next_pick_no, num_teams) == my_draft_slot
-                    and announced_pick_no != next_pick_no
-                ):
-                    render(render_full_board(_picks_in_order(picks_by_no)))
-                    announced_pick_no = next_pick_no
-
-            if len(picks_by_no) >= total_picks:
-                return
-
-        iteration += 1
-        if max_iterations is None or iteration < max_iterations:
-            sleep(poll_seconds)

@@ -32,7 +32,7 @@ Checked at the start of every draft.
    `--value-season 2025`.)* This retro's source draft ran on 2024 VORP because `stats sync --season
    2025` failed at the time — not because the data doesn't exist. nflverse had renamed its release
    from `player_stats` to `stats_player`; the installed `nfl_data_py` (0.3.3) hardcoded the old
-   name. **Updated 2026-08-24:** `draft board`/`watch-picks` no longer read VORP directly — they
+   name. **Updated 2026-08-24:** `draft board` no longer reads VORP directly — it
    require `data/bigboard/<value-season>.csv` to exist with zero rows flagged for review (see
    `.claude/skills/bigboard.md`), a materialized ranking built *from* VORP plus triaged rookies,
    not VORP itself. The check before every draft is now "does that bigboard file exist and pass
