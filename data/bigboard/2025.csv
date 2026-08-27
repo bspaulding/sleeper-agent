@@ -1,8 +1,8 @@
 rank,player_id,name,position,source,vorp,draft_round,rationale,log_ref
-1,4034,Christian McCaffrey,RB,vorp,280.9000020697713,,,2026-08-27-bigboard-external-consensus-comparison
-2,9509,Bijan Robinson,RB,vorp,238.10000232607126,,,2026-08-27-bigboard-external-consensus-comparison
-3,9221,Jahmyr Gibbs,RB,vorp,232.20000164210796,,,2026-08-27-bigboard-external-consensus-comparison
-4,6813,Jonathan Taylor,RB,vorp,227.60000182688236,,,2026-08-27-bigboard-external-consensus-comparison
+1,9509,Bijan Robinson,RB,vorp,238.10000232607126,,,2026-08-27-bigboard-external-consensus-comparison
+2,9221,Jahmyr Gibbs,RB,vorp,232.20000164210796,,,2026-08-27-bigboard-external-consensus-comparison
+3,6813,Jonathan Taylor,RB,vorp,227.60000182688236,,,2026-08-27-bigboard-external-consensus-comparison
+4,4034,Christian McCaffrey,RB,vorp,280.9000020697713,,"[INJURY REVIEW 2026-08-27: moved #1 -> #4 (behind Bijan/Gibbs/Taylor) — persistent, unresolved calf/soft-tissue ""tightness"" since 2026-08-10, still not fully practicing as of 2026-08-20; echoes the downplayed-calf-that-became-a-lost-half-season pattern from 2024 (out until Wk10). Raw VORP reflects peak-healthy production, not this recurring durability risk.]",2026-08-27-bigboard-injury-status-review
 5,9493,Puka Nacua,WR,vorp,203.8200015798211,,,2026-08-27-bigboard-external-consensus-comparison
 6,9488,Jaxon Smith-Njigba,WR,vorp,188.72000159323215,,,2026-08-27-bigboard-external-consensus-comparison
 7,9226,De'Von Achane,RB,vorp,187.10000164061785,,,2026-08-27-bigboard-external-consensus-comparison
@@ -15,16 +15,16 @@ rank,player_id,name,position,source,vorp,draft_round,rationale,log_ref
 14,8150,Kyren Williams,RB,vorp,129.60000118613243,,,2026-08-27-bigboard-external-consensus-comparison
 15,8137,George Pickens,WR,vorp,119.7200009971857,,,2026-08-27-bigboard-external-consensus-comparison
 16,7543,Travis Etienne,RB,vorp,118.20000098645687,,,2026-08-27-bigboard-external-consensus-comparison
-17,12527,Ashton Jeanty,RB,vorp,110.40000087022781,,,2026-08-27-bigboard-external-consensus-comparison
-18,7588,Javonte Williams,RB,vorp,109.10000089555979,,,2026-08-27-bigboard-external-consensus-comparison
-19,5850,Josh Jacobs,RB,vorp,103.40000070631504,,,2026-08-27-bigboard-external-consensus-comparison
-20,4866,Saquon Barkley,RB,vorp,97.6000010073185,,,2026-08-27-bigboard-external-consensus-comparison
-21,8144,Chris Olave,WR,vorp,96.82000059634447,,,2026-08-27-bigboard-external-consensus-comparison
-22,6790,D'Andre Swift,RB,vorp,94.90000096708536,,,2026-08-27-bigboard-external-consensus-comparison
-23,4984,Josh Allen,QB,vorp,91.70000031590462,,,2026-08-27-bigboard-external-consensus-comparison
-24,7567,Kenny Gainwell,RB,vorp,86.60000042617321,,,2026-08-27-bigboard-external-consensus-comparison
-25,7021,Rico Dowdle,RB,vorp,81.60000094771385,,,2026-08-27-bigboard-external-consensus-comparison
-26,8228,Jaylen Warren,RB,vorp,81.40000082552433,,,2026-08-27-bigboard-external-consensus-comparison
+17,7588,Javonte Williams,RB,vorp,109.10000089555979,,,2026-08-27-bigboard-external-consensus-comparison
+18,5850,Josh Jacobs,RB,vorp,103.40000070631504,,,2026-08-27-bigboard-external-consensus-comparison
+19,4866,Saquon Barkley,RB,vorp,97.6000010073185,,,2026-08-27-bigboard-external-consensus-comparison
+20,8144,Chris Olave,WR,vorp,96.82000059634447,,,2026-08-27-bigboard-external-consensus-comparison
+21,6790,D'Andre Swift,RB,vorp,94.90000096708536,,,2026-08-27-bigboard-external-consensus-comparison
+22,4984,Josh Allen,QB,vorp,91.70000031590462,,,2026-08-27-bigboard-external-consensus-comparison
+23,7567,Kenny Gainwell,RB,vorp,86.60000042617321,,,2026-08-27-bigboard-external-consensus-comparison
+24,7021,Rico Dowdle,RB,vorp,81.60000094771385,,,2026-08-27-bigboard-external-consensus-comparison
+25,8228,Jaylen Warren,RB,vorp,81.40000082552433,,,2026-08-27-bigboard-external-consensus-comparison
+26,12527,Ashton Jeanty,RB,vorp,110.40000087022781,,"[INJURY REVIEW 2026-08-27: moved #17 -> #26 — fresh right ankle sprain suffered 2026-08-25 (2 days before draft); ESPN reports it's believed low- rather than high-ankle and not major, but explicitly flags a real chance he sits Week 1 and that a high-ankle read could linger into the season. Re-check status night-of if any further update lands.]",2026-08-27-bigboard-injury-status-review
 27,11564,Drake Maye,QB,vorp,77.03999947756529,,,2026-08-27-bigboard-external-consensus-comparison
 28,421,Matthew Stafford,QB,vorp,75.45999852567911,,,2026-08-27-bigboard-external-consensus-comparison
 29,9997,Zay Flowers,WR,vorp,74.12000076472759,,,2026-08-27-bigboard-external-consensus-comparison
@@ -46,257 +46,257 @@ rank,player_id,name,position,source,vorp,draft_round,rationale,log_ref
 45,1466,Travis Kelce,TE,vorp,45.90000047534704,,,2026-08-27-bigboard-external-consensus-comparison
 46,8126,Wan'Dale Robinson,WR,vorp,45.7200003862381,,,2026-08-27-bigboard-external-consensus-comparison
 47,13286,Jadarian Price,RB,rookie,,1,"R1 pick (Seattle, last pick of round 1) into a wide-open backfield — Kenneth Walker III departed, Zach Charbonnet recovering from ACL — the single best pure opportunity-share situation in this rookie class per wiki/team/rookie-evaluation.md's RB secondary signal; placed just behind Love, still inside the RB24 band.",2026-08-24-bigboard-initial-build-rookie-placement
-48,9753,Zach Charbonnet,RB,vorp,45.70000020414591,,,2026-08-27-bigboard-external-consensus-comparison
-49,8110,Jake Ferguson,TE,vorp,42.800000101327896,,,2026-08-27-bigboard-external-consensus-comparison
-50,12526,Tetairoa McMillan,WR,vorp,41.22000037878752,,,2026-08-27-bigboard-external-consensus-comparison
-51,12518,Tyler Warren,TE,vorp,41.20000043511391,,,2026-08-27-bigboard-external-consensus-comparison
-52,11560,Caleb Williams,QB,vorp,40.7599998190999,,,2026-08-27-bigboard-external-consensus-comparison
-53,12506,Harold Fannin Jr.,TE,vorp,40.1000003144145,,,2026-08-27-bigboard-external-consensus-comparison
-54,3294,Dak Prescott,QB,vorp,39.85999892652035,,,2026-08-27-bigboard-external-consensus-comparison
-55,6801,Tee Higgins,WR,vorp,39.42000012844801,,,2026-08-27-bigboard-external-consensus-comparison
-56,2449,Stefon Diggs,WR,vorp,38.1200003772974,,,2026-08-27-bigboard-external-consensus-comparison
-57,5022,Dallas Goedert,TE,vorp,37.800000086426735,,,2026-08-27-bigboard-external-consensus-comparison
-58,7002,Juwan Johnson,TE,vorp,34.60000053048134,,,2026-08-27-bigboard-external-consensus-comparison
-59,12512,Quinshon Judkins,RB,vorp,34.10000038892031,,,2026-08-27-bigboard-external-consensus-comparison
-60,5892,David Montgomery,RB,vorp,32.22000025212765,,,2026-08-27-bigboard-external-consensus-comparison
-61,11563,Bo Nix,QB,vorp,31.9199997484684,,,2026-08-27-bigboard-external-consensus-comparison
-62,3214,Hunter Henry,TE,vorp,31.500000350177288,,,2026-08-27-bigboard-external-consensus-comparison
-63,8112,Drake London,WR,vorp,30.720000237226486,,,2026-08-27-bigboard-external-consensus-comparison
-64,5001,Dalton Schultz,TE,vorp,30.400000363588333,,,2026-08-27-bigboard-external-consensus-comparison
-65,6819,Michael Pittman,WR,vorp,30.22000003606081,,,2026-08-27-bigboard-external-consensus-comparison
-66,7525,DeVonta Smith,WR,vorp,29.62000036984682,,,2026-08-27-bigboard-external-consensus-comparison
-67,6794,Justin Jefferson,WR,vorp,29.32000043988228,,,2026-08-27-bigboard-external-consensus-comparison
-68,11604,Brock Bowers,TE,vorp,28.900000222027302,,,2026-08-27-bigboard-external-consensus-comparison
-69,6786,CeeDee Lamb,WR,vorp,28.720000475645065,,,2026-08-27-bigboard-external-consensus-comparison
-70,11655,Tyrone Tracy Jr.,RB,vorp,26.10000043362379,,,2026-08-27-bigboard-external-consensus-comparison
-71,6904,Jalen Hurts,QB,vorp,24.140000477433205,,,2026-08-27-bigboard-external-consensus-comparison
-72,3163,Jared Goff,QB,vorp,24.139998719096184,,,2026-08-27-bigboard-external-consensus-comparison
-73,12514,Emeka Egbuka,WR,vorp,23.520000278949738,,,2026-08-27-bigboard-external-consensus-comparison
-74,13279,Carnell Tate,WR,rookie,,1,"R1 (pick 4 overall, elite draft capital), frontrunner for WR1 volume in TEN despite 'mild risk' (new coaching staff, year-2 QB) — placed just above the WR24 landmark (rank 70 ≈ 22.5 vorp), consensus #2 rookie overall.",2026-08-24-bigboard-initial-build-rookie-placement
-75,7526,Jaylen Waddle,WR,vorp,21.940000258386135,,,2026-08-27-bigboard-external-consensus-comparison
-76,12517,Colston Loveland,TE,vorp,17.80000026524067,,,2026-08-27-bigboard-external-consensus-comparison
-77,5872,Deebo Samuel Sr.,WR,vorp,16.0200000628829,,,2026-08-27-bigboard-external-consensus-comparison
-78,6797,Justin Herbert,QB,vorp,15.960000142455101,,,2026-08-27-bigboard-external-consensus-comparison
-79,5846,DK Metcalf,WR,vorp,15.020000152289867,,,2026-08-27-bigboard-external-consensus-comparison
-80,4217,George Kittle,TE,vorp,14.200000137090683,,,2026-08-27-bigboard-external-consensus-comparison
-81,9487,Parker Washington,WR,vorp,12.520000129938126,,,2026-08-27-bigboard-external-consensus-comparison
-82,8142,Alec Pierce,WR,vorp,11.12000036239624,,,2026-08-27-bigboard-external-consensus-comparison
-83,13294,Makai Lemon,WR,rookie,,1,"R1 to PHI (pick 20) — inherits a share of A.J. Brown's vacated 121 targets but not a clean 1-for-1 replacement given the crowded WR room; consensus #4 rookie overall, placed in the WR24-36 band reflecting shared-target risk.",2026-08-24-bigboard-initial-build-rookie-placement
-84,12534,Kyle Monangai,RB,vorp,11.000000312924385,,,2026-08-27-bigboard-external-consensus-comparison
-85,4046,Patrick Mahomes,QB,vorp,10.760000139474869,,,2026-08-27-bigboard-external-consensus-comparison
-86,4098,Kareem Hunt,RB,vorp,10.700000025331974,,,2026-08-27-bigboard-external-consensus-comparison
-87,1479,Keenan Allen,WR,vorp,10.520000025629997,,,2026-08-27-bigboard-external-consensus-comparison
-88,13330,Kenyon Sadiq,TE,rookie,,1,"R1 TE (pick 16, NYJ) — round-1 TE carries the strongest positional hit rate in the whole rookie-evaluation framework (81.8% top-24, 54.5% top-12) and he's specifically flagged for immediate impact; placed just below the TE12 landmark (rank 80 ≈ 13.1 vorp, Brock Bowers), reflecting strong-likely-TE1-of-class upside without assuming the guaranteed outcome.",2026-08-24-bigboard-initial-build-rookie-placement
-89,12474,Woody Marks,RB,vorp,9.400000259280205,,,2026-08-27-bigboard-external-consensus-comparison
-90,11635,Ladd McConkey,WR,vorp,8.72000004351139,,,2026-08-27-bigboard-external-consensus-comparison
-91,13417,De'Zhaun Stribling,WR,rookie,,2,"R2 pick, but consensus fantasy ranking (#5 overall rookie) ranks him ABOVE several round-1 WRs (Tyson, Concepcion, Boston, Cooper) on situational/landing-spot grounds — exactly the 'weight landing spot over pure draft capital' override wiki/team/rookie-evaluation.md's best-ball framing calls for. Placed ahead of the round-1 WRs it out-ranks in consensus.",2026-08-24-bigboard-initial-build-rookie-placement
-92,8136,Rachaad White,RB,vorp,7.300000078976154,,,2026-08-27-bigboard-external-consensus-comparison
-93,12533,Jacory Croskey-Merritt,RB,vorp,6.600000202655792,,,2026-08-27-bigboard-external-consensus-comparison
-94,11627,Troy Franklin,WR,vorp,5.919999942183495,,,2026-08-27-bigboard-external-consensus-comparison
-95,5947,Jakobi Meyers,WR,vorp,4.620000131428242,,,2026-08-27-bigboard-external-consensus-comparison
-96,13281,Jordyn Tyson,WR,rookie,,1,"R1 (pick 8, NO) — elite pre-injury college profile and the single best per-game production projection among rookie WRs (CBS: 61/869/4), but a late-2025 hamstring injury tempers consensus rank (#6) below Tate/Lemon/Stribling; placed accordingly, still solidly inside the WR24-36 band.",2026-08-24-bigboard-initial-build-rookie-placement
-97,11584,Bucky Irving,RB,vorp,3.8000001907348633,,,2026-08-27-bigboard-external-consensus-comparison
-98,7049,Jauan Jennings,WR,vorp,2.1199998259544373,,,2026-08-27-bigboard-external-consensus-comparison
-99,9754,Quentin Johnston,WR,vorp,0.019999973475933075,,,2026-08-27-bigboard-external-consensus-comparison
-100,4983,DJ Moore,WR,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
-101,11603,AJ Barner,TE,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
-102,12507,Omarion Hampton,RB,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
-103,13298,KC Concepcion,WR,rookie,,1,"R1 to CLE (consensus #7 rookie overall) — placed in the WR24-36 band behind the higher-consensus R1 WRs, ahead of teammate Boston per consensus ordering.",2026-08-24-bigboard-initial-build-rookie-placement
-104,4892,Baker Mayfield,QB,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
-105,8134,Khalil Shakir,WR,vorp,-4.780000053346157,,,2026-08-27-bigboard-external-consensus-comparison
-106,8408,Jordan Mason,RB,vorp,-5.799999892711639,,,2026-08-27-bigboard-external-consensus-comparison
-107,8121,Romeo Doubs,WR,vorp,-6.780000053346157,,,2026-08-27-bigboard-external-consensus-comparison
-108,12481,Cam Skattebo,RB,vorp,-7.000000178813934,,,2026-08-27-bigboard-external-consensus-comparison
-109,7594,Chuba Hubbard,RB,vorp,-9.300000004470348,,,2026-08-27-bigboard-external-consensus-comparison
-110,13346,Denzel Boston,WR,rookie,,2,R1 to CLE alongside Concepcion (consensus #8 rookie overall) — two round-1 rookie WRs sharing one offense tempers each other's target share relative to a clean WR1 situation; placed just behind Concepcion per consensus.,2026-08-24-bigboard-initial-build-rookie-placement
-111,10213,Tre Tucker,WR,vorp,-10.480000019073486,,,2026-08-27-bigboard-external-consensus-comparison
-112,8132,Tyler Allgeier,RB,vorp,-12.700000189244747,,,2026-08-27-bigboard-external-consensus-comparison
-113,11586,Blake Corum,RB,vorp,-13.499999932944775,,,2026-08-27-bigboard-external-consensus-comparison
-114,8676,Rashid Shaheed,WR,vorp,-14.580000005662441,,,2026-08-27-bigboard-external-consensus-comparison
-115,12493,Oronde Gadsden II,TE,vorp,-14.899999804794788,,,2026-08-27-bigboard-external-consensus-comparison
-116,4199,Aaron Jones,RB,vorp,-15.999999985098839,,,2026-08-27-bigboard-external-consensus-comparison
-117,5012,Mark Andrews,TE,vorp,-16.300000093877316,,,2026-08-27-bigboard-external-consensus-comparison
-118,6865,Colby Parkinson,TE,vorp,-16.500000186264515,,,2026-08-27-bigboard-external-consensus-comparison
-119,13276,Omar Cooper,WR,rookie,,1,"R1 to NYJ (consensus #10 rookie overall) — 'ceiling may not be as high as others... physical and accountable' framing (modest 53/623/4 projection) argues for a real-but-unspectacular floor play; placed at the lower end of the round-1 WR cluster, still ahead of the WR48 landmark.",2026-08-24-bigboard-initial-build-rookie-placement
-120,11647,Kimani Vidal,RB,vorp,-17.799999937415123,,,2026-08-27-bigboard-external-consensus-comparison
-121,11597,Theo Johnson,TE,vorp,-19.50000000745058,,,2026-08-27-bigboard-external-consensus-comparison
-122,6806,J.K. Dobbins,RB,vorp,-19.79999989271164,,,2026-08-27-bigboard-external-consensus-comparison
-123,1339,Zach Ertz,TE,vorp,-20.900000043213367,,,2026-08-27-bigboard-external-consensus-comparison
-124,10236,Dalton Kincaid,TE,vorp,-21.199999943375587,,,2026-08-27-bigboard-external-consensus-comparison
-125,10229,Rashee Rice,WR,vorp,-22.0800002515316,,,2026-08-27-bigboard-external-consensus-comparison
-126,8210,Chig Okonkwo,TE,vorp,-23.299999959766865,,,2026-08-27-bigboard-external-consensus-comparison
-127,9508,Tyjae Spears,RB,vorp,-24.000000283122063,,,2026-08-27-bigboard-external-consensus-comparison
-128,8111,Cade Otton,TE,vorp,-25.09999994188547,,,2026-08-27-bigboard-external-consensus-comparison
-129,11620,Rome Odunze,WR,vorp,-26.080000147223473,,,2026-08-27-bigboard-external-consensus-comparison
-130,6130,Devin Singletary,RB,vorp,-26.900000222027302,,,2026-08-27-bigboard-external-consensus-comparison
-131,9480,Brenton Strange,TE,vorp,-29.299999989569187,,,2026-08-27-bigboard-external-consensus-comparison
-132,9484,Tucker Kraft,TE,vorp,-30.10000006109476,,,2026-08-27-bigboard-external-consensus-comparison
-133,4943,Sam Darnold,QB,vorp,-30.50000074505806,,,2026-08-27-bigboard-external-consensus-comparison
-134,4035,Alvin Kamara,RB,vorp,-33.00000011920929,,,2026-08-27-bigboard-external-consensus-comparison
-135,11631,Brian Thomas Jr.,WR,vorp,-33.38000004738569,,,2026-08-27-bigboard-external-consensus-comparison
-136,7600,Pat Freiermuth,TE,vorp,-33.70000007003546,,,2026-08-27-bigboard-external-consensus-comparison
-137,9500,Josh Downs,WR,vorp,-33.780000291764736,,,2026-08-27-bigboard-external-consensus-comparison
-138,5848,Marquise Brown,WR,vorp,-34.480000257492065,,,2026-08-27-bigboard-external-consensus-comparison
-139,5844,T.J. Hockenson,TE,vorp,-34.50000014156103,,,2026-08-27-bigboard-external-consensus-comparison
-140,6039,Ty Johnson,RB,vorp,-35.40000040829182,,,2026-08-27-bigboard-external-consensus-comparison
-141,7607,Michael Carter,RB,vorp,-36.70000020414591,,,2026-08-27-bigboard-external-consensus-comparison
-142,9756,Jordan Addison,WR,vorp,-37.08000010251999,,,2026-08-27-bigboard-external-consensus-comparison
-143,12508,Jaxson Dart,QB,vorp,-37.339998573064804,,,2026-08-27-bigboard-external-consensus-comparison
-144,8167,Christian Watson,WR,vorp,-39.78000021725893,,,2026-08-27-bigboard-external-consensus-comparison
-145,10859,Sam LaPorta,TE,vorp,-40.40000006556511,,,2026-08-27-bigboard-external-consensus-comparison
-146,11435,Emanuel Wilson,RB,vorp,-41.20000021159649,,,2026-08-27-bigboard-external-consensus-comparison
-147,8122,Bam Knight,RB,vorp,-41.800000458955765,,,2026-08-27-bigboard-external-consensus-comparison
-148,13414,Kaelon Black,RB,rookie,,3,"R3 RB (SF) — RB is this evaluation framework's most forgiving position (day-2/3 capital 'comparable to R1 at the top-36 tier' per wiki/team/rookie-evaluation.md), and he's a surprisingly strong consensus #17 rookie overall for a day-3 pick; placed near the RB36-48 band rather than left at replacement level.",2026-08-24-bigboard-initial-build-rookie-placement
-149,12484,Jayden Higgins,WR,vorp,-42.680000349879265,,,2026-08-27-bigboard-external-consensus-comparison
-150,6804,Jordan Love,QB,vorp,-42.77999999374151,,,2026-08-27-bigboard-external-consensus-comparison
-151,5906,Dawson Knox,TE,vorp,-43.60000017285347,,,2026-08-27-bigboard-external-consensus-comparison
-152,13274,Germie Bernard,WR,rookie,,2,"R2 WR (SF, Stribling's teammate) but absent from the consensus rookie top-20 unlike Stribling/Boston — no standout situational report found; placed as a marginal WR depth flier just behind Black, not meaningfully elevated above his round-2 baseline.",2026-08-24-bigboard-initial-build-rookie-placement
-153,10219,Chris Rodriguez Jr.,RB,vorp,-43.70000030845404,,,2026-08-27-bigboard-external-consensus-comparison
-154,12540,Chimere Dike,WR,vorp,-44.08000047504902,,,2026-08-27-bigboard-external-consensus-comparison
-155,12519,Luther Burden III,WR,vorp,-44.28000010550022,,,2026-08-27-bigboard-external-consensus-comparison
-156,9506,Sean Tucker,RB,vorp,-44.300000570714474,,,2026-08-27-bigboard-external-consensus-comparison
-157,11628,Marvin Harrison Jr.,WR,vorp,-44.38000022619963,,,2026-08-27-bigboard-external-consensus-comparison
-158,4066,Evan Engram,TE,vorp,-44.50000009685755,,,2026-08-27-bigboard-external-consensus-comparison
-159,12490,Bhayshul Tuten,RB,vorp,-46.10000052303076,,,2026-08-27-bigboard-external-consensus-comparison
-160,3257,Jacoby Brissett,QB,vorp,-46.48000002652407,,,2026-08-27-bigboard-external-consensus-comparison
-161,12469,Dylan Sampson,RB,vorp,-47.10000043362379,,,2026-08-27-bigboard-external-consensus-comparison
-162,4988,Nick Chubb,RB,vorp,-47.400000244379044,,,2026-08-27-bigboard-external-consensus-comparison
-163,9504,Kayshon Boutte,WR,vorp,-48.080000311136246,,,2026-08-27-bigboard-external-consensus-comparison
-164,8205,Isiah Pacheco,RB,vorp,-48.400000259280205,,,2026-08-27-bigboard-external-consensus-comparison
-165,5870,Daniel Jones,QB,vorp,-48.47999979555607,,,2026-08-27-bigboard-external-consensus-comparison
-166,6783,Jerry Jeudy,WR,vorp,-50.48000022768974,,,2026-08-27-bigboard-external-consensus-comparison
-167,96,Aaron Rodgers,QB,vorp,-50.84000016003847,,,2026-08-27-bigboard-external-consensus-comparison
-168,9228,Bryce Young,QB,vorp,-52.87999963760376,,,2026-08-27-bigboard-external-consensus-comparison
-169,4039,Cooper Kupp,WR,vorp,-53.88000024855137,,,2026-08-27-bigboard-external-consensus-comparison
-170,8698,Jake Tonges,TE,vorp,-54.00000035762787,,,2026-08-27-bigboard-external-consensus-comparison
-171,11610,Malik Washington,WR,vorp,-54.480000495910645,,,2026-08-27-bigboard-external-consensus-comparison
-172,13269,Fernando Mendoza,QB,rookie,,1,"R1 QB (LV) — consensus top rookie QB (#12 overall, 'no quarterback cracks the top 10') and round-1 QB carries the single strongest positional hit-rate signal in the whole framework (84% of fantasy-relevant rookie QBs are R1), but this league's single-QB/no-superflex format explicitly deprioritizes QB investment per wiki/team/rookie-evaluation.md — placed as a late speculative stash, not chased up the board.",2026-08-24-bigboard-initial-build-rookie-placement
-173,12502,Gunnar Helm,TE,vorp,-55.60000026226044,,,2026-08-27-bigboard-external-consensus-comparison
-174,12499,Elic Ayomanor,WR,vorp,-55.680000364780426,,,2026-08-27-bigboard-external-consensus-comparison
-175,4147,Samaje Perine,RB,vorp,-55.80000039935112,,,2026-08-27-bigboard-external-consensus-comparison
-176,5927,Terry McLaurin,WR,vorp,-57.980000264942646,,,2026-08-27-bigboard-external-consensus-comparison
-177,11783,Ryan Flournoy,WR,vorp,-58.18000038713217,,,2026-08-27-bigboard-external-consensus-comparison
-178,12498,Mason Taylor,TE,vorp,-58.400000244379044,,,2026-08-27-bigboard-external-consensus-comparison
-179,2505,Darren Waller,TE,vorp,-58.600000366568565,,,2026-08-27-bigboard-external-consensus-comparison
-180,4177,Mack Hollins,WR,vorp,-58.7800003066659,,,2026-08-27-bigboard-external-consensus-comparison
-181,4033,David Njoku,TE,vorp,-61.00000035762787,,,2026-08-27-bigboard-external-consensus-comparison
-182,4881,Lamar Jackson,QB,vorp,-61.05999902635813,,,2026-08-27-bigboard-external-consensus-comparison
-183,13275,Ty Simpson,QB,rookie,,1,"R1 QB, but absent from the consensus rookie top-20 (Mendoza is the only QB to crack it) — no standout situational signal found and this league deprioritizes rookie QB value regardless; placed as the lowest-priority QB in this flagged batch.",2026-08-24-bigboard-initial-build-rookie-placement
-184,4219,Jeremy McNichols,RB,vorp,-62.00000047683716,,,2026-08-27-bigboard-external-consensus-comparison
-185,4144,Jonnu Smith,TE,vorp,-62.100000359117985,,,2026-08-27-bigboard-external-consensus-comparison
-186,11624,Xavier Worthy,WR,vorp,-62.28000020980835,,,2026-08-27-bigboard-external-consensus-comparison
-187,11571,Isaiah Davis,RB,vorp,-64.50000046938658,,,2026-08-27-bigboard-external-consensus-comparison
-188,6826,Cole Kmet,TE,vorp,-68.6000002771616,,,2026-08-27-bigboard-external-consensus-comparison
-189,11637,Keon Coleman,WR,vorp,-68.78000053018332,,,2026-08-27-bigboard-external-consensus-comparison
-190,9758,C.J. Stroud,QB,vorp,-69.37999967485666,,,2026-08-27-bigboard-external-consensus-comparison
-191,5857,Noah Fant,TE,vorp,-69.50000036507845,,,2026-08-27-bigboard-external-consensus-comparison
-192,5995,Justice Hill,RB,vorp,-70.50000070780516,,,2026-08-27-bigboard-external-consensus-comparison
-193,8180,Jalen Nailor,WR,vorp,-71.48000045120716,,,2026-08-27-bigboard-external-consensus-comparison
-194,11575,Ray Davis,RB,vorp,-71.60000056028366,,,2026-08-27-bigboard-external-consensus-comparison
-195,6149,Darius Slayton,WR,vorp,-72.38000033050776,,,2026-08-27-bigboard-external-consensus-comparison
-196,12455,Brashard Smith,RB,vorp,-72.40000061690807,,,2026-08-27-bigboard-external-consensus-comparison
-197,8146,Garrett Wilson,WR,vorp,-72.68000054359436,,,2026-08-27-bigboard-external-consensus-comparison
-198,9479,Darnell Washington,TE,vorp,-72.90000025182962,,,2026-08-27-bigboard-external-consensus-comparison
-199,8154,Brian Robinson,RB,vorp,-73.20000046491623,,,2026-08-27-bigboard-external-consensus-comparison
-200,9482,Michael Mayer,TE,vorp,-73.5000003054738,,,2026-08-27-bigboard-external-consensus-comparison
-201,10218,Xavier Hutchinson,WR,vorp,-74.18000046163797,,,2026-08-27-bigboard-external-consensus-comparison
-202,12476,Devin Neal,RB,vorp,-75.70000063627958,,,2026-08-27-bigboard-external-consensus-comparison
-203,3271,Tyler Higbee,TE,vorp,-76.20000037550926,,,2026-08-27-bigboard-external-consensus-comparison
-204,9501,DeMario Douglas,WR,vorp,-76.38000043481588,,,2026-08-27-bigboard-external-consensus-comparison
-205,11199,Emari Demercado,RB,vorp,-76.40000048279762,,,2026-08-27-bigboard-external-consensus-comparison
-206,4993,Mike Gesicki,TE,vorp,-76.60000033676624,,,2026-08-27-bigboard-external-consensus-comparison
-207,9494,Marvin Mims Jr.,WR,vorp,-77.18000053614378,,,2026-08-27-bigboard-external-consensus-comparison
-208,12485,Tez Johnson,WR,vorp,-79.78000061959028,,,2026-08-27-bigboard-external-consensus-comparison
-209,4454,Kendrick Bourne,WR,vorp,-80.08000031113625,,,2026-08-27-bigboard-external-consensus-comparison
-210,9511,Keaton Mitchell,RB,vorp,-80.30000049620867,,,2026-08-27-bigboard-external-consensus-comparison
-211,11646,Jalen Coker,WR,vorp,-80.78000054508448,,,2026-08-27-bigboard-external-consensus-comparison
-212,12495,Ollie Gordon II,RB,vorp,-81.60000075399876,,,2026-08-27-bigboard-external-consensus-comparison
-213,9225,Tank Bigsby,RB,vorp,-81.90000052005053,,,2026-08-27-bigboard-external-consensus-comparison
-214,10226,Andrei Iosivas,WR,vorp,-82.28000046312809,,,2026-08-27-bigboard-external-consensus-comparison
-215,11626,Xavier Legette,WR,vorp,-82.88000059127808,,,2026-08-27-bigboard-external-consensus-comparison
-216,11625,Adonai Mitchell,WR,vorp,-83.28000046312809,,,2026-08-27-bigboard-external-consensus-comparison
-217,7694,Tommy Tremble,TE,vorp,-83.40000042319298,,,2026-08-27-bigboard-external-consensus-comparison
-218,8172,Greg Dulcich,TE,vorp,-83.5000003054738,,,2026-08-27-bigboard-external-consensus-comparison
-219,11638,Ricky Pearsall,WR,vorp,-83.58000034838915,,,2026-08-27-bigboard-external-consensus-comparison
-220,10214,Davis Allen,TE,vorp,-84.50000048428774,,,2026-08-27-bigboard-external-consensus-comparison
-221,8131,Isaiah Likely,TE,vorp,-84.60000033676624,,,2026-08-27-bigboard-external-consensus-comparison
-222,12522,Cam Ward,QB,vorp,-85.25999986380339,,,2026-08-27-bigboard-external-consensus-comparison
-223,8125,Calvin Austin III,WR,vorp,-85.98000057786703,,,2026-08-27-bigboard-external-consensus-comparison
-224,11643,Jaylen Wright,RB,vorp,-86.50000060349703,,,2026-08-27-bigboard-external-consensus-comparison
-225,8917,KaVontae Turpin,WR,vorp,-86.68000040948391,,,2026-08-27-bigboard-external-consensus-comparison
-226,2216,Mike Evans,WR,vorp,-87.3800005838275,,,2026-08-27-bigboard-external-consensus-comparison
-227,6271,Olamide Zaccheaus,WR,vorp,-87.38000062853098,,,2026-08-27-bigboard-external-consensus-comparison
-228,11579,Audric Estimé,RB,vorp,-87.60000064969063,,,2026-08-27-bigboard-external-consensus-comparison
-229,8225,Daniel Bellinger,TE,vorp,-87.70000036805868,,,2026-08-27-bigboard-external-consensus-comparison
-230,3202,Austin Hooper,TE,vorp,-88.00000040233135,,,2026-08-27-bigboard-external-consensus-comparison
-231,10231,Elijah Higgins,TE,vorp,-88.20000034570694,,,2026-08-27-bigboard-external-consensus-comparison
-232,3200,Sterling Shepard,WR,vorp,-89.18000055104494,,,2026-08-27-bigboard-external-consensus-comparison
-233,4037,Chris Godwin Jr.,WR,vorp,-89.18000059574842,,,2026-08-27-bigboard-external-consensus-comparison
-234,7090,Darnell Mooney,WR,vorp,-89.88000047206879,,,2026-08-27-bigboard-external-consensus-comparison
-235,8188,Tyquan Thornton,WR,vorp,-91.38000047951937,,,2026-08-27-bigboard-external-consensus-comparison
-236,8143,Jerome Ford,RB,vorp,-92.10000083595514,,,2026-08-27-bigboard-external-consensus-comparison
-237,5973,Josh Oliver,TE,vorp,-92.30000055581331,,,2026-08-27-bigboard-external-consensus-comparison
-238,11600,Ja'Tavion Sanders,TE,vorp,-93.30000051110983,,,2026-08-27-bigboard-external-consensus-comparison
-239,1373,Geno Smith,QB,vorp,-94.01999980956316,,,2026-08-27-bigboard-external-consensus-comparison
-240,12658,Jackson Hawes,TE,vorp,-94.60000051558018,,,2026-08-27-bigboard-external-consensus-comparison
-241,8800,Malik Davis,RB,vorp,-95.10000070184469,,,2026-08-27-bigboard-external-consensus-comparison
-242,12487,Terrance Ferguson,TE,vorp,-95.20000045001507,,,2026-08-27-bigboard-external-consensus-comparison
-243,11299,Zavier Scott,RB,vorp,-95.50000078231096,,,2026-08-27-bigboard-external-consensus-comparison
-244,12535,Isaac TeSlaa,WR,vorp,-96.28000077605247,,,2026-08-27-bigboard-external-consensus-comparison
-245,9486,Dontayvion Wicks,WR,vorp,-96.38000062853098,,,2026-08-27-bigboard-external-consensus-comparison
-246,8183,Brock Purdy,QB,vorp,-96.53999898582697,,,2026-08-27-bigboard-external-consensus-comparison
-247,5970,Greg Dortch,WR,vorp,-97.08000080287457,,,2026-08-27-bigboard-external-consensus-comparison
-248,12492,Pat Bryant,WR,vorp,-97.38000056892633,,,2026-08-27-bigboard-external-consensus-comparison
-249,2359,Ameer Abdullah,RB,vorp,-97.80000086128712,,,2026-08-27-bigboard-external-consensus-comparison
-250,9481,Luke Musgrave,TE,vorp,-98.10000041872263,,,2026-08-27-bigboard-external-consensus-comparison
-251,4040,JuJu Smith-Schuster,WR,vorp,-98.68000061810017,,,2026-08-27-bigboard-external-consensus-comparison
-252,11510,Hunter Luepke,RB,vorp,-98.70000082999468,,,2026-08-27-bigboard-external-consensus-comparison
-253,12473,Mitchell Evans,TE,vorp,-99.10000053793192,,,2026-08-27-bigboard-external-consensus-comparison
-254,5409,Tanner Hudson,TE,vorp,-99.50000054389238,,,2026-08-27-bigboard-external-consensus-comparison
-255,8147,John Metchie III,WR,vorp,-100.28000073134899,,,2026-08-27-bigboard-external-consensus-comparison
-256,11589,Trey Benson,RB,vorp,-100.30000076442957,,,2026-08-27-bigboard-external-consensus-comparison
-257,8208,Tyler Badie,RB,vorp,-100.30000085383654,,,2026-08-27-bigboard-external-consensus-comparison
-258,8145,Jeremy Ruckert,TE,vorp,-100.4000005275011,,,2026-08-27-bigboard-external-consensus-comparison
-259,6869,Adam Trautman,TE,vorp,-101.80000050365925,,,2026-08-27-bigboard-external-consensus-comparison
-260,12501,Matthew Golden,WR,vorp,-102.18000052124262,,,2026-08-27-bigboard-external-consensus-comparison
-261,6853,Van Jefferson,WR,vorp,-102.18000061064959,,,2026-08-27-bigboard-external-consensus-comparison
-262,9757,Kendre Miller,RB,vorp,-102.40000076591969,,,2026-08-27-bigboard-external-consensus-comparison
-263,4137,James Conner,RB,vorp,-102.40000090003014,,,2026-08-27-bigboard-external-consensus-comparison
-264,12509,Tre Harris,WR,vorp,-102.78000063449144,,,2026-08-27-bigboard-external-consensus-comparison
-265,11370,Chris Brooks,RB,vorp,-103.0000008046627,,,2026-08-27-bigboard-external-consensus-comparison
-266,12536,Jaylin Noel,WR,vorp,-103.78000067919493,,,2026-08-27-bigboard-external-consensus-comparison
-267,11439,Jaleel McLaughlin,RB,vorp,-104.30000077933073,,,2026-08-27-bigboard-external-consensus-comparison
-268,4381,Taysom Hill,TE,vorp,-104.52000053972006,,,2026-08-27-bigboard-external-consensus-comparison
-269,2374,Tyler Lockett,WR,vorp,-105.08000069856644,,,2026-08-27-bigboard-external-consensus-comparison
-270,1426,DeAndre Hopkins,WR,vorp,-105.18000064045191,,,2026-08-27-bigboard-external-consensus-comparison
-271,3634,Kalif Raymond,WR,vorp,-105.38000067323446,,,2026-08-27-bigboard-external-consensus-comparison
-272,11834,Devaughn Vele,WR,vorp,-105.8800006955862,,,2026-08-27-bigboard-external-consensus-comparison
-273,11588,Jawhar Jordan,RB,vorp,-106.00000075995922,,,2026-08-27-bigboard-external-consensus-comparison
-274,2749,Raheem Mostert,RB,vorp,-106.30000083893538,,,2026-08-27-bigboard-external-consensus-comparison
-275,12497,Tory Horton,WR,vorp,-107.08000089228153,,,2026-08-27-bigboard-external-consensus-comparison
-276,6151,Miles Sanders,RB,vorp,-108.00000087916851,,,2026-08-27-bigboard-external-consensus-comparison
-277,7828,Noah Gray,TE,vorp,-108.50000052899122,,,2026-08-27-bigboard-external-consensus-comparison
-278,6768,Tua Tagovailoa,QB,vorp,-109.2199995815754,,,2026-08-27-bigboard-external-consensus-comparison
-279,12521,Elijah Arroyo,TE,vorp,-109.4000005275011,,,2026-08-27-bigboard-external-consensus-comparison
-280,7537,Jaret Patterson,RB,vorp,-110.00000084936619,,,2026-08-27-bigboard-external-consensus-comparison
-281,7891,Brock Wright,TE,vorp,-110.50000063329935,,,2026-08-27-bigboard-external-consensus-comparison
-282,4718,Dare Ogunbowale,RB,vorp,-110.60000094771385,,,2026-08-27-bigboard-external-consensus-comparison
-283,12544,LeQuint Allen Jr.,RB,vorp,-110.9000008776784,,,2026-08-27-bigboard-external-consensus-comparison
-284,8127,Charlie Kolar,TE,vorp,-111.1000005826354,,,2026-08-27-bigboard-external-consensus-comparison
-285,11608,Isaiah Williams,WR,vorp,-111.48000079393387,,,2026-08-27-bigboard-external-consensus-comparison
-286,6945,Antonio Gibson,RB,vorp,-111.50000093132257,,,2026-08-27-bigboard-external-consensus-comparison
-287,11570,Rasheen Ali,RB,vorp,-111.5000009611249,,,2026-08-27-bigboard-external-consensus-comparison
-288,10444,Cedric Tillman,WR,vorp,-112.18000072985888,,,2026-08-27-bigboard-external-consensus-comparison
-289,12048,George Holani,RB,vorp,-113.90000096708536,,,2026-08-27-bigboard-external-consensus-comparison
-290,3286,Demarcus Robinson,WR,vorp,-113.98000071197748,,,2026-08-27-bigboard-external-consensus-comparison
-291,4950,Christian Kirk,WR,vorp,-114.28000077605247,,,2026-08-27-bigboard-external-consensus-comparison
-292,7535,Hunter Long,TE,vorp,-114.80000066757202,,,2026-08-27-bigboard-external-consensus-comparison
-293,11632,Malik Nabers,WR,vorp,-115.08000072836876,,,2026-08-27-bigboard-external-consensus-comparison
-294,12457,Jaydon Blue,RB,vorp,-115.30000089854002,,,2026-08-27-bigboard-external-consensus-comparison
-295,6001,Drew Sample,TE,vorp,-115.40000063180923,,,2026-08-27-bigboard-external-consensus-comparison
-296,12472,Raheim Sanders,RB,vorp,-115.40000092983246,,,2026-08-27-bigboard-external-consensus-comparison
-297,11577,Will Shipley,RB,vorp,-116.20000094175339,,,2026-08-27-bigboard-external-consensus-comparison
-298,11371,Julian Hill,TE,vorp,-116.30000058561563,,,2026-08-27-bigboard-external-consensus-comparison
+48,8110,Jake Ferguson,TE,vorp,42.800000101327896,,,2026-08-27-bigboard-external-consensus-comparison
+49,12526,Tetairoa McMillan,WR,vorp,41.22000037878752,,,2026-08-27-bigboard-external-consensus-comparison
+50,12518,Tyler Warren,TE,vorp,41.20000043511391,,,2026-08-27-bigboard-external-consensus-comparison
+51,11560,Caleb Williams,QB,vorp,40.7599998190999,,,2026-08-27-bigboard-external-consensus-comparison
+52,12506,Harold Fannin Jr.,TE,vorp,40.1000003144145,,,2026-08-27-bigboard-external-consensus-comparison
+53,3294,Dak Prescott,QB,vorp,39.85999892652035,,,2026-08-27-bigboard-external-consensus-comparison
+54,6801,Tee Higgins,WR,vorp,39.42000012844801,,,2026-08-27-bigboard-external-consensus-comparison
+55,2449,Stefon Diggs,WR,vorp,38.1200003772974,,,2026-08-27-bigboard-external-consensus-comparison
+56,5022,Dallas Goedert,TE,vorp,37.800000086426735,,,2026-08-27-bigboard-external-consensus-comparison
+57,7002,Juwan Johnson,TE,vorp,34.60000053048134,,,2026-08-27-bigboard-external-consensus-comparison
+58,12512,Quinshon Judkins,RB,vorp,34.10000038892031,,,2026-08-27-bigboard-external-consensus-comparison
+59,5892,David Montgomery,RB,vorp,32.22000025212765,,,2026-08-27-bigboard-external-consensus-comparison
+60,11563,Bo Nix,QB,vorp,31.9199997484684,,,2026-08-27-bigboard-external-consensus-comparison
+61,3214,Hunter Henry,TE,vorp,31.500000350177288,,,2026-08-27-bigboard-external-consensus-comparison
+62,8112,Drake London,WR,vorp,30.720000237226486,,,2026-08-27-bigboard-external-consensus-comparison
+63,5001,Dalton Schultz,TE,vorp,30.400000363588333,,,2026-08-27-bigboard-external-consensus-comparison
+64,6819,Michael Pittman,WR,vorp,30.22000003606081,,,2026-08-27-bigboard-external-consensus-comparison
+65,7525,DeVonta Smith,WR,vorp,29.62000036984682,,,2026-08-27-bigboard-external-consensus-comparison
+66,6794,Justin Jefferson,WR,vorp,29.32000043988228,,,2026-08-27-bigboard-external-consensus-comparison
+67,11604,Brock Bowers,TE,vorp,28.900000222027302,,,2026-08-27-bigboard-external-consensus-comparison
+68,6786,CeeDee Lamb,WR,vorp,28.720000475645065,,,2026-08-27-bigboard-external-consensus-comparison
+69,11655,Tyrone Tracy Jr.,RB,vorp,26.10000043362379,,,2026-08-27-bigboard-external-consensus-comparison
+70,6904,Jalen Hurts,QB,vorp,24.140000477433205,,,2026-08-27-bigboard-external-consensus-comparison
+71,3163,Jared Goff,QB,vorp,24.139998719096184,,,2026-08-27-bigboard-external-consensus-comparison
+72,12514,Emeka Egbuka,WR,vorp,23.520000278949738,,,2026-08-27-bigboard-external-consensus-comparison
+73,13279,Carnell Tate,WR,rookie,,1,"R1 (pick 4 overall, elite draft capital), frontrunner for WR1 volume in TEN despite 'mild risk' (new coaching staff, year-2 QB) — placed just above the WR24 landmark (rank 70 ≈ 22.5 vorp), consensus #2 rookie overall.",2026-08-24-bigboard-initial-build-rookie-placement
+74,7526,Jaylen Waddle,WR,vorp,21.940000258386135,,,2026-08-27-bigboard-external-consensus-comparison
+75,12517,Colston Loveland,TE,vorp,17.80000026524067,,,2026-08-27-bigboard-external-consensus-comparison
+76,5872,Deebo Samuel Sr.,WR,vorp,16.0200000628829,,,2026-08-27-bigboard-external-consensus-comparison
+77,6797,Justin Herbert,QB,vorp,15.960000142455101,,,2026-08-27-bigboard-external-consensus-comparison
+78,5846,DK Metcalf,WR,vorp,15.020000152289867,,,2026-08-27-bigboard-external-consensus-comparison
+79,4217,George Kittle,TE,vorp,14.200000137090683,,,2026-08-27-bigboard-external-consensus-comparison
+80,9487,Parker Washington,WR,vorp,12.520000129938126,,,2026-08-27-bigboard-external-consensus-comparison
+81,8142,Alec Pierce,WR,vorp,11.12000036239624,,,2026-08-27-bigboard-external-consensus-comparison
+82,13294,Makai Lemon,WR,rookie,,1,"R1 to PHI (pick 20) — inherits a share of A.J. Brown's vacated 121 targets but not a clean 1-for-1 replacement given the crowded WR room; consensus #4 rookie overall, placed in the WR24-36 band reflecting shared-target risk.",2026-08-24-bigboard-initial-build-rookie-placement
+83,12534,Kyle Monangai,RB,vorp,11.000000312924385,,,2026-08-27-bigboard-external-consensus-comparison
+84,4046,Patrick Mahomes,QB,vorp,10.760000139474869,,,2026-08-27-bigboard-external-consensus-comparison
+85,4098,Kareem Hunt,RB,vorp,10.700000025331974,,,2026-08-27-bigboard-external-consensus-comparison
+86,1479,Keenan Allen,WR,vorp,10.520000025629997,,,2026-08-27-bigboard-external-consensus-comparison
+87,13330,Kenyon Sadiq,TE,rookie,,1,"R1 TE (pick 16, NYJ) — round-1 TE carries the strongest positional hit rate in the whole rookie-evaluation framework (81.8% top-24, 54.5% top-12) and he's specifically flagged for immediate impact; placed just below the TE12 landmark (rank 80 ≈ 13.1 vorp, Brock Bowers), reflecting strong-likely-TE1-of-class upside without assuming the guaranteed outcome.",2026-08-24-bigboard-initial-build-rookie-placement
+88,12474,Woody Marks,RB,vorp,9.400000259280205,,,2026-08-27-bigboard-external-consensus-comparison
+89,11635,Ladd McConkey,WR,vorp,8.72000004351139,,,2026-08-27-bigboard-external-consensus-comparison
+90,13417,De'Zhaun Stribling,WR,rookie,,2,"R2 pick, but consensus fantasy ranking (#5 overall rookie) ranks him ABOVE several round-1 WRs (Tyson, Concepcion, Boston, Cooper) on situational/landing-spot grounds — exactly the 'weight landing spot over pure draft capital' override wiki/team/rookie-evaluation.md's best-ball framing calls for. Placed ahead of the round-1 WRs it out-ranks in consensus.",2026-08-24-bigboard-initial-build-rookie-placement
+91,8136,Rachaad White,RB,vorp,7.300000078976154,,,2026-08-27-bigboard-external-consensus-comparison
+92,12533,Jacory Croskey-Merritt,RB,vorp,6.600000202655792,,,2026-08-27-bigboard-external-consensus-comparison
+93,11627,Troy Franklin,WR,vorp,5.919999942183495,,,2026-08-27-bigboard-external-consensus-comparison
+94,5947,Jakobi Meyers,WR,vorp,4.620000131428242,,,2026-08-27-bigboard-external-consensus-comparison
+95,11584,Bucky Irving,RB,vorp,3.8000001907348633,,,2026-08-27-bigboard-external-consensus-comparison
+96,7049,Jauan Jennings,WR,vorp,2.1199998259544373,,,2026-08-27-bigboard-external-consensus-comparison
+97,9754,Quentin Johnston,WR,vorp,0.019999973475933075,,,2026-08-27-bigboard-external-consensus-comparison
+98,9753,Zach Charbonnet,RB,vorp,45.70000020414591,,"[INJURY REVIEW 2026-08-27: moved #48 -> #100 — remains on PUP as of late Aug camp reports recovering from a Jan-2026-playoffs torn ACL; still on PUP at the 53-man cutdown forces a minimum 4-game absence, real risk of missing a meaningful chunk of the season behind Kenneth Walker III.]",2026-08-27-bigboard-injury-status-review
+99,4983,DJ Moore,WR,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
+100,11603,AJ Barner,TE,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
+101,12507,Omarion Hampton,RB,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
+102,13298,KC Concepcion,WR,rookie,,1,"R1 to CLE (consensus #7 rookie overall) — placed in the WR24-36 band behind the higher-consensus R1 WRs, ahead of teammate Boston per consensus ordering.",2026-08-24-bigboard-initial-build-rookie-placement
+103,4892,Baker Mayfield,QB,vorp,0.0,,,2026-08-27-bigboard-external-consensus-comparison
+104,8134,Khalil Shakir,WR,vorp,-4.780000053346157,,,2026-08-27-bigboard-external-consensus-comparison
+105,8408,Jordan Mason,RB,vorp,-5.799999892711639,,,2026-08-27-bigboard-external-consensus-comparison
+106,8121,Romeo Doubs,WR,vorp,-6.780000053346157,,,2026-08-27-bigboard-external-consensus-comparison
+107,12481,Cam Skattebo,RB,vorp,-7.000000178813934,,,2026-08-27-bigboard-external-consensus-comparison
+108,7594,Chuba Hubbard,RB,vorp,-9.300000004470348,,,2026-08-27-bigboard-external-consensus-comparison
+109,13346,Denzel Boston,WR,rookie,,2,R1 to CLE alongside Concepcion (consensus #8 rookie overall) — two round-1 rookie WRs sharing one offense tempers each other's target share relative to a clean WR1 situation; placed just behind Concepcion per consensus.,2026-08-24-bigboard-initial-build-rookie-placement
+110,10213,Tre Tucker,WR,vorp,-10.480000019073486,,,2026-08-27-bigboard-external-consensus-comparison
+111,8132,Tyler Allgeier,RB,vorp,-12.700000189244747,,,2026-08-27-bigboard-external-consensus-comparison
+112,11586,Blake Corum,RB,vorp,-13.499999932944775,,,2026-08-27-bigboard-external-consensus-comparison
+113,8676,Rashid Shaheed,WR,vorp,-14.580000005662441,,,2026-08-27-bigboard-external-consensus-comparison
+114,12493,Oronde Gadsden II,TE,vorp,-14.899999804794788,,,2026-08-27-bigboard-external-consensus-comparison
+115,4199,Aaron Jones,RB,vorp,-15.999999985098839,,,2026-08-27-bigboard-external-consensus-comparison
+116,5012,Mark Andrews,TE,vorp,-16.300000093877316,,,2026-08-27-bigboard-external-consensus-comparison
+117,6865,Colby Parkinson,TE,vorp,-16.500000186264515,,,2026-08-27-bigboard-external-consensus-comparison
+118,13276,Omar Cooper,WR,rookie,,1,"R1 to NYJ (consensus #10 rookie overall) — 'ceiling may not be as high as others... physical and accountable' framing (modest 53/623/4 projection) argues for a real-but-unspectacular floor play; placed at the lower end of the round-1 WR cluster, still ahead of the WR48 landmark.",2026-08-24-bigboard-initial-build-rookie-placement
+119,11647,Kimani Vidal,RB,vorp,-17.799999937415123,,,2026-08-27-bigboard-external-consensus-comparison
+120,11597,Theo Johnson,TE,vorp,-19.50000000745058,,,2026-08-27-bigboard-external-consensus-comparison
+121,6806,J.K. Dobbins,RB,vorp,-19.79999989271164,,,2026-08-27-bigboard-external-consensus-comparison
+122,1339,Zach Ertz,TE,vorp,-20.900000043213367,,,2026-08-27-bigboard-external-consensus-comparison
+123,10236,Dalton Kincaid,TE,vorp,-21.199999943375587,,,2026-08-27-bigboard-external-consensus-comparison
+124,10229,Rashee Rice,WR,vorp,-22.0800002515316,,,2026-08-27-bigboard-external-consensus-comparison
+125,8210,Chig Okonkwo,TE,vorp,-23.299999959766865,,,2026-08-27-bigboard-external-consensus-comparison
+126,9508,Tyjae Spears,RB,vorp,-24.000000283122063,,,2026-08-27-bigboard-external-consensus-comparison
+127,8111,Cade Otton,TE,vorp,-25.09999994188547,,,2026-08-27-bigboard-external-consensus-comparison
+128,11620,Rome Odunze,WR,vorp,-26.080000147223473,,,2026-08-27-bigboard-external-consensus-comparison
+129,6130,Devin Singletary,RB,vorp,-26.900000222027302,,,2026-08-27-bigboard-external-consensus-comparison
+130,9480,Brenton Strange,TE,vorp,-29.299999989569187,,,2026-08-27-bigboard-external-consensus-comparison
+131,9484,Tucker Kraft,TE,vorp,-30.10000006109476,,,2026-08-27-bigboard-external-consensus-comparison
+132,4943,Sam Darnold,QB,vorp,-30.50000074505806,,,2026-08-27-bigboard-external-consensus-comparison
+133,4035,Alvin Kamara,RB,vorp,-33.00000011920929,,,2026-08-27-bigboard-external-consensus-comparison
+134,11631,Brian Thomas Jr.,WR,vorp,-33.38000004738569,,,2026-08-27-bigboard-external-consensus-comparison
+135,7600,Pat Freiermuth,TE,vorp,-33.70000007003546,,,2026-08-27-bigboard-external-consensus-comparison
+136,9500,Josh Downs,WR,vorp,-33.780000291764736,,,2026-08-27-bigboard-external-consensus-comparison
+137,5848,Marquise Brown,WR,vorp,-34.480000257492065,,,2026-08-27-bigboard-external-consensus-comparison
+138,5844,T.J. Hockenson,TE,vorp,-34.50000014156103,,,2026-08-27-bigboard-external-consensus-comparison
+139,6039,Ty Johnson,RB,vorp,-35.40000040829182,,,2026-08-27-bigboard-external-consensus-comparison
+140,7607,Michael Carter,RB,vorp,-36.70000020414591,,,2026-08-27-bigboard-external-consensus-comparison
+141,9756,Jordan Addison,WR,vorp,-37.08000010251999,,,2026-08-27-bigboard-external-consensus-comparison
+142,12508,Jaxson Dart,QB,vorp,-37.339998573064804,,,2026-08-27-bigboard-external-consensus-comparison
+143,8167,Christian Watson,WR,vorp,-39.78000021725893,,,2026-08-27-bigboard-external-consensus-comparison
+144,10859,Sam LaPorta,TE,vorp,-40.40000006556511,,,2026-08-27-bigboard-external-consensus-comparison
+145,11435,Emanuel Wilson,RB,vorp,-41.20000021159649,,,2026-08-27-bigboard-external-consensus-comparison
+146,8122,Bam Knight,RB,vorp,-41.800000458955765,,,2026-08-27-bigboard-external-consensus-comparison
+147,13414,Kaelon Black,RB,rookie,,3,"R3 RB (SF) — RB is this evaluation framework's most forgiving position (day-2/3 capital 'comparable to R1 at the top-36 tier' per wiki/team/rookie-evaluation.md), and he's a surprisingly strong consensus #17 rookie overall for a day-3 pick; placed near the RB36-48 band rather than left at replacement level.",2026-08-24-bigboard-initial-build-rookie-placement
+148,6804,Jordan Love,QB,vorp,-42.77999999374151,,,2026-08-27-bigboard-external-consensus-comparison
+149,5906,Dawson Knox,TE,vorp,-43.60000017285347,,,2026-08-27-bigboard-external-consensus-comparison
+150,13274,Germie Bernard,WR,rookie,,2,"R2 WR (SF, Stribling's teammate) but absent from the consensus rookie top-20 unlike Stribling/Boston — no standout situational report found; placed as a marginal WR depth flier just behind Black, not meaningfully elevated above his round-2 baseline.",2026-08-24-bigboard-initial-build-rookie-placement
+151,10219,Chris Rodriguez Jr.,RB,vorp,-43.70000030845404,,,2026-08-27-bigboard-external-consensus-comparison
+152,12540,Chimere Dike,WR,vorp,-44.08000047504902,,,2026-08-27-bigboard-external-consensus-comparison
+153,12519,Luther Burden III,WR,vorp,-44.28000010550022,,,2026-08-27-bigboard-external-consensus-comparison
+154,9506,Sean Tucker,RB,vorp,-44.300000570714474,,,2026-08-27-bigboard-external-consensus-comparison
+155,11628,Marvin Harrison Jr.,WR,vorp,-44.38000022619963,,,2026-08-27-bigboard-external-consensus-comparison
+156,4066,Evan Engram,TE,vorp,-44.50000009685755,,,2026-08-27-bigboard-external-consensus-comparison
+157,12490,Bhayshul Tuten,RB,vorp,-46.10000052303076,,,2026-08-27-bigboard-external-consensus-comparison
+158,3257,Jacoby Brissett,QB,vorp,-46.48000002652407,,,2026-08-27-bigboard-external-consensus-comparison
+159,12469,Dylan Sampson,RB,vorp,-47.10000043362379,,,2026-08-27-bigboard-external-consensus-comparison
+160,4988,Nick Chubb,RB,vorp,-47.400000244379044,,,2026-08-27-bigboard-external-consensus-comparison
+161,9504,Kayshon Boutte,WR,vorp,-48.080000311136246,,,2026-08-27-bigboard-external-consensus-comparison
+162,8205,Isiah Pacheco,RB,vorp,-48.400000259280205,,,2026-08-27-bigboard-external-consensus-comparison
+163,5870,Daniel Jones,QB,vorp,-48.47999979555607,,,2026-08-27-bigboard-external-consensus-comparison
+164,6783,Jerry Jeudy,WR,vorp,-50.48000022768974,,,2026-08-27-bigboard-external-consensus-comparison
+165,96,Aaron Rodgers,QB,vorp,-50.84000016003847,,,2026-08-27-bigboard-external-consensus-comparison
+166,9228,Bryce Young,QB,vorp,-52.87999963760376,,,2026-08-27-bigboard-external-consensus-comparison
+167,4039,Cooper Kupp,WR,vorp,-53.88000024855137,,,2026-08-27-bigboard-external-consensus-comparison
+168,8698,Jake Tonges,TE,vorp,-54.00000035762787,,,2026-08-27-bigboard-external-consensus-comparison
+169,11610,Malik Washington,WR,vorp,-54.480000495910645,,,2026-08-27-bigboard-external-consensus-comparison
+170,13269,Fernando Mendoza,QB,rookie,,1,"R1 QB (LV) — consensus top rookie QB (#12 overall, 'no quarterback cracks the top 10') and round-1 QB carries the single strongest positional hit-rate signal in the whole framework (84% of fantasy-relevant rookie QBs are R1), but this league's single-QB/no-superflex format explicitly deprioritizes QB investment per wiki/team/rookie-evaluation.md — placed as a late speculative stash, not chased up the board.",2026-08-24-bigboard-initial-build-rookie-placement
+171,12502,Gunnar Helm,TE,vorp,-55.60000026226044,,,2026-08-27-bigboard-external-consensus-comparison
+172,12499,Elic Ayomanor,WR,vorp,-55.680000364780426,,,2026-08-27-bigboard-external-consensus-comparison
+173,4147,Samaje Perine,RB,vorp,-55.80000039935112,,,2026-08-27-bigboard-external-consensus-comparison
+174,5927,Terry McLaurin,WR,vorp,-57.980000264942646,,,2026-08-27-bigboard-external-consensus-comparison
+175,13281,Jordyn Tyson,WR,rookie,,1,"R1 (pick 8, NO) — elite pre-injury college profile and the single best per-game production projection among rookie WRs (CBS: 61/869/4), but a late-2025 hamstring injury tempers consensus rank (#6) below Tate/Lemon/Stribling; placed accordingly, still solidly inside the WR24-36 band. [INJURY REVIEW 2026-08-27: moved #96 -> #177 — hamstring injury from an 2026-08 joint practice expected to cost roughly two months, likely opening the season on IR; too large a games-missed hit for a rookie WR's speculative upside to justify the original rookie-round insertion slot.]",2026-08-27-bigboard-injury-status-review
+176,11783,Ryan Flournoy,WR,vorp,-58.18000038713217,,,2026-08-27-bigboard-external-consensus-comparison
+177,12498,Mason Taylor,TE,vorp,-58.400000244379044,,,2026-08-27-bigboard-external-consensus-comparison
+178,2505,Darren Waller,TE,vorp,-58.600000366568565,,,2026-08-27-bigboard-external-consensus-comparison
+179,4177,Mack Hollins,WR,vorp,-58.7800003066659,,,2026-08-27-bigboard-external-consensus-comparison
+180,4033,David Njoku,TE,vorp,-61.00000035762787,,,2026-08-27-bigboard-external-consensus-comparison
+181,4881,Lamar Jackson,QB,vorp,-61.05999902635813,,,2026-08-27-bigboard-external-consensus-comparison
+182,13275,Ty Simpson,QB,rookie,,1,"R1 QB, but absent from the consensus rookie top-20 (Mendoza is the only QB to crack it) — no standout situational signal found and this league deprioritizes rookie QB value regardless; placed as the lowest-priority QB in this flagged batch.",2026-08-24-bigboard-initial-build-rookie-placement
+183,4219,Jeremy McNichols,RB,vorp,-62.00000047683716,,,2026-08-27-bigboard-external-consensus-comparison
+184,4144,Jonnu Smith,TE,vorp,-62.100000359117985,,,2026-08-27-bigboard-external-consensus-comparison
+185,11624,Xavier Worthy,WR,vorp,-62.28000020980835,,,2026-08-27-bigboard-external-consensus-comparison
+186,11571,Isaiah Davis,RB,vorp,-64.50000046938658,,,2026-08-27-bigboard-external-consensus-comparison
+187,6826,Cole Kmet,TE,vorp,-68.6000002771616,,,2026-08-27-bigboard-external-consensus-comparison
+188,11637,Keon Coleman,WR,vorp,-68.78000053018332,,,2026-08-27-bigboard-external-consensus-comparison
+189,9758,C.J. Stroud,QB,vorp,-69.37999967485666,,,2026-08-27-bigboard-external-consensus-comparison
+190,5857,Noah Fant,TE,vorp,-69.50000036507845,,,2026-08-27-bigboard-external-consensus-comparison
+191,5995,Justice Hill,RB,vorp,-70.50000070780516,,,2026-08-27-bigboard-external-consensus-comparison
+192,8180,Jalen Nailor,WR,vorp,-71.48000045120716,,,2026-08-27-bigboard-external-consensus-comparison
+193,11575,Ray Davis,RB,vorp,-71.60000056028366,,,2026-08-27-bigboard-external-consensus-comparison
+194,6149,Darius Slayton,WR,vorp,-72.38000033050776,,,2026-08-27-bigboard-external-consensus-comparison
+195,12455,Brashard Smith,RB,vorp,-72.40000061690807,,,2026-08-27-bigboard-external-consensus-comparison
+196,8146,Garrett Wilson,WR,vorp,-72.68000054359436,,,2026-08-27-bigboard-external-consensus-comparison
+197,9479,Darnell Washington,TE,vorp,-72.90000025182962,,,2026-08-27-bigboard-external-consensus-comparison
+198,8154,Brian Robinson,RB,vorp,-73.20000046491623,,,2026-08-27-bigboard-external-consensus-comparison
+199,9482,Michael Mayer,TE,vorp,-73.5000003054738,,,2026-08-27-bigboard-external-consensus-comparison
+200,10218,Xavier Hutchinson,WR,vorp,-74.18000046163797,,,2026-08-27-bigboard-external-consensus-comparison
+201,12476,Devin Neal,RB,vorp,-75.70000063627958,,,2026-08-27-bigboard-external-consensus-comparison
+202,3271,Tyler Higbee,TE,vorp,-76.20000037550926,,,2026-08-27-bigboard-external-consensus-comparison
+203,9501,DeMario Douglas,WR,vorp,-76.38000043481588,,,2026-08-27-bigboard-external-consensus-comparison
+204,11199,Emari Demercado,RB,vorp,-76.40000048279762,,,2026-08-27-bigboard-external-consensus-comparison
+205,4993,Mike Gesicki,TE,vorp,-76.60000033676624,,,2026-08-27-bigboard-external-consensus-comparison
+206,9494,Marvin Mims Jr.,WR,vorp,-77.18000053614378,,,2026-08-27-bigboard-external-consensus-comparison
+207,12485,Tez Johnson,WR,vorp,-79.78000061959028,,,2026-08-27-bigboard-external-consensus-comparison
+208,4454,Kendrick Bourne,WR,vorp,-80.08000031113625,,,2026-08-27-bigboard-external-consensus-comparison
+209,9511,Keaton Mitchell,RB,vorp,-80.30000049620867,,,2026-08-27-bigboard-external-consensus-comparison
+210,11646,Jalen Coker,WR,vorp,-80.78000054508448,,,2026-08-27-bigboard-external-consensus-comparison
+211,12495,Ollie Gordon II,RB,vorp,-81.60000075399876,,,2026-08-27-bigboard-external-consensus-comparison
+212,9225,Tank Bigsby,RB,vorp,-81.90000052005053,,,2026-08-27-bigboard-external-consensus-comparison
+213,10226,Andrei Iosivas,WR,vorp,-82.28000046312809,,,2026-08-27-bigboard-external-consensus-comparison
+214,11626,Xavier Legette,WR,vorp,-82.88000059127808,,,2026-08-27-bigboard-external-consensus-comparison
+215,11625,Adonai Mitchell,WR,vorp,-83.28000046312809,,,2026-08-27-bigboard-external-consensus-comparison
+216,7694,Tommy Tremble,TE,vorp,-83.40000042319298,,,2026-08-27-bigboard-external-consensus-comparison
+217,8172,Greg Dulcich,TE,vorp,-83.5000003054738,,,2026-08-27-bigboard-external-consensus-comparison
+218,10214,Davis Allen,TE,vorp,-84.50000048428774,,,2026-08-27-bigboard-external-consensus-comparison
+219,8131,Isaiah Likely,TE,vorp,-84.60000033676624,,,2026-08-27-bigboard-external-consensus-comparison
+220,12522,Cam Ward,QB,vorp,-85.25999986380339,,,2026-08-27-bigboard-external-consensus-comparison
+221,8125,Calvin Austin III,WR,vorp,-85.98000057786703,,,2026-08-27-bigboard-external-consensus-comparison
+222,11643,Jaylen Wright,RB,vorp,-86.50000060349703,,,2026-08-27-bigboard-external-consensus-comparison
+223,8917,KaVontae Turpin,WR,vorp,-86.68000040948391,,,2026-08-27-bigboard-external-consensus-comparison
+224,2216,Mike Evans,WR,vorp,-87.3800005838275,,,2026-08-27-bigboard-external-consensus-comparison
+225,6271,Olamide Zaccheaus,WR,vorp,-87.38000062853098,,,2026-08-27-bigboard-external-consensus-comparison
+226,11579,Audric Estimé,RB,vorp,-87.60000064969063,,,2026-08-27-bigboard-external-consensus-comparison
+227,8225,Daniel Bellinger,TE,vorp,-87.70000036805868,,,2026-08-27-bigboard-external-consensus-comparison
+228,3202,Austin Hooper,TE,vorp,-88.00000040233135,,,2026-08-27-bigboard-external-consensus-comparison
+229,10231,Elijah Higgins,TE,vorp,-88.20000034570694,,,2026-08-27-bigboard-external-consensus-comparison
+230,3200,Sterling Shepard,WR,vorp,-89.18000055104494,,,2026-08-27-bigboard-external-consensus-comparison
+231,4037,Chris Godwin Jr.,WR,vorp,-89.18000059574842,,,2026-08-27-bigboard-external-consensus-comparison
+232,7090,Darnell Mooney,WR,vorp,-89.88000047206879,,,2026-08-27-bigboard-external-consensus-comparison
+233,8188,Tyquan Thornton,WR,vorp,-91.38000047951937,,,2026-08-27-bigboard-external-consensus-comparison
+234,8143,Jerome Ford,RB,vorp,-92.10000083595514,,,2026-08-27-bigboard-external-consensus-comparison
+235,5973,Josh Oliver,TE,vorp,-92.30000055581331,,,2026-08-27-bigboard-external-consensus-comparison
+236,11600,Ja'Tavion Sanders,TE,vorp,-93.30000051110983,,,2026-08-27-bigboard-external-consensus-comparison
+237,1373,Geno Smith,QB,vorp,-94.01999980956316,,,2026-08-27-bigboard-external-consensus-comparison
+238,12658,Jackson Hawes,TE,vorp,-94.60000051558018,,,2026-08-27-bigboard-external-consensus-comparison
+239,8800,Malik Davis,RB,vorp,-95.10000070184469,,,2026-08-27-bigboard-external-consensus-comparison
+240,12487,Terrance Ferguson,TE,vorp,-95.20000045001507,,,2026-08-27-bigboard-external-consensus-comparison
+241,11299,Zavier Scott,RB,vorp,-95.50000078231096,,,2026-08-27-bigboard-external-consensus-comparison
+242,12535,Isaac TeSlaa,WR,vorp,-96.28000077605247,,,2026-08-27-bigboard-external-consensus-comparison
+243,9486,Dontayvion Wicks,WR,vorp,-96.38000062853098,,,2026-08-27-bigboard-external-consensus-comparison
+244,8183,Brock Purdy,QB,vorp,-96.53999898582697,,,2026-08-27-bigboard-external-consensus-comparison
+245,5970,Greg Dortch,WR,vorp,-97.08000080287457,,,2026-08-27-bigboard-external-consensus-comparison
+246,12492,Pat Bryant,WR,vorp,-97.38000056892633,,,2026-08-27-bigboard-external-consensus-comparison
+247,2359,Ameer Abdullah,RB,vorp,-97.80000086128712,,,2026-08-27-bigboard-external-consensus-comparison
+248,9481,Luke Musgrave,TE,vorp,-98.10000041872263,,,2026-08-27-bigboard-external-consensus-comparison
+249,4040,JuJu Smith-Schuster,WR,vorp,-98.68000061810017,,,2026-08-27-bigboard-external-consensus-comparison
+250,11510,Hunter Luepke,RB,vorp,-98.70000082999468,,,2026-08-27-bigboard-external-consensus-comparison
+251,12473,Mitchell Evans,TE,vorp,-99.10000053793192,,,2026-08-27-bigboard-external-consensus-comparison
+252,5409,Tanner Hudson,TE,vorp,-99.50000054389238,,,2026-08-27-bigboard-external-consensus-comparison
+253,8147,John Metchie III,WR,vorp,-100.28000073134899,,,2026-08-27-bigboard-external-consensus-comparison
+254,11589,Trey Benson,RB,vorp,-100.30000076442957,,,2026-08-27-bigboard-external-consensus-comparison
+255,8208,Tyler Badie,RB,vorp,-100.30000085383654,,,2026-08-27-bigboard-external-consensus-comparison
+256,8145,Jeremy Ruckert,TE,vorp,-100.4000005275011,,,2026-08-27-bigboard-external-consensus-comparison
+257,6869,Adam Trautman,TE,vorp,-101.80000050365925,,,2026-08-27-bigboard-external-consensus-comparison
+258,12501,Matthew Golden,WR,vorp,-102.18000052124262,,,2026-08-27-bigboard-external-consensus-comparison
+259,6853,Van Jefferson,WR,vorp,-102.18000061064959,,,2026-08-27-bigboard-external-consensus-comparison
+260,9757,Kendre Miller,RB,vorp,-102.40000076591969,,,2026-08-27-bigboard-external-consensus-comparison
+261,4137,James Conner,RB,vorp,-102.40000090003014,,,2026-08-27-bigboard-external-consensus-comparison
+262,12509,Tre Harris,WR,vorp,-102.78000063449144,,,2026-08-27-bigboard-external-consensus-comparison
+263,11370,Chris Brooks,RB,vorp,-103.0000008046627,,,2026-08-27-bigboard-external-consensus-comparison
+264,12536,Jaylin Noel,WR,vorp,-103.78000067919493,,,2026-08-27-bigboard-external-consensus-comparison
+265,11439,Jaleel McLaughlin,RB,vorp,-104.30000077933073,,,2026-08-27-bigboard-external-consensus-comparison
+266,4381,Taysom Hill,TE,vorp,-104.52000053972006,,,2026-08-27-bigboard-external-consensus-comparison
+267,2374,Tyler Lockett,WR,vorp,-105.08000069856644,,,2026-08-27-bigboard-external-consensus-comparison
+268,1426,DeAndre Hopkins,WR,vorp,-105.18000064045191,,,2026-08-27-bigboard-external-consensus-comparison
+269,3634,Kalif Raymond,WR,vorp,-105.38000067323446,,,2026-08-27-bigboard-external-consensus-comparison
+270,11834,Devaughn Vele,WR,vorp,-105.8800006955862,,,2026-08-27-bigboard-external-consensus-comparison
+271,11588,Jawhar Jordan,RB,vorp,-106.00000075995922,,,2026-08-27-bigboard-external-consensus-comparison
+272,2749,Raheem Mostert,RB,vorp,-106.30000083893538,,,2026-08-27-bigboard-external-consensus-comparison
+273,12497,Tory Horton,WR,vorp,-107.08000089228153,,,2026-08-27-bigboard-external-consensus-comparison
+274,6151,Miles Sanders,RB,vorp,-108.00000087916851,,,2026-08-27-bigboard-external-consensus-comparison
+275,7828,Noah Gray,TE,vorp,-108.50000052899122,,,2026-08-27-bigboard-external-consensus-comparison
+276,6768,Tua Tagovailoa,QB,vorp,-109.2199995815754,,,2026-08-27-bigboard-external-consensus-comparison
+277,12521,Elijah Arroyo,TE,vorp,-109.4000005275011,,,2026-08-27-bigboard-external-consensus-comparison
+278,7537,Jaret Patterson,RB,vorp,-110.00000084936619,,,2026-08-27-bigboard-external-consensus-comparison
+279,7891,Brock Wright,TE,vorp,-110.50000063329935,,,2026-08-27-bigboard-external-consensus-comparison
+280,4718,Dare Ogunbowale,RB,vorp,-110.60000094771385,,,2026-08-27-bigboard-external-consensus-comparison
+281,12544,LeQuint Allen Jr.,RB,vorp,-110.9000008776784,,,2026-08-27-bigboard-external-consensus-comparison
+282,8127,Charlie Kolar,TE,vorp,-111.1000005826354,,,2026-08-27-bigboard-external-consensus-comparison
+283,11608,Isaiah Williams,WR,vorp,-111.48000079393387,,,2026-08-27-bigboard-external-consensus-comparison
+284,6945,Antonio Gibson,RB,vorp,-111.50000093132257,,,2026-08-27-bigboard-external-consensus-comparison
+285,11570,Rasheen Ali,RB,vorp,-111.5000009611249,,,2026-08-27-bigboard-external-consensus-comparison
+286,10444,Cedric Tillman,WR,vorp,-112.18000072985888,,,2026-08-27-bigboard-external-consensus-comparison
+287,12048,George Holani,RB,vorp,-113.90000096708536,,,2026-08-27-bigboard-external-consensus-comparison
+288,3286,Demarcus Robinson,WR,vorp,-113.98000071197748,,,2026-08-27-bigboard-external-consensus-comparison
+289,4950,Christian Kirk,WR,vorp,-114.28000077605247,,,2026-08-27-bigboard-external-consensus-comparison
+290,7535,Hunter Long,TE,vorp,-114.80000066757202,,,2026-08-27-bigboard-external-consensus-comparison
+291,11632,Malik Nabers,WR,vorp,-115.08000072836876,,,2026-08-27-bigboard-external-consensus-comparison
+292,12457,Jaydon Blue,RB,vorp,-115.30000089854002,,,2026-08-27-bigboard-external-consensus-comparison
+293,6001,Drew Sample,TE,vorp,-115.40000063180923,,,2026-08-27-bigboard-external-consensus-comparison
+294,12472,Raheim Sanders,RB,vorp,-115.40000092983246,,,2026-08-27-bigboard-external-consensus-comparison
+295,11577,Will Shipley,RB,vorp,-116.20000094175339,,,2026-08-27-bigboard-external-consensus-comparison
+296,11371,Julian Hill,TE,vorp,-116.30000058561563,,,2026-08-27-bigboard-external-consensus-comparison
+297,12484,Jayden Higgins,WR,vorp,-42.680000349879265,,"[INJURY REVIEW 2026-08-27: moved #149 -> #298 — placed on season-ending IR 2026-08-21 (torn ACL); out for all of 2026, no realistic draft-day value this season.]",2026-08-27-bigboard-injury-status-review
+298,11638,Ricky Pearsall,WR,vorp,-83.58000034838915,,"[INJURY REVIEW 2026-08-27: moved #219 -> #299 — placed on season-ending IR 2026-08-01 (PCL surgery, re-aggravated in camp); out for all of 2026.]",2026-08-27-bigboard-injury-status-review
 299,4054,Mo Alie-Cox,TE,vorp,-116.6000006198883,,,2026-08-27-bigboard-external-consensus-comparison
 300,7571,Rashod Bateman,WR,vorp,-116.78000079840422,,,2026-08-27-bigboard-external-consensus-comparison
 301,7842,Luke Farrell,TE,vorp,-116.80000066757202,,,2026-08-27-bigboard-external-consensus-comparison

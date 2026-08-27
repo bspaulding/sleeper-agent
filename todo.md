@@ -2,10 +2,6 @@
 
 ## Before the draft (Saturday, Aug 29)
 
-- bigboard evals currently include special placings for rookies, but do not (i think?)
-  take into account injury statuses and other news about a player, like a reduced role
-  for role changers. We should make sure this is taken into account and that the bigboard
-  has notes for those players that were moved out of their vorp slot for a some reason.
 - Easter Egg / Fun Draft reviewer: Yahoo Fantasy Used to have these draft grade
   reports they would email out after the draft. It would be fun to have a tongue-in-cheek
   reviewer for the whole league, driven by an llm skill. We would want it to look at each
