@@ -11,44 +11,11 @@
 - Verify our `is_keeper` flags (Diggs/Darnold) once they appear on the draft
   object's `/picks` endpoint (not visible pre-lock as of Aug 23), and diff
   `wiki/league/projected-keepers-2026.md` against the real inserted set.
-- Partial news sweep done 2026-08-27 as `decisions/2026/2026-08-27-bigboard-injury-status-review.md`
-  (McCaffrey/Jeanty/Charbonnet/Tyson/Higgins/Pearsall moved; Jacobs/Nacua reviewed, no change).
-  Left explicitly open pending a follow-up: **Judkins** (nagging knee vs. possibly-future-dated
-  search results), **Olave** (resolved medical-tent exit vs. possibly-future-dated search
-  results), **Thornton** (not reached). The automated sweep below picks these up.
-- The `sleeper-agent: draft day` one-shot Routine existed but was broken (wrong
-  `environment_id` — no repo checkout/git creds, confirmed via the 2026-08-26
-  `pre-draft prep` one-shot's failed run log which shared the same bad environment) and
-  stale (referenced the retired `.claude/skills/draft.md` and a `--watch` flag that no
-  longer exists). Rather than fix it as a live in-draft tracker — not useful, since a
-  routine's live session isn't watchable from the Claude app and Brad drafts manually in
-  Sleeper anyway — repurposed 2026-08-27 into **`sleeper-agent: pre-draft news sweep`**:
-  fires Saturday Aug 29, 1:00pm PT (2026-08-29T20:00:00Z, 2hrs ahead of the 3pm PT draft),
-  re-checks the Judkins/Olave/Thornton opens above plus Jacobs'/Nacua's/Jeanty's statuses,
-  and hand-edits `data/bigboard/2025.csv` + files a `decisions --kind bigboard` entry if
-  anything material changed. The companion `sleeper-agent: pre-draft prep` one-shot fired
-  2026-08-26 but hit the same bad environment and did nothing useful; it's spent now
-  (won't refire) and isn't being recreated since the news-sweep Routine above covers it.
-- Swept the other three cadence Routines (weekly stats/VORP, waiver reminder, trade
-  scouting) for the same kind of staleness. Weekly stats/VORP sync's commands are all
-  still current. Fixed 2026-08-27: `waiver window reminder`'s `waiver recommend` and
-  `trade scouting`'s `trade propose` calls were both missing the now-required `--season`
-  flag (they'd been silently self-correcting via each prompt's "check `--help` if stale"
-  fallback — worked, but fragile); `trade scouting` also had a typo'd `sleeper sync` →
-  fixed to `sleeper league sync`.
-- In-season news-freshness for waiver/trade decisions: first tried a separate shared
-  `sleeper-agent: news sweep` Routine (cron `0 11 * * 1,3`, 2hrs ahead of waiver
-  reminder/trade scouting) — wrong call, reverted 2026-08-27 (left disabled, not
-  deleted — no delete action in the `RemoteTrigger` API). It violated
-  `IMPLEMENTATION_PLAN.md` §9's self-contained-Routine principle: a separate prep
-  Routine creates a staleness gap (2hr window) and an implicit ordering dependency
-  between two independently-scheduled Routines with no coordination/failure-visibility
-  if one runs late or dies (as `pre-draft prep` already did once). Fixed instead by
-  folding `.claude/skills/news-research.md`'s existing checkpointed full-sweep mode
-  (keyed on `wiki/news-sources.md`'s `last_swept`) directly into each of the three
-  cadence Routines' own prompts as their own first content step — the checkpoint
-  already makes repeated sweeps cheap (only covers what's new since whichever routine
-  last ran it), so self-containment cost nothing here.
+- Follow up on the three cases the 2026-08-27 injury-status review left open (see
+  `decisions/2026/2026-08-27-bigboard-injury-status-review.md`): **Judkins**, **Olave**,
+  **Thornton**. The scheduled `sleeper-agent: pre-draft news sweep` Routine (fires
+  Saturday 1:00pm PT, 2hrs ahead of the 3pm PT draft) should pick these up automatically —
+  check its report before the draft in case it didn't.
 - **VORP has no projected-output signal — fundamental, needs its own spec, not a quick fix.**
   Confirmed via `cli/src/sleeper_agent/stats/vorp.py::compute_vorp`: it is purely retrospective,
   built only from a completed `--value-season`'s actual weekly stats — there is no projections
