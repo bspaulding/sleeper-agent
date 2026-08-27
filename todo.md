@@ -36,6 +36,19 @@
   flag (they'd been silently self-correcting via each prompt's "check `--help` if stale"
   fallback — worked, but fragile); `trade scouting` also had a typo'd `sleeper sync` →
   fixed to `sleeper league sync`.
+- In-season news-freshness for waiver/trade decisions: first tried a separate shared
+  `sleeper-agent: news sweep` Routine (cron `0 11 * * 1,3`, 2hrs ahead of waiver
+  reminder/trade scouting) — wrong call, reverted 2026-08-27 (left disabled, not
+  deleted — no delete action in the `RemoteTrigger` API). It violated
+  `IMPLEMENTATION_PLAN.md` §9's self-contained-Routine principle: a separate prep
+  Routine creates a staleness gap (2hr window) and an implicit ordering dependency
+  between two independently-scheduled Routines with no coordination/failure-visibility
+  if one runs late or dies (as `pre-draft prep` already did once). Fixed instead by
+  folding `.claude/skills/news-research.md`'s existing checkpointed full-sweep mode
+  (keyed on `wiki/news-sources.md`'s `last_swept`) directly into each of the three
+  cadence Routines' own prompts as their own first content step — the checkpoint
+  already makes repeated sweeps cheap (only covers what's new since whichever routine
+  last ran it), so self-containment cost nothing here.
 - **VORP has no projected-output signal — fundamental, needs its own spec, not a quick fix.**
   Confirmed via `cli/src/sleeper_agent/stats/vorp.py::compute_vorp`: it is purely retrospective,
   built only from a completed `--value-season`'s actual weekly stats — there is no projections
