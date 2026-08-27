@@ -13,6 +13,40 @@
   non-tty stdout (piped/logged/unattended `Monitor` runs) falls back to the
   plain `watch_board` loop since the TUI can't attach to a pipe. 2026-08-24.
 
+## Mock draft feedback triage (2026-08-27, draft 1397736844753412096)
+
+Raw feedback from a live mock draft (slot 8), triaged by replaying the draft's real picks
+(`GET /v1/draft/1397736844753412096/picks`, fetched and analyzed 2026-08-27) against the actual
+`position_tag`/`compute_vorp` code, not guessed from the complaint text alone.
+
+- **"Too many RBs, still!" is a ranking/VORP issue, not a tagging issue — confirmed separate from
+  the shared-FLEX-pool bug fixed 2026-08-27 (`position_tag`/`remaining_flex_capacity` in
+  `board.py`, now two independent NEED-or-SURPLUS + FLEX tags), per direct clarification.** The
+  board is recommending too many RBs near
+  the top of the list itself (a value/replacement-baseline question), not because of any
+  NEED/FLEX/SURPLUS mistagging. Needs its own investigation into why RB ranks so richly relative
+  to WR right now — start with `stats/vorp.py`'s `compute_replacement_ranks`/
+  `DEFAULT_FLEX_WEIGHTS` (the replacement-level baseline per position) rather than `board.py`.
+  Likely connects to the VORP-projection gap below (a stale/retrospective baseline could be
+  misjudging RB scarcity for the coming season) but confirm before assuming they're the same fix.
+- **Injury severity note missing — confirms an existing todo item, not a new one.** `[INJ:
+  <status>]` (`board.py`/`board_app.py`) just echoes Sleeper's raw `injury_status` string
+  verbatim with no severity/impact judgment. This is the same gap as the "bigboard... does not
+  take into account injury statuses" item below (bigboard notes for role-changers/injuries) —
+  this mock draft is a live confirmation that gap is still open, not a separate ask.
+- **VORP has no projected-output signal — fundamental, needs its own spec, not a quick fix.**
+  Confirmed via `cli/src/sleeper_agent/stats/vorp.py::compute_vorp`: it is purely retrospective,
+  built only from a completed `--value-season`'s actual weekly stats — there is no projections
+  data source anywhere in the pipeline. Needed: (a) a projections data feed/sync (same shape as
+  the existing nflverse weekly-stats sync), (b) a `vorp_projected` metric (VORP over replacement
+  using projected rather than realized season output) alongside today's realized-stats VORP, (c)
+  a decision on how `bigboard build`/live `draft board` blend or choose between the two (and
+  whether this changes the bigboard spec's "VORP stays purely quantitative" constraint). Scope as
+  a new doc under `docs/superpowers/specs/`, not a one-line change.
+- **Compare our bigboard/VORP ranking against Sleeper's own rankings and analyze.** Feature idea,
+  needs scoping before implementation: which Sleeper ranking source (their staff rankings? live
+  mock-draft ADP?), and what output shape (a standalone report, or an inline flag on `draft
+  board` rows where our rank and theirs diverge meaningfully).
 ## Before the draft (Saturday, Aug 29)
 
 - bigboard evals currently include special placings for rookies, but do not (i think?)

@@ -53,15 +53,36 @@ def roster_requirement_from_draft(draft: Draft) -> RosterRequirement:
     )
 
 
-def position_tag(position: str, count: int, requirement: RosterRequirement) -> str:
+def remaining_flex_capacity(
+    counts: dict[str, int], requirement: RosterRequirement
+) -> int:
+    """How many of the shared FLEX slots are still unclaimed, across every
+    flex-eligible position at once — not evaluated independently per
+    position. A player drafted past their own position's hard_min but into a
+    still-open flex slot uses up one unit of this *shared* pool, regardless
+    of which flex-eligible position they play; RB and WR aren't each granted
+    their own private copy of `flex_capacity`."""
+    used = sum(
+        max(0, counts.get(position, 0) - requirement.hard_min.get(position, 0))
+        for position in FLEX_ELIGIBLE_POSITIONS
+    )
+    return requirement.flex_capacity - used
+
+
+def position_tag(
+    position: str, count: int, requirement: RosterRequirement, remaining_flex: int
+) -> str:
+    """NEED/SURPLUS reflects only this position's own hard_min — never mixed
+    with FLEX capacity, which is a separate, shared resource (see
+    `remaining_flex_capacity`). A row can be both: a position already past
+    its hard_min ("SURPLUS") can still be worth drafting if the shared FLEX
+    pool has room ("SURPLUS, FLEX") — those are two independent facts about
+    the roster, not one combined tier."""
     hard_min = requirement.hard_min.get(position, 0)
     if count < hard_min:
         return "NEED"
-    flex_ceiling = hard_min + (
-        requirement.flex_capacity if position in FLEX_ELIGIBLE_POSITIONS else 0
-    )
-    if count < flex_ceiling:
-        return "FLEX"
+    if position in FLEX_ELIGIBLE_POSITIONS and remaining_flex > 0:
+        return "SURPLUS, FLEX"
     return "SURPLUS"
 
 
@@ -178,6 +199,11 @@ def render_board(
         lines.append("")
     lines.append("Best available by value:")
     tiers = compute_tiers(board) if annotation is not None else {}
+    remaining_flex = (
+        remaining_flex_capacity(annotation[0], annotation[1])
+        if annotation is not None
+        else 0
+    )
     team_changes = team_changes or {}
     injury_statuses = injury_statuses or {}
     for rank, row in enumerate(board, start=1):
@@ -193,7 +219,9 @@ def render_board(
             line = f"{rank:2d}. {row.name:<25} {row.position:<3} vorp={vorp_display}"
         if annotation is not None:
             counts, req = annotation
-            tag = position_tag(row.position, counts.get(row.position, 0), req)
+            tag = position_tag(
+                row.position, counts.get(row.position, 0), req, remaining_flex
+            )
             if row.source == "vorp":
                 tier = tiers.get(row.player_id, 1)
                 line += f" tier={tier} [{tag}]"

@@ -36,6 +36,7 @@ from sleeper_agent.draft_tools.board import (
     next_unmade_pick_no,
     picks_in_order,
     position_tag,
+    remaining_flex_capacity,
     render_pick_line,
     render_roster_summary,
     slot_for_pick,
@@ -56,7 +57,7 @@ class BoardRowView:
     name: str
     position: str
     detail: str  # "50.0" (vorp) or "ROOKIE R1"
-    tag: str | None  # NEED/FLEX/SURPLUS when "me" is resolved, else None
+    tag: str | None  # "NEED"/"SURPLUS"/"SURPLUS, FLEX" when "me" is resolved, else None
     tier: int | None
     flags: tuple[str, ...]  # "[MOVED: A→B]", "[INJ: ...]"
 
@@ -160,10 +161,12 @@ class DraftBoardModel:
             )
             requirement = self._requirement
             tiers = compute_tiers(board)
+            remaining_flex = remaining_flex_capacity(my_counts, requirement)
         else:
             my_counts = None
             requirement = None
             tiers = {}
+            remaining_flex = 0
         rows: list[BoardRowView] = []
         for rank, row in enumerate(board, start=1):
             if row.source == "rookie":
@@ -182,7 +185,10 @@ class DraftBoardModel:
                 flags.append(f"[INJ: {status}]")
             if my_counts is not None and requirement is not None:
                 tag = position_tag(
-                    row.position, my_counts.get(row.position, 0), requirement
+                    row.position,
+                    my_counts.get(row.position, 0),
+                    requirement,
+                    remaining_flex,
                 )
                 tier = tiers.get(row.player_id) if row.source == "vorp" else None
             else:
@@ -215,6 +221,7 @@ class DraftBoardApp(App[None]):
         Binding("q", "quit", "Quit"),
         Binding("p", "toggle_picks", "Toggle picks"),
         Binding("tab", "toggle_picks", "Toggle picks"),
+        Binding("s", "toggle_surplus", "Hide surplus"),
     ]
     CSS: ClassVar[str] = """
     #status {
@@ -262,6 +269,19 @@ class DraftBoardApp(App[None]):
         self._complete_exit_seconds = complete_exit_seconds
         self._last_state: BoardUiState | None = None
         self._last_error: str | None = None
+        # Guards against overlapping polls: `@work(exclusive=False)` on the
+        # fetch worker lets Textual launch a new one every tick regardless of
+        # whether the previous fetch has returned. If a round-trip to Sleeper
+        # ever runs longer than `poll_seconds`, that piles up concurrent
+        # in-flight requests whose responses land in a burst — every redraw
+        # in the burst is individually correct, but Textual only paints the
+        # terminal once per idle cycle, so the visible effect is the board
+        # looking frozen and then jumping straight to the final state. Skip
+        # (not cancel) a tick while one is already in flight instead: unlike
+        # `exclusive=True`, this can never starve a slow-but-eventually-
+        # successful fetch by repeatedly cancelling it before it completes.
+        self._poll_in_flight = False
+        self._hide_surplus = False
         # Cached at on_mount: querying the DOM on every poll would be slow and
         # can transiently NoMatches while the screen tree is mid-update — the
         # references themselves are stable once mounted.
@@ -312,8 +332,17 @@ class DraftBoardApp(App[None]):
         assert self._status_widget is not None
         return self._status_widget
 
-    @work(exclusive=False, group="board-poll", thread=True)
     def _poll_once(self) -> None:
+        """`set_interval` tick handler. Only launches a new fetch if the
+        previous one has already returned — see `_poll_in_flight`'s docstring
+        in `__init__`."""
+        if self._poll_in_flight:
+            return
+        self._poll_in_flight = True
+        self._fetch_picks_worker()
+
+    @work(exclusive=False, group="board-poll", thread=True)
+    def _fetch_picks_worker(self) -> None:
         try:
             picks = self._fetch_picks(self._draft_id, base_url=self._base_url)
         except Exception as exc:  # noqa: BLE001
@@ -329,16 +358,25 @@ class DraftBoardApp(App[None]):
 
     @on(PicksFetched)
     def handle_picks_fetched(self, event: PicksFetched) -> None:
+        self._poll_in_flight = False
         self._last_error = None
         self._apply_state(self._model.feed(event.picks))
 
     @on(FetchFailed)
     def handle_fetch_failed(self, event: FetchFailed) -> None:
+        self._poll_in_flight = False
         self._last_error = event.error
         self._update_status()
 
     def action_toggle_picks(self) -> None:
         self._picks().toggle_class("hidden")
+
+    def action_toggle_surplus(self) -> None:
+        self._hide_surplus = not self._hide_surplus
+        if self._last_state is not None:
+            # Re-render immediately from the cached state rather than waiting
+            # for the next poll — the toggle should feel instant.
+            self._redraw_board(self._last_state)
 
     def _apply_state(self, state: BoardUiState) -> None:
         self._last_state = state
@@ -355,7 +393,12 @@ class DraftBoardApp(App[None]):
     def _redraw_board(self, state: BoardUiState) -> None:
         table = self._board()
         table.clear()
-        for row in state.rows:
+        rows = (
+            [row for row in state.rows if row.tag != "SURPLUS"]
+            if self._hide_surplus
+            else state.rows
+        )
+        for row in rows:
             table.add_row(
                 str(row.rank),
                 row.name,

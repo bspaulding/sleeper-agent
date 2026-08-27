@@ -83,11 +83,14 @@ which implies a much tighter allocation: `QB≥1, RB≥2, WR≥2, TE≥1, DEF≥
 with the 2 FLEX + 6 bench spots as the only real room for leaning into whichever position is
 paying off that draft. The 8 RB mock-draft-1 result used up nearly all of that flexible room on
 one position, at the direct cost of a completely unfillable DEF slot and zero WR bench cushion.
-Note that `draft board`'s per-row NEED/FLEX/SURPLUS tags check each of RB/WR/TE against the
-*full* FLEX capacity independently (e.g. "would a 3rd RB still be FLEX-eligible" ignores how many
-FLEX spots WR and TE have already claimed) — a deliberate approximation, not true joint
-allocation across the shared pool, so don't read three FLEX-tagged rows across different
-positions as three additional slots.
+`draft board`'s per-row tag now reflects this properly (fixed 2026-08-27, after a second mock
+draft reproduced the same RB overrun): NEED/SURPLUS reflects only a position's own hard_min, and
+`FLEX` is a second, independent tag appended only when the *shared* pool across RB/WR/TE
+(`board.remaining_flex_capacity`) still has room — e.g. `RB (SURPLUS), FLEX` means your starting
+RB slots are full but this pick would still occupy a real, currently-open FLEX slot. Once another
+position (or enough of the same one) claims those FLEX slots, everything still over its own
+hard_min shows plain `SURPLUS` with no FLEX suffix — so three rows tagged `FLEX` really do share
+one pool, not three independent ones.
 
 ## Sources
 

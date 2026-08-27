@@ -10,6 +10,7 @@ from sleeper_agent.draft_tools.board import (
     compute_tiers,
     my_roster_positions,
     position_tag,
+    remaining_flex_capacity,
     render_board,
     render_roster_summary,
     roster_requirement_from_draft,
@@ -702,26 +703,57 @@ def test_roster_requirement_from_draft_reads_slot_counts() -> None:
 def test_position_tag_below_hard_min_is_need() -> None:
     requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
 
-    assert position_tag("RB", 1, requirement) == "NEED"
+    assert position_tag("RB", 1, requirement, remaining_flex=2) == "NEED"
 
 
-def test_position_tag_exactly_at_hard_min_is_flex_not_need() -> None:
+def test_position_tag_at_hard_min_with_flex_room_is_surplus_and_flex() -> None:
+    # NEED/SURPLUS is purely this position's own hard_min; FLEX is a second,
+    # independent fact layered on top when the shared pool still has room.
     requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
 
-    assert position_tag("RB", 2, requirement) == "FLEX"
+    assert position_tag("RB", 2, requirement, remaining_flex=2) == "SURPLUS, FLEX"
 
 
-def test_position_tag_exactly_at_hard_min_plus_flex_is_surplus_not_flex() -> None:
+def test_position_tag_at_hard_min_with_flex_exhausted_is_surplus_only() -> None:
     requirement = RosterRequirement(hard_min={"RB": 2}, flex_capacity=2)
 
-    assert position_tag("RB", 4, requirement) == "SURPLUS"
+    assert position_tag("RB", 2, requirement, remaining_flex=0) == "SURPLUS"
 
 
 def test_position_tag_non_flex_eligible_position_skips_flex_tier() -> None:
-    # QB isn't FLEX-eligible in this league, so hitting hard_min goes straight to SURPLUS.
+    # QB isn't FLEX-eligible in this league, so hitting hard_min is SURPLUS
+    # regardless of remaining shared-pool room.
     requirement = RosterRequirement(hard_min={"QB": 1}, flex_capacity=2)
 
-    assert position_tag("QB", 1, requirement) == "SURPLUS"
+    assert position_tag("QB", 1, requirement, remaining_flex=2) == "SURPLUS"
+
+
+def test_remaining_flex_capacity_is_shared_across_positions() -> None:
+    """The bug this replaces: RB and WR each independently got their own
+    `flex_capacity` allowance instead of drawing down one shared pool. A
+    real mock draft (2026-08-27, draft 1397736844753412096) showed the
+    effect — RB overran its hard_min by 2 (using both real flex slots) while
+    WR was still only at hard_min, yet WR kept reporting FLEX-eligible for
+    two more rounds than it should have."""
+    requirement = RosterRequirement(
+        hard_min={"RB": 2, "WR": 2, "TE": 1}, flex_capacity=2
+    )
+
+    # No one has claimed the pool yet.
+    assert remaining_flex_capacity({"RB": 2, "WR": 2, "TE": 1}, requirement) == 2
+
+    # RB alone used both shared flex slots (4 RB = hard_min 2 + 2 extra).
+    counts = {"RB": 4, "WR": 2, "TE": 1}
+    assert remaining_flex_capacity(counts, requirement) == 0
+    assert position_tag("WR", 2, requirement, remaining_flex=0) == "SURPLUS"
+
+    # One flex slot still open: RB used only 1 of the 2.
+    counts = {"RB": 3, "WR": 2, "TE": 1}
+    remaining = remaining_flex_capacity(counts, requirement)
+    assert remaining == 1
+    assert position_tag("WR", 2, requirement, remaining_flex=remaining) == (
+        "SURPLUS, FLEX"
+    )
 
 
 # --- my_roster_positions --------------------------------------------------
