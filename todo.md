@@ -1,18 +1,5 @@
 # Project TODO
 
-## Done
-
-- ~~Keeper decision~~ — Diggs (R7) + Darnold (R14) locked 2026-08-23; see
-  `decisions/2026/2026-08-23-keeper-diggs-r7-darnold-r14.md` and
-  `wiki/team/keeper-strategy.md`.
-- ~~Live VORP board TUI~~ — `draft board` now defaults to a Textual TUI
-  (`draft_tools/board_app.py`): clears/redraws the best-available board on
-  every new pick instead of scrolling log lines, with a toggleable (`p`/
-  `Tab`) picks-stream panel. `draft watch-picks` (the old line-mode
-  streamer) is removed; `--once` still gives a one-shot plain print, and a
-  non-tty stdout (piped/logged/unattended `Monitor` runs) falls back to the
-  plain `watch_board` loop since the TUI can't attach to a pipe. 2026-08-24.
-
 ## Mock draft feedback triage (2026-08-27, draft 1397736844753412096)
 
 Raw feedback from a live mock draft (slot 8), triaged by replaying the draft's real picks
@@ -47,6 +34,7 @@ Raw feedback from a live mock draft (slot 8), triaged by replaying the draft's r
   needs scoping before implementation: which Sleeper ranking source (their staff rankings? live
   mock-draft ADP?), and what output shape (a standalone report, or an inline flag on `draft
   board` rows where our rank and theirs diverge meaningfully).
+
 ## Before the draft (Saturday, Aug 29)
 
 - bigboard evals currently include special placings for rookies, but do not (i think?)
