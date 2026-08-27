@@ -184,3 +184,27 @@ def test_compute_vorp_ranks_and_scores_against_replacement_level() -> None:
     assert all(r.position != "QB" for r in results)
     assert all(r.position != "TE" for r in results)
     assert "00-UNMAPPED" not in {r.sleeper_id for r in results}
+
+
+def test_compute_vorp_excludes_postseason_rows() -> None:
+    """nflreadpy's weekly file mixes REG and POST rows with no filtering of
+    its own — a deep playoff run must not inflate a player's season total
+    with games a 12-team redraft league never plays."""
+    weekly = pl.DataFrame(
+        [
+            {**_weekly_row("00-A", "Runner A", "RB", 1, 100, 1), "season_type": "REG"},
+            {**_weekly_row("00-A", "Runner A", "RB", 2, 100, 1), "season_type": "REG"},
+            {**_weekly_row("00-A", "Runner A", "RB", 3, 100, 1), "season_type": "POST"},
+            {**_weekly_row("00-B", "Runner B", "RB", 1, 50, 0), "season_type": "REG"},
+            {**_weekly_row("00-B", "Runner B", "RB", 2, 50, 0), "season_type": "REG"},
+        ]
+    )
+    ids = pl.DataFrame({"gsis_id": ["00-A", "00-B"], "sleeper_id": ["101", "102"]})
+    scoring_settings = {"rush_yd": 0.1, "rush_td": 6.0}
+    roster_positions = ["QB", "RB", "RB", "WR", "WR", "TE"]
+
+    results = compute_vorp(weekly, ids, scoring_settings, roster_positions, num_teams=1)
+
+    by_id = {r.sleeper_id: r for r in results}
+    assert by_id["101"].games_played == 2
+    assert by_id["101"].season_points == 32.0

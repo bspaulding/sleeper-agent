@@ -1,6 +1,6 @@
 ---
-last_updated: '2026-08-22'
-source: decisions/2026/2026-08-22-draft-mock-draft-2-abandoned-retro.md
+last_updated: '2026-08-27'
+source: decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md
 ---
 
 # Team roster philosophy
@@ -18,6 +18,17 @@ Checked at the start of every draft.
    every row, so this check no longer has to be done by hand. See also
    `wiki/team/draft-strategy.md` for the general theory behind this (VBD baselines, tiered
    drafting, RB strategy spectrum).
+10. **A handful of specific players still sit meaningfully off from published consensus — check
+    `wiki/team/bigboard-external-comparison.md` before trusting the raw rank for one of them.**
+    A real bug (postseason games silently counted into "season" VORP —
+    `decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md`) explained most of the
+    McCaffrey/Kyren Williams/Etienne/Swift/Pitts/QB-group overvaluation and is already fixed
+    (`data/bigboard/2025.csv` regenerated). What's left is the genuine, unfixed limitation: our
+    VORP is still realized-2025-stats-only (no projections), so it can't see repeatability risk
+    (McCaffrey's injury history, Kyren Williams' workload outlook) or under-rank players whose
+    2025 was suppressed by injury/a down year they're expected to bounce back from (Chase, A.J.
+    Brown, DeVonta Smith, Nico Collins, Loveland). Doesn't change the board itself — a live
+    judgment call like `MOVED` tags (rule 8), not a fix.
 2. **Draft exactly one DEF, rounds 10–15.** Required starting slot, no bench value in a second
    one, no positional runs on it worth reaching into early for — see §4.
 3. **Never spend a pick on a kicker.** No K slot exists in this league.

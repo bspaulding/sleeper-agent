@@ -16,6 +16,12 @@ Raw feedback from a live mock draft (slot 8), triaged by replaying the draft's r
   `DEFAULT_FLEX_WEIGHTS` (the replacement-level baseline per position) rather than `board.py`.
   Likely connects to the VORP-projection gap below (a stale/retrospective baseline could be
   misjudging RB scarcity for the coming season) but confirm before assuming they're the same fix.
+  **Quantified 2026-08-27** (`wiki/team/bigboard-external-comparison.md`): our top 12 runs 8 RB vs.
+  5–7 in two published external top-12s — real, but a moderate rebalance, not evidence the board
+  is drastically broken. **Re-verified after the postseason-VORP bug fix same day** (see below) —
+  still 8 RB in the top 12, unchanged by that fix, so this is genuine replacement-level scarcity
+  (RB's rank-35 replacement level is worse in ppg terms than WR's, at the same replacement rank),
+  not a data bug. Still open: is 8-vs-5-7 worth tuning `DEFAULT_FLEX_WEIGHTS`, or is it correct as-is.
 - **Injury severity note missing — confirms an existing todo item, not a new one.** `[INJ:
   <status>]` (`board.py`/`board_app.py`) just echoes Sleeper's raw `injury_status` string
   verbatim with no severity/impact judgment. This is the same gap as the "bigboard... does not
@@ -30,10 +36,20 @@ Raw feedback from a live mock draft (slot 8), triaged by replaying the draft's r
   a decision on how `bigboard build`/live `draft board` blend or choose between the two (and
   whether this changes the bigboard spec's "VORP stays purely quantitative" constraint). Scope as
   a new doc under `docs/superpowers/specs/`, not a one-line change.
-- **Compare our bigboard/VORP ranking against Sleeper's own rankings and analyze.** Feature idea,
-  needs scoping before implementation: which Sleeper ranking source (their staff rankings? live
-  mock-draft ADP?), and what output shape (a standalone report, or an inline flag on `draft
-  board` rows where our rank and theirs diverge meaningfully).
+  **Narrowed 2026-08-27** (`decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md`):
+  most of the "overvalued" evidence gathered below (McCaffrey, Kyren Williams, Etienne, Swift,
+  Pitts, the whole QB group) turned out to be a real, separate bug — postseason games silently
+  counted into "season" VORP — not the projection gap. **Fixed** (`stats/vorp.py` now filters
+  `season_type == "REG"`; `data/vorp/2025.parquet` and `data/bigboard/2025.csv` regenerated, 370
+  tests passing). What's left after that fix — Chase, A.J. Brown, DeVonta Smith, Nico Collins
+  undervalued; nothing forward-looking to catch injury-recovery/repeatability risk — is the real,
+  still-open projection gap this item describes.
+- ~~**Compare our bigboard/VORP ranking against Sleeper's own rankings and analyze.**~~ **Done
+  2026-08-27** — Sleeper doesn't expose a real ranking via its public API (`search_rank` is a
+  search-relevance field contaminated by real-world fame, not fantasy value — confirmed via Tom
+  Brady/Todd Gurley). Compared against two published external rankings (Bleacher Report, ESPN
+  Field Yates) instead; see `wiki/team/bigboard-external-comparison.md` and
+  `decisions/2026/2026-08-27-bigboard-external-consensus-comparison.md`. Feeds the two items above.
 
 ## Before the draft (Saturday, Aug 29)
 

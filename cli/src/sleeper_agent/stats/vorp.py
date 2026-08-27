@@ -108,8 +108,23 @@ def compute_replacement_ranks(
 
 
 def _season_totals(scored_weekly: pl.DataFrame) -> pl.DataFrame:
+    """Sum to one row per player. Regular-season games only: `nflreadpy`'s
+    weekly file mixes `REG` and `POST` rows with no filtering of its own
+    (confirmed 2026-08-27 — `stats_player_week_<season>.parquet` carries
+    both), so an unfiltered sum silently credits deep playoff teams' players
+    with games a 12-team redraft league never plays. `games_played` above 17
+    in `data/vorp/<season>.parquet` was the tell (see
+    `decisions/2026/2026-08-27-bigboard-external-consensus-comparison.md`).
+    Only filtered when the column exists, so fixture DataFrames without it
+    (all pre-existing tests) still work unchanged.
+    """
+    regular_season = (
+        scored_weekly.filter(pl.col("season_type") == "REG")
+        if "season_type" in scored_weekly.columns
+        else scored_weekly
+    )
     return (
-        scored_weekly.filter(pl.col("position").is_in(list(CORE_POSITIONS)))
+        regular_season.filter(pl.col("position").is_in(list(CORE_POSITIONS)))
         .group_by(["player_id", "player_display_name", "position"])
         .agg(
             [
