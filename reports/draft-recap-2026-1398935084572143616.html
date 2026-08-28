@@ -1,934 +1,743 @@
 <title>Only Gold Draft Report Card</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Newsreader:ital,wght@0,400;0,500;0,600;1,500;1,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
   :root {
-    --ground: #EEF1F6;
+    --ink: #1A1C22;
+    --ink-soft: #4A4E5A;
+    --ink-faint: #8A8E9A;
+    --paper: #EEEFF3;
     --surface: #FFFFFF;
-    --surface-raised: #F7F8FC;
-    --line: #D6DBE6;
-    --ink: #14192B;
-    --ink-soft: #4A5170;
-    --ink-faint: #7A81A0;
-    --gold: #A9781F;
-    --gold-strong: #7E5B18;
-    --gold-wash: #F3E7CC;
-    --crimson: #A6342A;
-    --crimson-wash: #F6DEDA;
-    --shadow: 0 1px 2px rgba(20, 25, 43, 0.06), 0 8px 24px -12px rgba(20, 25, 43, 0.18);
+    --surface-raised: #F7F7FA;
+    --line: #D8DAE2;
+    --gold: #B8862E;
+    --gold-strong: #8F6A1F;
+    --gold-wash: #F3E6C8;
+    --crimson: #B54234;
+    --crimson-wash: #F4DCD7;
+    --mid: #6B7280;
+    --mid-wash: #E7E8ED;
+    --shadow: 0 1px 2px rgba(20, 20, 30, 0.04), 0 8px 24px rgba(20, 20, 30, 0.06);
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --ground: #0F1220;
-      --surface: #171C2E;
-      --surface-raised: #1E2438;
-      --line: #333B58;
-      --ink: #F1EEE3;
-      --ink-soft: #B7BCD6;
-      --ink-faint: #8B92B4;
-      --gold: #E0B24E;
-      --gold-strong: #F2C769;
-      --gold-wash: #3A3115;
-      --crimson: #E27567;
-      --crimson-wash: #3D2020;
-      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -14px rgba(0, 0, 0, 0.6);
+      --ink: #EDEEF3;
+      --ink-soft: #C4C7D1;
+      --ink-faint: #8B8FA0;
+      --paper: #121319;
+      --surface: #1A1C24;
+      --surface-raised: #21232D;
+      --line: #32343F;
+      --gold: #E8B84B;
+      --gold-strong: #F2CB6E;
+      --gold-wash: #3A2F14;
+      --crimson: #E17761;
+      --crimson-wash: #3A211C;
+      --mid: #9CA1AF;
+      --mid-wash: #262834;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.4);
     }
   }
 
   :root[data-theme="dark"] {
-    --ground: #0F1220;
-    --surface: #171C2E;
-    --surface-raised: #1E2438;
-    --line: #333B58;
-    --ink: #F1EEE3;
-    --ink-soft: #B7BCD6;
-    --ink-faint: #8B92B4;
-    --gold: #E0B24E;
-    --gold-strong: #F2C769;
-    --gold-wash: #3A3115;
-    --crimson: #E27567;
-    --crimson-wash: #3D2020;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -14px rgba(0, 0, 0, 0.6);
+    --ink: #EDEEF3;
+    --ink-soft: #C4C7D1;
+    --ink-faint: #8B8FA0;
+    --paper: #121319;
+    --surface: #1A1C24;
+    --surface-raised: #21232D;
+    --line: #32343F;
+    --gold: #E8B84B;
+    --gold-strong: #F2CB6E;
+    --gold-wash: #3A2F14;
+    --crimson: #E17761;
+    --crimson-wash: #3A211C;
+    --mid: #9CA1AF;
+    --mid-wash: #262834;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.4);
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    background: var(--ground);
+    background: var(--paper);
     color: var(--ink);
-    font-family: 'Newsreader', Georgia, 'Iowan Old Style', serif;
-    line-height: 1.55;
+    font-family: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
-  .wrap {
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 0 20px 96px;
-  }
-
-  a { color: var(--gold-strong); }
-
-  /* ---------- masthead ---------- */
-
-  .masthead {
-    padding: 56px 0 36px;
-    border-bottom: 3px solid var(--ink);
-  }
-
-  .eyebrow {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.14em;
+  .display {
+    font-family: 'Anton', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
     text-transform: uppercase;
-    color: var(--gold-strong);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .eyebrow::before {
-    content: "";
-    width: 22px;
-    height: 2px;
-    background: var(--gold-strong);
-    display: inline-block;
-  }
-
-  h1.masthead-title {
-    font-family: 'Big Shoulders Display', system-ui, sans-serif;
-    font-weight: 900;
-    font-stretch: condensed;
-    text-transform: uppercase;
-    font-size: clamp(3rem, 11vw, 6rem);
-    line-height: 0.85;
-    letter-spacing: 0.005em;
-    margin: 10px 0 18px;
+    letter-spacing: 0.01em;
     text-wrap: balance;
   }
 
-  .masthead-sub {
+  .mono {
+    font-family: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+  }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 56px 0 44px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 6px solid var(--gold);
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        115deg,
+        rgba(232, 184, 75, 0.05) 0px,
+        rgba(232, 184, 75, 0.05) 1px,
+        transparent 1px,
+        transparent 64px
+      );
+    pointer-events: none;
+  }
+
+  .hero-inner { position: relative; }
+
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-strong, var(--gold));
+    margin-bottom: 18px;
+  }
+
+  .hero-eyebrow .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold-strong, var(--gold));
+    box-shadow: 0 0 0 3px rgba(232, 184, 75, 0.2);
+  }
+
+  .hero h1 {
+    margin: 0;
+    font-size: clamp(2.6rem, 7vw, 4.6rem);
+    line-height: 0.96;
+    color: #F5F1E6;
+  }
+
+  .hero h1 .gold { color: var(--gold-strong, var(--gold)); }
+
+  .hero-sub {
+    margin: 20px 0 0;
+    max-width: 620px;
+    font-size: 1.08rem;
+    line-height: 1.55;
+    color: #C9CCD6;
+  }
+
+  .hero-meta {
+    margin-top: 28px;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 22px;
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.82rem;
-    color: var(--ink-soft);
+    gap: 10px 28px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: #9BA0AE;
+    letter-spacing: 0.02em;
   }
-  .masthead-sub b { color: var(--ink); font-weight: 600; }
+  .hero-meta b { color: #DCD2B4; font-weight: 600; }
 
-  .masthead-lede {
-    margin-top: 22px;
-    font-size: 1.2rem;
-    font-style: italic;
-    font-weight: 500;
-    color: var(--ink-soft);
-    max-width: 62ch;
+  /* ---------- Ticker ---------- */
+
+  .ticker-outer {
+    background: var(--gold);
+    color: #221802;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
   }
-
-  /* ---------- section headers ---------- */
-
-  .section-head {
+  .ticker-track {
     display: flex;
-    align-items: baseline;
-    gap: 14px;
-    margin: 64px 0 22px;
+    width: max-content;
+    gap: 56px;
+    padding: 11px 0;
+    animation: scroll-ticker 42s linear infinite;
   }
-  .section-head h2 {
-    font-family: 'Big Shoulders Display', system-ui, sans-serif;
-    font-weight: 800;
+
+  .ticker-track span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  @keyframes scroll-ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track { animation: none; overflow-x: auto; }
+  }
+
+  /* ---------- Sections ---------- */
+
+  section { padding: 56px 0; }
+
+  .section-head { margin-bottom: 28px; }
+
+  .section-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    font-size: clamp(1.6rem, 4vw, 2.1rem);
-    letter-spacing: 0.01em;
-    margin: 0;
-  }
-  .section-head .section-num {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
     color: var(--gold-strong);
-    font-size: 0.85rem;
-  }
-  .section-rule {
-    flex: 1;
-    height: 1px;
-    background: var(--line);
-    align-self: center;
   }
 
-  /* ---------- trophy case ---------- */
+  .section-head h2 {
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    margin: 6px 0 0;
+    text-wrap: balance;
+  }
 
-  .trophies {
+  .section-dek {
+    margin: 10px 0 0;
+    max-width: 640px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    font-size: 0.98rem;
+  }
+
+  /* ---------- Trophy case ---------- */
+
+  .trophy-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
   }
 
-  .trophy {
+  .trophy-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 22px 22px 20px;
+    box-shadow: var(--shadow);
     position: relative;
+  }
+
+  .trophy-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--gold);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .trophy-name {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    font-size: 1.18rem;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .trophy-team {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-strong);
+    background: var(--gold-wash);
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+
+  .trophy-card p {
+    margin: 0;
+    font-size: 0.94rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Report cards ---------- */
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 18px;
+  }
+
+  .team-card {
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 6px;
-    padding: 18px 18px 20px;
-    box-shadow: var(--shadow);
-  }
-  .trophy::before,
-  .trophy::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    width: 14px;
-    height: 14px;
-    background: var(--ground);
-    border-radius: 50%;
-    transform: translateY(-50%);
-  }
-  .trophy::before { left: -8px; }
-  .trophy::after { right: -8px; }
-
-  .trophy-name {
-    font-family: 'Big Shoulders Display', system-ui, sans-serif;
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 1.15rem;
-    letter-spacing: 0.01em;
-    color: var(--gold-strong);
-    line-height: 1.05;
-  }
-  .trophy-team {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.75rem;
-    color: var(--ink-faint);
-    margin: 6px 0 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .trophy p {
-    margin: 0;
-    font-size: 0.96rem;
-    color: var(--ink-soft);
-  }
-  .trophy p b { color: var(--ink); font-weight: 600; }
-
-  /* ---------- team cards ---------- */
-
-  .team {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-    margin-bottom: 20px;
     overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
   }
 
   .team-head {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     padding: 20px 22px;
+    background: var(--surface-raised);
     border-bottom: 1px solid var(--line);
   }
 
   .grade-badge {
-    font-family: 'Big Shoulders Display', system-ui, sans-serif;
-    font-weight: 900;
-    font-size: 2.6rem;
-    line-height: 1;
-    width: 68px;
-    height: 68px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-  .grade-good { background: var(--gold-wash); color: var(--gold-strong); }
-  .grade-mid  { background: var(--surface-raised); color: var(--ink-soft); border: 1px solid var(--line); }
-  .grade-bad  { background: var(--crimson-wash); color: var(--crimson); }
-
-  .team-title {
-    font-family: 'Big Shoulders Display', system-ui, sans-serif;
-    font-weight: 800;
-    text-transform: uppercase;
+    flex: none;
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-family: 'Anton', sans-serif;
     font-size: 1.5rem;
-    letter-spacing: 0.01em;
-  }
-  .team-title .rank-note {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-weight: 400;
-    text-transform: none;
-    font-size: 0.72rem;
-    color: var(--ink-faint);
-    letter-spacing: 0.03em;
-    display: block;
-    margin-top: 2px;
+    letter-spacing: 0;
   }
 
-  .mvd-chip {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 999px;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
+  .grade-good { background: var(--gold-wash); color: var(--gold-strong); border: 2px solid var(--gold); }
+  .grade-mid { background: var(--mid-wash); color: var(--mid); border: 2px solid var(--mid); }
+  .grade-bad { background: var(--crimson-wash); color: var(--crimson); border: 2px solid var(--crimson); }
+
+  .team-id {
+    flex: 1;
+    min-width: 0;
   }
-  .mvd-pos { background: var(--gold-wash); color: var(--gold-strong); }
-  .mvd-neg { background: var(--crimson-wash); color: var(--crimson); }
-  .mvd-chip small { display: block; font-size: 0.6rem; font-weight: 400; opacity: 0.75; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 1px; }
+
+  .team-slot {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .team-slot-num {
+    font-family: 'Anton', sans-serif;
+    font-size: 1.3rem;
+    color: var(--ink);
+    display: block;
+    line-height: 1.15;
+  }
 
   .team-body {
-    padding: 20px 22px 8px;
+    padding: 18px 22px 22px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
+
   .team-body p {
-    margin: 0 0 14px;
-    font-size: 1.04rem;
-  }
-  .team-body p.take {
-    font-style: italic;
-    font-weight: 500;
-    color: var(--ink);
-    font-size: 1.1rem;
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.62;
+    color: var(--ink-soft);
   }
 
-  details.picks {
-    margin: 0 22px 20px;
-    border-top: 1px dashed var(--line);
-    padding-top: 12px;
+  .pick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
-  details.picks summary {
-    cursor: pointer;
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+
+  .pick-chip {
     font-size: 0.78rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    padding: 4px 0;
-  }
-  details.picks summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-  details.picks[open] summary { color: var(--ink-soft); margin-bottom: 8px; }
-
-  .pick-table-wrap { overflow-x: auto; }
-  table.pick-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.82rem;
-    font-variant-numeric: tabular-nums;
-  }
-  table.pick-table th {
-    text-align: left;
-    font-weight: 500;
-    color: var(--ink-faint);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-size: 0.68rem;
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--line);
-  }
-  table.pick-table td {
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--line);
-    white-space: nowrap;
-  }
-  table.pick-table .c-name { white-space: normal; font-family: 'Newsreader', serif; font-size: 0.86rem; color: var(--ink); }
-  table.pick-table .c-pos { color: var(--ink-faint); }
-  table.pick-table .d-pos { color: var(--gold-strong); font-weight: 600; }
-  table.pick-table .d-neg { color: var(--crimson); font-weight: 600; }
-  table.pick-table .d-zero { color: var(--ink-faint); }
-  table.pick-table .d-null { color: var(--ink-faint); font-style: italic; }
-  .keeper-tag {
-    font-size: 0.6rem;
     background: var(--surface-raised);
     border: 1px solid var(--line);
-    color: var(--ink-faint);
-    padding: 1px 5px;
-    border-radius: 3px;
-    letter-spacing: 0.04em;
+    border-radius: 999px;
+    padding: 5px 11px;
+    color: var(--ink-soft);
+    white-space: nowrap;
   }
 
-  /* ---------- footer ---------- */
+  .pick-chip b { color: var(--ink); font-weight: 600; }
+  .pick-chip .r {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--gold-strong);
+    margin-right: 5px;
+  }
 
-  .colophon {
-    margin-top: 72px;
-    padding-top: 22px;
+  /* ---------- Footer ---------- */
+
+  footer {
+    padding: 40px 0 60px;
     border-top: 1px solid var(--line);
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 0.75rem;
+  }
+
+  footer p {
+    margin: 0;
+    font-size: 0.85rem;
     color: var(--ink-faint);
-    line-height: 1.8;
+    line-height: 1.6;
+    max-width: 560px;
   }
 
   @media (max-width: 520px) {
-    .team-head { grid-template-columns: auto 1fr; }
-    .mvd-chip { grid-column: 1 / -1; justify-self: start; }
+    .hero { padding: 42px 0 32px; }
+    section { padding: 40px 0; }
   }
 </style>
 
+<div class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-eyebrow"><span class="dot"></span> Only Gold League &middot; Sports Desk</div>
+    <h1 class="display">Draft Report<br>Card<span class="gold">.</span></h1>
+    <p class="hero-sub">Twelve teams walked into the mock draft room. Twelve teams walked out with
+      opinions they didn't ask for. Grades, trophies, and a few decisions that deserve to be
+      re-litigated in the group chat &mdash; right this way.</p>
+    <div class="hero-meta">
+      <span><b>League</b> Only Gold</span>
+      <span><b>Season</b> 2026</span>
+      <span><b>Format</b> 12&nbsp;teams &middot; 15&nbsp;rounds</span>
+      <span><b>Slot on the clock</b> 8</span>
+      <span><b>Status</b> Mock draft, complete</span>
+    </div>
+  </div>
+</div>
+
+<div class="ticker-outer">
+  <div class="ticker-track">
+    <span>SLOT 8 HOARDS TIGHT ENDS, WINS ANYWAY</span>
+    <span>SLOT 6 TAKES A QB NOBODY ELSE WAS READY FOR</span>
+    <span>SLOT 5 FINDS A RUNNING BACK IN ROUND TWELVE, SAYS NOTHING</span>
+    <span>ROUNDS 8&ndash;9: SEVEN QUARTERBACKS LEAVE THE BUILDING</span>
+    <span>SLOT 2 PROPOSES MARRIAGE TO A QB IN ROUND FOUR</span>
+    <span>SLOT 1 FINDS ONE LAST TIGHT END ON THE WAY OUT THE DOOR</span>
+    <span>SLOT 8 HOARDS TIGHT ENDS, WINS ANYWAY</span>
+    <span>SLOT 6 TAKES A QB NOBODY ELSE WAS READY FOR</span>
+    <span>SLOT 5 FINDS A RUNNING BACK IN ROUND TWELVE, SAYS NOTHING</span>
+    <span>ROUNDS 8&ndash;9: SEVEN QUARTERBACKS LEAVE THE BUILDING</span>
+    <span>SLOT 2 PROPOSES MARRIAGE TO A QB IN ROUND FOUR</span>
+    <span>SLOT 1 FINDS ONE LAST TIGHT END ON THE WAY OUT THE DOOR</span>
+  </div>
+</div>
+
 <div class="wrap">
 
-  <header class="masthead">
-    <div class="eyebrow">Only Gold &middot; Sports Desk</div>
-    <h1 class="masthead-title">Draft Report Card</h1>
-    <div class="masthead-sub">
-      <span><b>Mock Draft #4</b></span>
-      <span>Slot 8 &middot; 12 teams &middot; 15 rounds</span>
-      <span>Graded vs. the 2025 value-season big board</span>
-    </div>
-    <p class="masthead-lede">
-      Twelve GMs walked into a room. Eleven of them walked out with regrets. We ran the numbers
-      so we wouldn't have to be nice about it.
-    </p>
-  </header>
-
-  <section>
+  <section id="trophies">
     <div class="section-head">
-      <span class="section-num">01</span>
-      <h2>The Hardware</h2>
-      <div class="section-rule"></div>
+      <div class="section-eyebrow">The Hardware</div>
+      <h2 class="display">Trophy Case</h2>
+      <p class="section-dek">Freeform awards, earned the hard way. No trophy here is invented
+        &mdash; every one of these actually happened, live, in front of everybody.</p>
     </div>
-
-    <div class="trophies">
-      <div class="trophy">
-        <div class="trophy-name">Draft-Value MVP</div>
+    <div class="trophy-grid">
+      <div class="trophy-card">
+        <div class="trophy-name">The Tight End Timeshare</div>
         <div class="trophy-team">Slot 8</div>
-        <p>Somehow finished the draft <b>+43.6</b> value per pick ahead of the field, which is
-        the fantasy equivalent of counting cards and not getting caught.</p>
+        <p>Kyle Pitts in round five. Dallas Goedert in round ten. Juwan Johnson in round eleven.
+          Dalton Schultz in round twelve. Four tight ends, one roster, zero explanation offered
+          or requested.</p>
       </div>
-      <div class="trophy">
-        <div class="trophy-name">Reach of the Century</div>
-        <div class="trophy-team">Slot 6 &mdash; Jayden Daniels, 6.067</div>
-        <p>Took a QB our board had ranked <b>525th</b> like he was a top-70 lock. This wasn't a
-        reach, it was a home invasion.</p>
+      <div class="trophy-card">
+        <div class="trophy-name">The Time Machine</div>
+        <div class="trophy-team">Slot 6</div>
+        <p>Jayden Daniels came off the board in round six &mdash; years ahead of when the rest of
+          the room had even opened that folder. Bold. Lonely. Very bold.</p>
       </div>
-      <div class="trophy">
-        <div class="trophy-name">Best Player Available, Handed To You</div>
-        <div class="trophy-team">Slot 5 &mdash; Bijan Robinson, 1.005</div>
-        <p>Our #1 overall player was still on the board at <b>pick 5</b>. Four other GMs looked
-        directly at a gift horse and checked its teeth anyway.</p>
+      <div class="trophy-card">
+        <div class="trophy-name">Daylight Robbery</div>
+        <div class="trophy-team">Slot 5</div>
+        <p>Tyrone Tracy was still sitting on the board in round twelve. Slot 5 didn't hesitate,
+          didn't celebrate, just took him and moved on like it happens every day.</p>
       </div>
-      <div class="trophy">
-        <div class="trophy-name">The Tight End Whisperer</div>
-        <div class="trophy-team">Slot 8</div>
-        <p>Rostered <b>four</b> tight ends. Nobody needs four tight ends. This is a support
-        group with a FLEX spot.</p>
+      <div class="trophy-card">
+        <div class="trophy-name">Premature Commitment</div>
+        <div class="trophy-team">Slot 2</div>
+        <p>Round four is early for anything. Round four is very early for Joe Burrow, a proposal
+          the rest of the table wasn't remotely ready to hear.</p>
       </div>
-      <div class="trophy">
-        <div class="trophy-name">Steal of the Late Rounds</div>
-        <div class="trophy-team">Slot 7 &mdash; Trevor Lawrence, 9.103</div>
-        <p>Still on the board in <b>round 9</b>, like the rest of the league forgot he plays
-        quarterback for a living.</p>
+      <div class="trophy-card">
+        <div class="trophy-name">The Quarterback Stampede</div>
+        <div class="trophy-team">The whole room</div>
+        <p>Rounds eight and nine: Prescott, Stafford, Herbert, Dart, Lawrence, Mahomes, and Nix
+          all left the board inside twenty picks, like someone rang a bell nobody else heard.</p>
       </div>
-      <div class="trophy">
-        <div class="trophy-name">Fool's Gold Award</div>
-        <div class="trophy-team">Slot 12 &mdash; Kyler Murray, 14.157</div>
-        <p>Cheap by round number, catastrophic by every other measure our board owns. Ranked
-        <b>573rd</b>. There is no 573rd.</p>
+      <div class="trophy-card">
+        <div class="trophy-name">Buzzer Beater</div>
+        <div class="trophy-team">Slot 1</div>
+        <p>AJ Barner, pick 169 of 180 &mdash; proof there was still a usable tight end left on the
+          floor with one round to go, and somebody was paying attention.</p>
       </div>
     </div>
   </section>
 
-  <section>
+  <section id="grades">
     <div class="section-head">
-      <span class="section-num">02</span>
-      <h2>The Grades</h2>
-      <div class="section-rule"></div>
+      <div class="section-eyebrow">The Verdicts</div>
+      <h2 class="display">Report Cards</h2>
+      <p class="section-dek">One letter grade per team, weighed against the room, not the
+        spreadsheet. Read it and weep, or gloat, whichever applies.</p>
     </div>
 
-    <!-- SLOT 8 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-good">A</div>
-        <div class="team-title">Slot 8<span class="rank-note">1st of 12</span></div>
-        <div class="mvd-chip mvd-pos">+43.6<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">This is the roster equivalent of finding a twenty in last winter's coat, twelve times in a row.</p>
-        <p>Somewhere around round 10, this GM stopped drafting a fantasy team and started running
-        a tight end retirement home &mdash; four of them, all reporting for duty, none of them
-        asked for. Finished a scarcely believable <b>+43.6</b> value per pick ahead of the field.
-        Everyone else in this league should be furious. Instead they're going to ask what he did
-        differently, he's going to say "nothing," and he's going to be lying.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.008</td><td class="c-name">De&#39;Von Achane</td><td class="c-pos">RB</td><td class="c-rank">7</td><td class="c-delta"><span class="d-pos">+1</span></td></tr>
-<tr><td class="c-pick">2.017</td><td class="c-name">James Cook</td><td class="c-pos">RB</td><td class="c-rank">8</td><td class="c-delta"><span class="d-pos">+9</span></td></tr>
-<tr><td class="c-pick">3.032</td><td class="c-name">Drake Maye</td><td class="c-pos">QB</td><td class="c-rank">27</td><td class="c-delta"><span class="d-pos">+5</span></td></tr>
-<tr><td class="c-pick">4.041</td><td class="c-name">Zay Flowers</td><td class="c-pos">WR</td><td class="c-rank">29</td><td class="c-delta"><span class="d-pos">+12</span></td></tr>
-<tr><td class="c-pick">5.056</td><td class="c-name">Kyle Pitts</td><td class="c-pos">TE</td><td class="c-rank">34</td><td class="c-delta"><span class="d-pos">+22</span></td></tr>
-<tr><td class="c-pick">6.065</td><td class="c-name">Michael Wilson</td><td class="c-pos">WR</td><td class="c-rank">39</td><td class="c-delta"><span class="d-pos">+26</span></td></tr>
-<tr><td class="c-pick">7.080</td><td class="c-name">Kenny Gainwell</td><td class="c-pos">RB</td><td class="c-rank">23</td><td class="c-delta"><span class="d-pos">+57</span></td></tr>
-<tr><td class="c-pick">8.089</td><td class="c-name">Matthew Stafford</td><td class="c-pos">QB</td><td class="c-rank">28</td><td class="c-delta"><span class="d-pos">+61</span></td></tr>
-<tr><td class="c-pick">9.104</td><td class="c-name">Wan&#39;Dale Robinson</td><td class="c-pos">WR</td><td class="c-rank">46</td><td class="c-delta"><span class="d-pos">+58</span></td></tr>
-<tr><td class="c-pick">10.113</td><td class="c-name">Dallas Goedert</td><td class="c-pos">TE</td><td class="c-rank">56</td><td class="c-delta"><span class="d-pos">+57</span></td></tr>
-<tr><td class="c-pick">11.128</td><td class="c-name">Juwan Johnson</td><td class="c-pos">TE</td><td class="c-rank">57</td><td class="c-delta"><span class="d-pos">+71</span></td></tr>
-<tr><td class="c-pick">12.137</td><td class="c-name">Dalton Schultz</td><td class="c-pos">TE</td><td class="c-rank">63</td><td class="c-delta"><span class="d-pos">+74</span></td></tr>
-<tr><td class="c-pick">13.152</td><td class="c-name">Pittsburgh Steelers</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">14.161</td><td class="c-name">Keenan Allen</td><td class="c-pos">WR</td><td class="c-rank">86</td><td class="c-delta"><span class="d-pos">+75</span></td></tr>
-<tr><td class="c-pick">15.176</td><td class="c-name">Troy Franklin</td><td class="c-pos">WR</td><td class="c-rank">93</td><td class="c-delta"><span class="d-pos">+83</span></td></tr>
-          </tbody>
-        </table>
+    <div class="team-grid">
+
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-mid">B&minus;</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 1</span></div>
         </div>
-      </details>
-    </div>
-
-    <!-- SLOT 4 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-good">B+</div>
-        <div class="team-title">Slot 4<span class="rank-note">2nd of 12</span></div>
-        <div class="mvd-chip mvd-pos">+9.8<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">The dark horse nobody at the table is talking about, which is exactly the problem.</p>
-        <p>This is the guy quietly stacking chips all night while everyone else argues about the
-        flop. One real tell: reached for Brian Thomas in round 7 like he owed him money.
-        Otherwise, maddeningly, boringly correct at every single turn.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.004</td><td class="c-name">Jonathan Taylor</td><td class="c-pos">RB</td><td class="c-rank">3</td><td class="c-delta"><span class="d-pos">+1</span></td></tr>
-<tr><td class="c-pick">2.021</td><td class="c-name">Trey McBride</td><td class="c-pos">TE</td><td class="c-rank">9</td><td class="c-delta"><span class="d-pos">+12</span></td></tr>
-<tr><td class="c-pick">3.028</td><td class="c-name">George Pickens</td><td class="c-pos">WR</td><td class="c-rank">15</td><td class="c-delta"><span class="d-pos">+13</span></td></tr>
-<tr><td class="c-pick">4.045</td><td class="c-name">Travis Etienne</td><td class="c-pos">RB</td><td class="c-rank">16</td><td class="c-delta"><span class="d-pos">+29</span></td></tr>
-<tr><td class="c-pick">5.052</td><td class="c-name">Quinshon Judkins</td><td class="c-pos">RB</td><td class="c-rank">58</td><td class="c-delta"><span class="d-neg">-6</span></td></tr>
-<tr><td class="c-pick">6.069</td><td class="c-name">Jadarian Price</td><td class="c-pos">RB</td><td class="c-rank">47</td><td class="c-delta"><span class="d-pos">+22</span></td></tr>
-<tr><td class="c-pick">7.076</td><td class="c-name">Brian Thomas</td><td class="c-pos">WR</td><td class="c-rank">134</td><td class="c-delta"><span class="d-neg">-58</span></td></tr>
-<tr><td class="c-pick">8.093</td><td class="c-name">Justin Herbert</td><td class="c-pos">QB</td><td class="c-rank">77</td><td class="c-delta"><span class="d-pos">+16</span></td></tr>
-<tr><td class="c-pick">9.100</td><td class="c-name">Kyle Monangai</td><td class="c-pos">RB</td><td class="c-rank">83</td><td class="c-delta"><span class="d-pos">+17</span></td></tr>
-<tr><td class="c-pick">10.117</td><td class="c-name">Oronde Gadsden</td><td class="c-pos">TE</td><td class="c-rank">114</td><td class="c-delta"><span class="d-pos">+3</span></td></tr>
-<tr><td class="c-pick">11.124</td><td class="c-name">Philadelphia Eagles</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">12.141</td><td class="c-name">Khalil Shakir</td><td class="c-pos">WR</td><td class="c-rank">104</td><td class="c-delta"><span class="d-pos">+37</span></td></tr>
-<tr><td class="c-pick">13.148</td><td class="c-name">Denzel Boston</td><td class="c-pos">WR</td><td class="c-rank">109</td><td class="c-delta"><span class="d-pos">+39</span></td></tr>
-<tr><td class="c-pick">14.165</td><td class="c-name">Tank Dell</td><td class="c-pos">WR</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">15.172</td><td class="c-name">Fernando Mendoza</td><td class="c-pos">QB</td><td class="c-rank">170</td><td class="c-delta"><span class="d-pos">+2</span></td></tr>
-          </tbody>
-        </table>
+        <div class="team-body">
+          <p>Jahmyr Gibbs at the top of the board is about as safe a start as this league allows
+            &mdash; and then Slot 1 spent the next three rounds trying to set that goodwill on
+            fire. Garrett Wilson in round four felt less like a football decision than paying full
+            price for a show that already closed. Josh Allen at pick 24 was the early-QB flex
+            nobody asked for, but at least somebody remembered tight ends exist by round fifteen.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Jahmyr Gibbs</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R4</span><b>Garrett Wilson</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R15</span><b>AJ Barner</b> &middot; TE</span>
+          </div>
         </div>
-      </details>
-    </div>
+      </div>
 
-    <!-- SLOT 5 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-good">B</div>
-        <div class="team-title">Slot 5<span class="rank-note">3rd of 12</span></div>
-        <div class="mvd-chip mvd-pos">+3.1<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Four teams in front of this pick looked directly at the best player in the draft and passed.</p>
-        <p>So Bijan Robinson just fell into this guy's lap like a coupon he didn't clip. Followed
-        it up by drafting Mike Evans in round 6 like it was still 2017, then quietly
-        rediscovered basic math for the rest of the night. A roster that opened as a gift and
-        closed as a redemption arc.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.005</td><td class="c-name">Bijan Robinson</td><td class="c-pos">RB</td><td class="c-rank">1</td><td class="c-delta"><span class="d-pos">+4</span></td></tr>
-<tr><td class="c-pick">2.020</td><td class="c-name">Drake London</td><td class="c-pos">WR</td><td class="c-rank">62</td><td class="c-delta"><span class="d-neg">-42</span></td></tr>
-<tr><td class="c-pick">3.029</td><td class="c-name">Chris Olave</td><td class="c-pos">WR</td><td class="c-rank">20</td><td class="c-delta"><span class="d-pos">+9</span></td></tr>
-<tr><td class="c-pick">4.044</td><td class="c-name">Emeka Egbuka</td><td class="c-pos">WR</td><td class="c-rank">72</td><td class="c-delta"><span class="d-neg">-28</span></td></tr>
-<tr><td class="c-pick">5.053</td><td class="c-name">DJ Moore</td><td class="c-pos">WR</td><td class="c-rank">99</td><td class="c-delta"><span class="d-neg">-46</span></td></tr>
-<tr><td class="c-pick">6.068</td><td class="c-name">Mike Evans</td><td class="c-pos">WR</td><td class="c-rank">224</td><td class="c-delta"><span class="d-neg">-156</span></td></tr>
-<tr><td class="c-pick">7.077</td><td class="c-name">Caleb Williams</td><td class="c-pos">QB</td><td class="c-rank">51</td><td class="c-delta"><span class="d-pos">+26</span></td></tr>
-<tr><td class="c-pick">8.092</td><td class="c-name">Rhamondre Stevenson</td><td class="c-pos">RB</td><td class="c-rank">44</td><td class="c-delta"><span class="d-pos">+48</span></td></tr>
-<tr><td class="c-pick">9.101</td><td class="c-name">George Kittle</td><td class="c-pos">TE</td><td class="c-rank">79</td><td class="c-delta"><span class="d-pos">+22</span></td></tr>
-<tr><td class="c-pick">10.116</td><td class="c-name">Jakobi Meyers</td><td class="c-pos">WR</td><td class="c-rank">94</td><td class="c-delta"><span class="d-pos">+22</span></td></tr>
-<tr><td class="c-pick">11.125</td><td class="c-name">Aaron Jones</td><td class="c-pos">RB</td><td class="c-rank">115</td><td class="c-delta"><span class="d-pos">+10</span></td></tr>
-<tr><td class="c-pick">12.140</td><td class="c-name">Tyrone Tracy</td><td class="c-pos">RB</td><td class="c-rank">69</td><td class="c-delta"><span class="d-pos">+71</span></td></tr>
-<tr><td class="c-pick">13.149</td><td class="c-name">Kenyon Sadiq</td><td class="c-pos">TE</td><td class="c-rank">87</td><td class="c-delta"><span class="d-pos">+62</span></td></tr>
-<tr><td class="c-pick">14.164</td><td class="c-name">Jacksonville Jaguars</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">15.173</td><td class="c-name">Sam Darnold</td><td class="c-pos">QB</td><td class="c-rank">132</td><td class="c-delta"><span class="d-pos">+41</span></td></tr>
-          </tbody>
-        </table>
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-bad">D</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 2</span></div>
         </div>
-      </details>
-    </div>
-
-    <!-- SLOT 7 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-mid">B-</div>
-        <div class="team-title">Slot 7<span class="rank-note">4th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;0.4<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">The most aggressively fine team in the league, and there's a strange peace in that.</p>
-        <p>Five running backs, zero personality, the vibes of a guy who orders a water at the
-        bar. Somehow found Trevor Lawrence sitting alone in round 9 like nobody remembered he
-        plays football &mdash; the one interesting thing that happened here all night.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.007</td><td class="c-name">Jaxon Smith-Njigba</td><td class="c-pos">WR</td><td class="c-rank">6</td><td class="c-delta"><span class="d-pos">+1</span></td></tr>
-<tr><td class="c-pick">2.018</td><td class="c-name">Justin Jefferson</td><td class="c-pos">WR</td><td class="c-rank">66</td><td class="c-delta"><span class="d-neg">-48</span></td></tr>
-<tr><td class="c-pick">3.031</td><td class="c-name">Josh Jacobs</td><td class="c-pos">RB</td><td class="c-rank">18</td><td class="c-delta"><span class="d-pos">+13</span></td></tr>
-<tr><td class="c-pick">4.042</td><td class="c-name">Bucky Irving</td><td class="c-pos">RB</td><td class="c-rank">95</td><td class="c-delta"><span class="d-neg">-53</span></td></tr>
-<tr><td class="c-pick">5.055</td><td class="c-name">D&#39;Andre Swift</td><td class="c-pos">RB</td><td class="c-rank">21</td><td class="c-delta"><span class="d-pos">+34</span></td></tr>
-<tr><td class="c-pick">6.066</td><td class="c-name">Jalen Hurts</td><td class="c-pos">QB</td><td class="c-rank">70</td><td class="c-delta"><span class="d-neg">-4</span></td></tr>
-<tr><td class="c-pick">7.079</td><td class="c-name">RJ Harvey</td><td class="c-pos">RB</td><td class="c-rank">31</td><td class="c-delta"><span class="d-pos">+48</span></td></tr>
-<tr><td class="c-pick">8.090</td><td class="c-name">Tony Pollard</td><td class="c-pos">RB</td><td class="c-rank">37</td><td class="c-delta"><span class="d-pos">+53</span></td></tr>
-<tr><td class="c-pick">9.103</td><td class="c-name">Trevor Lawrence</td><td class="c-pos">QB</td><td class="c-rank">33</td><td class="c-delta"><span class="d-pos">+70</span></td></tr>
-<tr><td class="c-pick">10.114</td><td class="c-name">Jordan Mason</td><td class="c-pos">RB</td><td class="c-rank">105</td><td class="c-delta"><span class="d-pos">+9</span></td></tr>
-<tr><td class="c-pick">11.127</td><td class="c-name">Matthew Golden</td><td class="c-pos">WR</td><td class="c-rank">258</td><td class="c-delta"><span class="d-neg">-131</span></td></tr>
-<tr><td class="c-pick">12.138</td><td class="c-name">Xavier Worthy</td><td class="c-pos">WR</td><td class="c-rank">185</td><td class="c-delta"><span class="d-neg">-47</span></td></tr>
-<tr><td class="c-pick">13.151</td><td class="c-name">Minnesota Vikings</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">14.162</td><td class="c-name">Cyrus Allen</td><td class="c-pos">WR</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">15.175</td><td class="c-name">Chig Okonkwo</td><td class="c-pos">TE</td><td class="c-rank">125</td><td class="c-delta"><span class="d-pos">+50</span></td></tr>
-          </tbody>
-        </table>
+        <div class="team-body">
+          <p>Puka Nacua at pick two was the correct answer to a very easy question. Then round
+            four happened, Joe Burrow's name got called, and the room collectively checked its
+            phones for a trade alert. It's not that Burrow is bad &mdash; it's that this was a
+            fantasy draft, not a QB1 waiver claim. Hunter Henry quietly playing hero ball in round
+            eleven deserves a nod nobody's going to give it.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Puka Nacua</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R4</span><b>Joe Burrow</b> &middot; QB</span>
+            <span class="pick-chip"><span class="r">R11</span><b>Hunter Henry</b> &middot; TE</span>
+          </div>
         </div>
-      </details>
-    </div>
+      </div>
 
-    <!-- SLOT 9 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-mid">B-</div>
-        <div class="team-title">Slot 9<span class="rank-note">5th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;1.3<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Started the draft looking like the smartest guy in the room.</p>
-        <p>Then spent rounds three through six reaching for pass-catchers like they were about
-        to be discontinued. Found the thread again late and strolled home like nothing happened.
-        A rollercoaster that mostly, somehow, stayed on the tracks.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.009</td><td class="c-name">Amon-Ra St. Brown</td><td class="c-pos">WR</td><td class="c-rank">10</td><td class="c-delta"><span class="d-neg">-1</span></td></tr>
-<tr><td class="c-pick">2.016</td><td class="c-name">Derrick Henry</td><td class="c-pos">RB</td><td class="c-rank">12</td><td class="c-delta"><span class="d-pos">+4</span></td></tr>
-<tr><td class="c-pick">3.033</td><td class="c-name">Ladd McConkey</td><td class="c-pos">WR</td><td class="c-rank">89</td><td class="c-delta"><span class="d-neg">-56</span></td></tr>
-<tr><td class="c-pick">4.040</td><td class="c-name">Breece Hall</td><td class="c-pos">RB</td><td class="c-rank">30</td><td class="c-delta"><span class="d-pos">+10</span></td></tr>
-<tr><td class="c-pick">5.057</td><td class="c-name">Tucker Kraft</td><td class="c-pos">TE</td><td class="c-rank">131</td><td class="c-delta"><span class="d-neg">-74</span></td></tr>
-<tr><td class="c-pick">6.064</td><td class="c-name">Rome Odunze</td><td class="c-pos">WR</td><td class="c-rank">128</td><td class="c-delta"><span class="d-neg">-64</span></td></tr>
-<tr><td class="c-pick">7.081</td><td class="c-name">Courtland Sutton</td><td class="c-pos">WR</td><td class="c-rank">43</td><td class="c-delta"><span class="d-pos">+38</span></td></tr>
-<tr><td class="c-pick">8.088</td><td class="c-name">Dak Prescott</td><td class="c-pos">QB</td><td class="c-rank">53</td><td class="c-delta"><span class="d-pos">+35</span></td></tr>
-<tr><td class="c-pick">9.105</td><td class="c-name">Dalton Kincaid</td><td class="c-pos">TE</td><td class="c-rank">123</td><td class="c-delta"><span class="d-neg">-18</span></td></tr>
-<tr><td class="c-pick">10.112</td><td class="c-name">Jordan Addison</td><td class="c-pos">WR</td><td class="c-rank">141</td><td class="c-delta"><span class="d-neg">-29</span></td></tr>
-<tr><td class="c-pick">11.129</td><td class="c-name">Jared Goff</td><td class="c-pos">QB</td><td class="c-rank">71</td><td class="c-delta"><span class="d-pos">+58</span></td></tr>
-<tr><td class="c-pick">12.136</td><td class="c-name">Romeo Doubs</td><td class="c-pos">WR</td><td class="c-rank">106</td><td class="c-delta"><span class="d-pos">+30</span></td></tr>
-<tr><td class="c-pick">13.153</td><td class="c-name">Detroit Lions</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">14.160</td><td class="c-name">Tyjae Spears</td><td class="c-pos">RB</td><td class="c-rank">126</td><td class="c-delta"><span class="d-pos">+34</span></td></tr>
-<tr><td class="c-pick">15.177</td><td class="c-name">Isiah Pacheco</td><td class="c-pos">RB</td><td class="c-rank">162</td><td class="c-delta"><span class="d-pos">+15</span></td></tr>
-          </tbody>
-        </table>
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-bad">D+</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 3</span></div>
         </div>
-      </details>
-    </div>
-
-    <!-- SLOT 1 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-mid">C+</div>
-        <div class="team-title">Slot 1<span class="rank-note">6th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;9.9<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Was cruising until round 4, and then round 4 happened.</p>
-        <p>Took Garrett Wilson like he was still a first-rounder somewhere in 2023 and nobody
-        told him the market moved. Everything before and after that single pick is perfectly
-        sensible. That one selection alone is its own weather event, with its own name.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.001</td><td class="c-name">Jahmyr Gibbs</td><td class="c-pos">RB</td><td class="c-rank">2</td><td class="c-delta"><span class="d-neg">-1</span></td></tr>
-<tr><td class="c-pick">2.024</td><td class="c-name">Josh Allen</td><td class="c-pos">QB</td><td class="c-rank">22</td><td class="c-delta"><span class="d-pos">+2</span></td></tr>
-<tr><td class="c-pick">3.025</td><td class="c-name">Nico Collins</td><td class="c-pos">WR</td><td class="c-rank">36</td><td class="c-delta"><span class="d-neg">-11</span></td></tr>
-<tr><td class="c-pick">4.048</td><td class="c-name">Garrett Wilson</td><td class="c-pos">WR</td><td class="c-rank">196</td><td class="c-delta"><span class="d-neg">-148</span></td></tr>
-<tr><td class="c-pick">5.049</td><td class="c-name">Tyler Warren</td><td class="c-pos">TE</td><td class="c-rank">50</td><td class="c-delta"><span class="d-neg">-1</span></td></tr>
-<tr><td class="c-pick">6.072</td><td class="c-name">Rico Dowdle</td><td class="c-pos">RB</td><td class="c-rank">24</td><td class="c-delta"><span class="d-pos">+48</span></td></tr>
-<tr><td class="c-pick">7.073</td><td class="c-name">DK Metcalf</td><td class="c-pos">WR</td><td class="c-rank">78</td><td class="c-delta"><span class="d-neg">-5</span></td></tr>
-<tr><td class="c-pick">8.096</td><td class="c-name">Blake Corum</td><td class="c-pos">RB</td><td class="c-rank">112</td><td class="c-delta"><span class="d-neg">-16</span></td></tr>
-<tr><td class="c-pick">9.097</td><td class="c-name">Alec Pierce</td><td class="c-pos">WR</td><td class="c-rank">81</td><td class="c-delta"><span class="d-pos">+16</span></td></tr>
-<tr><td class="c-pick">10.120</td><td class="c-name">Denver Broncos</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">11.121</td><td class="c-name">KC Concepcion</td><td class="c-pos">WR</td><td class="c-rank">102</td><td class="c-delta"><span class="d-pos">+19</span></td></tr>
-<tr><td class="c-pick">12.144</td><td class="c-name">Jalen Coker</td><td class="c-pos">WR</td><td class="c-rank">210</td><td class="c-delta"><span class="d-neg">-66</span></td></tr>
-<tr><td class="c-pick">13.145</td><td class="c-name">Jordan Love</td><td class="c-pos">QB</td><td class="c-rank">148</td><td class="c-delta"><span class="d-neg">-3</span></td></tr>
-<tr><td class="c-pick">14.168</td><td class="c-name">Keaton Mitchell</td><td class="c-pos">RB</td><td class="c-rank">209</td><td class="c-delta"><span class="d-neg">-41</span></td></tr>
-<tr><td class="c-pick">15.169</td><td class="c-name">AJ Barner</td><td class="c-pos">TE</td><td class="c-rank">100</td><td class="c-delta"><span class="d-pos">+69</span></td></tr>
-          </tbody>
-        </table>
+        <div class="team-body">
+          <p>Ja'Marr Chase at three is chalk, and chalk is fine. Malik Nabers in round three is the
+            pick that made the whole table go quiet &mdash; a name-brand receiver taken so far
+            ahead of where the tape says he belongs that it read like a tribute pick, not a
+            football decision. Zach Charbonnet late was a nice recovery, but recovery only counts
+            if you're still standing.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Ja'Marr Chase</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R3</span><b>Malik Nabers</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R12</span><b>Zach Charbonnet</b> &middot; RB</span>
+          </div>
         </div>
-      </details>
-    </div>
+      </div>
 
-    <!-- SLOT 10 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-mid">C</div>
-        <div class="team-title">Slot 10<span class="rank-note">7th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;13.6<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Spent picks one and two paying full retail for players the rest of the league had on clearance.</p>
-        <p>Then quietly assembled a completely respectable bench like nothing happened. The
-        fantasy equivalent of scalping your own concert tickets and then couponing groceries
-        for a month to make up the difference.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.010</td><td class="c-name">CeeDee Lamb</td><td class="c-pos">WR</td><td class="c-rank">68</td><td class="c-delta"><span class="d-neg">-58</span></td></tr>
-<tr><td class="c-pick">2.015</td><td class="c-name">Omarion Hampton</td><td class="c-pos">RB</td><td class="c-rank">101</td><td class="c-delta"><span class="d-neg">-86</span></td></tr>
-<tr><td class="c-pick">3.034</td><td class="c-name">DeVonta Smith</td><td class="c-pos">WR</td><td class="c-rank">65</td><td class="c-delta"><span class="d-neg">-31</span></td></tr>
-<tr><td class="c-pick">4.039</td><td class="c-name">Tee Higgins</td><td class="c-pos">WR</td><td class="c-rank">54</td><td class="c-delta"><span class="d-neg">-15</span></td></tr>
-<tr><td class="c-pick">5.058</td><td class="c-name">Jameson Williams</td><td class="c-pos">WR</td><td class="c-rank">41</td><td class="c-delta"><span class="d-pos">+17</span></td></tr>
-<tr><td class="c-pick">6.063</td><td class="c-name">Carnell Tate</td><td class="c-pos">WR</td><td class="c-rank">73</td><td class="c-delta"><span class="d-neg">-10</span></td></tr>
-<tr><td class="c-pick">7.082</td><td class="c-name">Makai Lemon</td><td class="c-pos">WR</td><td class="c-rank">82</td><td class="c-delta"><span class="d-zero">0</span></td></tr>
-<tr><td class="c-pick">8.087</td><td class="c-name">Jake Ferguson</td><td class="c-pos">TE</td><td class="c-rank">48</td><td class="c-delta"><span class="d-pos">+39</span></td></tr>
-<tr><td class="c-pick">9.106</td><td class="c-name">Patrick Mahomes</td><td class="c-pos">QB</td><td class="c-rank">84</td><td class="c-delta"><span class="d-pos">+22</span></td></tr>
-<tr><td class="c-pick">10.111</td><td class="c-name">Jacory Croskey-Merritt</td><td class="c-pos">RB</td><td class="c-rank">92</td><td class="c-delta"><span class="d-pos">+19</span></td></tr>
-<tr><td class="c-pick">11.130</td><td class="c-name">Baltimore Ravens</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">12.135</td><td class="c-name">Chris Rodriguez</td><td class="c-pos">RB</td><td class="c-rank">151</td><td class="c-delta"><span class="d-neg">-16</span></td></tr>
-<tr><td class="c-pick">13.154</td><td class="c-name">Brian Robinson</td><td class="c-pos">RB</td><td class="c-rank">198</td><td class="c-delta"><span class="d-neg">-44</span></td></tr>
-<tr><td class="c-pick">14.159</td><td class="c-name">Jonah Coleman</td><td class="c-pos">RB</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">15.178</td><td class="c-name">MarShawn Lloyd</td><td class="c-pos">RB</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-          </tbody>
-        </table>
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-good">A&minus;</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 4</span></div>
         </div>
-      </details>
-    </div>
-
-    <!-- SLOT 11 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-mid">C-</div>
-        <div class="team-title">Slot 11<span class="rank-note">8th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;18.0<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Drafted a genuinely excellent pair of running backs, then lost the plot entirely.</p>
-        <p>Took Lamar Jackson in round 3 running on vibes from two seasons ago, then followed it
-        with a tight end reach for good measure. A roster with a great engine bolted to a
-        terrible sense of direction.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.011</td><td class="c-name">Saquon Barkley</td><td class="c-pos">RB</td><td class="c-rank">19</td><td class="c-delta"><span class="d-neg">-8</span></td></tr>
-<tr><td class="c-pick">2.014</td><td class="c-name">Chase Brown</td><td class="c-pos">RB</td><td class="c-rank">11</td><td class="c-delta"><span class="d-pos">+3</span></td></tr>
-<tr><td class="c-pick">3.035</td><td class="c-name">Lamar Jackson</td><td class="c-pos">QB</td><td class="c-rank">181</td><td class="c-delta"><span class="d-neg">-146</span></td></tr>
-<tr><td class="c-pick">4.038</td><td class="c-name">Tetairoa McMillan</td><td class="c-pos">WR</td><td class="c-rank">49</td><td class="c-delta"><span class="d-neg">-11</span></td></tr>
-<tr><td class="c-pick">5.059</td><td class="c-name">TreVeyon Henderson</td><td class="c-pos">RB</td><td class="c-rank">32</td><td class="c-delta"><span class="d-pos">+27</span></td></tr>
-<tr><td class="c-pick">6.062</td><td class="c-name">Jaylen Warren</td><td class="c-pos">RB</td><td class="c-rank">25</td><td class="c-delta"><span class="d-pos">+37</span></td></tr>
-<tr><td class="c-pick">7.083</td><td class="c-name">Travis Kelce</td><td class="c-pos">TE</td><td class="c-rank">45</td><td class="c-delta"><span class="d-pos">+38</span></td></tr>
-<tr><td class="c-pick">8.086</td><td class="c-name">Jordyn Tyson</td><td class="c-pos">WR</td><td class="c-rank">175</td><td class="c-delta"><span class="d-neg">-89</span></td></tr>
-<tr><td class="c-pick">9.107</td><td class="c-name">Michael Pittman</td><td class="c-pos">WR</td><td class="c-rank">64</td><td class="c-delta"><span class="d-pos">+43</span></td></tr>
-<tr><td class="c-pick">10.110</td><td class="c-name">Isaiah Likely</td><td class="c-pos">TE</td><td class="c-rank">219</td><td class="c-delta"><span class="d-neg">-109</span></td></tr>
-<tr><td class="c-pick">11.131</td><td class="c-name">Rachaad White</td><td class="c-pos">RB</td><td class="c-rank">91</td><td class="c-delta"><span class="d-pos">+40</span></td></tr>
-<tr><td class="c-pick">12.134</td><td class="c-name">New England Patriots</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">13.155</td><td class="c-name">Ja&#39;Kobi Lane</td><td class="c-pos">WR</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">14.158</td><td class="c-name">Woody Marks</td><td class="c-pos">RB</td><td class="c-rank">88</td><td class="c-delta"><span class="d-pos">+70</span></td></tr>
-<tr><td class="c-pick">15.179</td><td class="c-name">Tyler Shough</td><td class="c-pos">QB</td><td class="c-rank">308</td><td class="c-delta"><span class="d-neg">-129</span></td></tr>
-          </tbody>
-        </table>
+        <div class="team-body">
+          <p>Four picks, four Sundays you'd actually want to watch: Jonathan Taylor, Trey McBride,
+            George Pickens, Travis Etienne. This is what a draft looks like when somebody did the
+            homework and then had the discipline to just keep doing it. The only crime here is how
+            boring it is to make fun of a team with no crimes.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Jonathan Taylor</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R2</span><b>Trey McBride</b> &middot; TE</span>
+            <span class="pick-chip"><span class="r">R4</span><b>Travis Etienne</b> &middot; RB</span>
+          </div>
         </div>
-      </details>
-    </div>
+      </div>
 
-    <!-- SLOT 12 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-mid">C-</div>
-        <div class="team-title">Slot 12<span class="rank-note">9th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;31.2<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Found Stefon Diggs and Bo Nix on the clearance rack. Genuinely nice work.</p>
-        <p>Then, in round 14, appeared to panic and drafted Kyler Murray like the building was
-        on fire and he was the only quarterback left in it. The building was not on fire. There
-        were other quarterbacks.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.012</td><td class="c-name">Ashton Jeanty</td><td class="c-pos">RB</td><td class="c-rank">26</td><td class="c-delta"><span class="d-neg">-14</span></td></tr>
-<tr><td class="c-pick">2.013</td><td class="c-name">A.J. Brown</td><td class="c-pos">WR</td><td class="c-rank">40</td><td class="c-delta"><span class="d-neg">-27</span></td></tr>
-<tr><td class="c-pick">3.036</td><td class="c-name">Colston Loveland</td><td class="c-pos">TE</td><td class="c-rank">75</td><td class="c-delta"><span class="d-neg">-39</span></td></tr>
-<tr><td class="c-pick">4.037</td><td class="c-name">Javonte Williams</td><td class="c-pos">RB</td><td class="c-rank">17</td><td class="c-delta"><span class="d-pos">+20</span></td></tr>
-<tr><td class="c-pick">5.060</td><td class="c-name">Davante Adams</td><td class="c-pos">WR</td><td class="c-rank">38</td><td class="c-delta"><span class="d-pos">+22</span></td></tr>
-<tr><td class="c-pick">6.061</td><td class="c-name">Terry McLaurin</td><td class="c-pos">WR</td><td class="c-rank">174</td><td class="c-delta"><span class="d-neg">-113</span></td></tr>
-<tr><td class="c-pick">7.084</td><td class="c-name">Los Angeles Rams</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">8.085</td><td class="c-name">Chuba Hubbard</td><td class="c-pos">RB</td><td class="c-rank">108</td><td class="c-delta"><span class="d-neg">-23</span></td></tr>
-<tr><td class="c-pick">9.108</td><td class="c-name">Bo Nix</td><td class="c-pos">QB</td><td class="c-rank">60</td><td class="c-delta"><span class="d-pos">+48</span></td></tr>
-<tr><td class="c-pick">10.109</td><td class="c-name">Stefon Diggs</td><td class="c-pos">WR</td><td class="c-rank">55</td><td class="c-delta"><span class="d-pos">+54</span></td></tr>
-<tr><td class="c-pick">11.132</td><td class="c-name">De&#39;Zhaun Stribling</td><td class="c-pos">WR</td><td class="c-rank">90</td><td class="c-delta"><span class="d-pos">+42</span></td></tr>
-<tr><td class="c-pick">12.133</td><td class="c-name">Mark Andrews</td><td class="c-pos">TE</td><td class="c-rank">116</td><td class="c-delta"><span class="d-pos">+17</span></td></tr>
-<tr><td class="c-pick">13.156</td><td class="c-name">Alvin Kamara</td><td class="c-pos">RB</td><td class="c-rank">133</td><td class="c-delta"><span class="d-pos">+23</span></td></tr>
-<tr><td class="c-pick">14.157</td><td class="c-name">Kyler Murray</td><td class="c-pos">QB</td><td class="c-rank">573</td><td class="c-delta"><span class="d-neg">-416</span></td></tr>
-<tr><td class="c-pick">15.180</td><td class="c-name">Zachariah Branch</td><td class="c-pos">WR</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-          </tbody>
-        </table>
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-good">B+</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 5</span></div>
         </div>
-      </details>
-    </div>
-
-    <!-- SLOT 3 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-bad">D+</div>
-        <div class="team-title">Slot 3<span class="rank-note">10th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;44.6<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Nailed the very first pick of his own draft and then seemed to lose interest for the next eleven rounds.</p>
-        <p>Reached for Malik Nabers so hard in round 3 that our board audibly gasped. Everything
-        that followed felt less like a strategy and more like a series of names this GM
-        vaguely remembered liking. A cautionary tale about drafting purely off vibes.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.003</td><td class="c-name">Ja&#39;Marr Chase</td><td class="c-pos">WR</td><td class="c-rank">13</td><td class="c-delta"><span class="d-neg">-10</span></td></tr>
-<tr><td class="c-pick">2.022</td><td class="c-name">Brock Bowers</td><td class="c-pos">TE</td><td class="c-rank">67</td><td class="c-delta"><span class="d-neg">-45</span></td></tr>
-<tr><td class="c-pick">3.027</td><td class="c-name">Malik Nabers</td><td class="c-pos">WR</td><td class="c-rank">291</td><td class="c-delta"><span class="d-neg">-264</span></td></tr>
-<tr><td class="c-pick">4.046</td><td class="c-name">Jaylen Waddle</td><td class="c-pos">WR</td><td class="c-rank">74</td><td class="c-delta"><span class="d-neg">-28</span></td></tr>
-<tr><td class="c-pick">5.051</td><td class="c-name">David Montgomery</td><td class="c-pos">RB</td><td class="c-rank">59</td><td class="c-delta"><span class="d-neg">-8</span></td></tr>
-<tr><td class="c-pick">6.070</td><td class="c-name">Bhayshul Tuten</td><td class="c-pos">RB</td><td class="c-rank">157</td><td class="c-delta"><span class="d-neg">-87</span></td></tr>
-<tr><td class="c-pick">7.075</td><td class="c-name">Marvin Harrison</td><td class="c-pos">WR</td><td class="c-rank">155</td><td class="c-delta"><span class="d-neg">-80</span></td></tr>
-<tr><td class="c-pick">8.094</td><td class="c-name">Jaxson Dart</td><td class="c-pos">QB</td><td class="c-rank">142</td><td class="c-delta"><span class="d-neg">-48</span></td></tr>
-<tr><td class="c-pick">9.099</td><td class="c-name">J.K. Dobbins</td><td class="c-pos">RB</td><td class="c-rank">121</td><td class="c-delta"><span class="d-neg">-22</span></td></tr>
-<tr><td class="c-pick">10.118</td><td class="c-name">Josh Downs</td><td class="c-pos">WR</td><td class="c-rank">136</td><td class="c-delta"><span class="d-neg">-18</span></td></tr>
-<tr><td class="c-pick">11.123</td><td class="c-name">Brock Purdy</td><td class="c-pos">QB</td><td class="c-rank">244</td><td class="c-delta"><span class="d-neg">-121</span></td></tr>
-<tr><td class="c-pick">12.142</td><td class="c-name">Zach Charbonnet</td><td class="c-pos">RB</td><td class="c-rank">98</td><td class="c-delta"><span class="d-pos">+44</span></td></tr>
-<tr><td class="c-pick">13.147</td><td class="c-name">Rashid Shaheed</td><td class="c-pos">WR</td><td class="c-rank">113</td><td class="c-delta"><span class="d-pos">+34</span></td></tr>
-<tr><td class="c-pick">14.166</td><td class="c-name">T.J. Hockenson</td><td class="c-pos">TE</td><td class="c-rank">138</td><td class="c-delta"><span class="d-pos">+28</span></td></tr>
-<tr><td class="c-pick">15.171</td><td class="c-name">Los Angeles Chargers</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-          </tbody>
-        </table>
+        <div class="team-body">
+          <p>Bijan Robinson at five doesn't need a joke written about it. The middle rounds got a
+            little indulgent &mdash; DJ Moore and Mike Evans in the same stretch felt like a
+            receiver nostalgia tour &mdash; but finding Tyrone Tracy still on the board in round
+            twelve is the kind of late pull that makes the rest of the room ask what everyone else
+            was doing.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Bijan Robinson</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R6</span><b>Mike Evans</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R12</span><b>Tyrone Tracy</b> &middot; RB</span>
+          </div>
         </div>
-      </details>
-    </div>
+      </div>
 
-    <!-- SLOT 2 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-bad">D</div>
-        <div class="team-title">Slot 2<span class="rank-note">11th of 12</span></div>
-        <div class="mvd-chip mvd-neg">&minus;49.6<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Drafted Joe Burrow in round 4 like it was still his MVP season and not, checks notes, several years and a great many injury reports later.</p>
-        <p>Followed it with three more picks our board considers a personal insult. Puka Nacua
-        in round 1 remains the only decision all night this GM can defend in open court.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.002</td><td class="c-name">Puka Nacua</td><td class="c-pos">WR</td><td class="c-rank">5</td><td class="c-delta"><span class="d-neg">-3</span></td></tr>
-<tr><td class="c-pick">2.023</td><td class="c-name">Jeremiyah Love</td><td class="c-pos">RB</td><td class="c-rank">42</td><td class="c-delta"><span class="d-neg">-19</span></td></tr>
-<tr><td class="c-pick">3.026</td><td class="c-name">Rashee Rice</td><td class="c-pos">WR</td><td class="c-rank">124</td><td class="c-delta"><span class="d-neg">-98</span></td></tr>
-<tr><td class="c-pick">4.047</td><td class="c-name">Joe Burrow</td><td class="c-pos">QB</td><td class="c-rank">458</td><td class="c-delta"><span class="d-neg">-411</span></td></tr>
-<tr><td class="c-pick">5.050</td><td class="c-name">Luther Burden</td><td class="c-pos">WR</td><td class="c-rank">153</td><td class="c-delta"><span class="d-neg">-103</span></td></tr>
-<tr><td class="c-pick">6.071</td><td class="c-name">Harold Fannin</td><td class="c-pos">TE</td><td class="c-rank">52</td><td class="c-delta"><span class="d-pos">+19</span></td></tr>
-<tr><td class="c-pick">7.074</td><td class="c-name">Christian Watson</td><td class="c-pos">WR</td><td class="c-rank">143</td><td class="c-delta"><span class="d-neg">-69</span></td></tr>
-<tr><td class="c-pick">8.095</td><td class="c-name">Jonathon Brooks</td><td class="c-pos">RB</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">9.098</td><td class="c-name">Houston Texans</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">10.119</td><td class="c-name">Quentin Johnston</td><td class="c-pos">WR</td><td class="c-rank">97</td><td class="c-delta"><span class="d-pos">+22</span></td></tr>
-<tr><td class="c-pick">11.122</td><td class="c-name">Hunter Henry</td><td class="c-pos">TE</td><td class="c-rank">61</td><td class="c-delta"><span class="d-pos">+61</span></td></tr>
-<tr><td class="c-pick">12.143</td><td class="c-name">Baker Mayfield</td><td class="c-pos">QB</td><td class="c-rank">103</td><td class="c-delta"><span class="d-pos">+40</span></td></tr>
-<tr><td class="c-pick">13.146</td><td class="c-name">Travis Hunter</td><td class="c-pos">WR</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">14.167</td><td class="c-name">Tank Bigsby</td><td class="c-pos">RB</td><td class="c-rank">212</td><td class="c-delta"><span class="d-neg">-45</span></td></tr>
-<tr><td class="c-pick">15.170</td><td class="c-name">Dylan Sampson</td><td class="c-pos">RB</td><td class="c-rank">159</td><td class="c-delta"><span class="d-pos">+11</span></td></tr>
-          </tbody>
-        </table>
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-bad">F</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 6</span></div>
         </div>
-      </details>
-    </div>
-
-    <!-- SLOT 6 -->
-    <div class="team">
-      <div class="team-head">
-        <div class="grade-badge grade-bad">F</div>
-        <div class="team-title">Slot 6<span class="rank-note">12th of 12 &mdash; unanimous last place</span></div>
-        <div class="mvd-chip mvd-neg">&minus;67.8<small>mean &Delta;</small></div>
-      </div>
-      <div class="team-body">
-        <p class="take">Somewhere in Vegas, a sportsbook has quietly stopped taking action on this roster.</p>
-        <p>Christian McCaffrey in round 1 is fine. Everything after that is a crime scene, and
-        the murder weapon is round 6, where this GM closed his eyes, spun in a circle, and
-        pointed at a name &mdash; and that name was Jayden Daniels, a player our board had
-        ranked <b>525th</b> overall. Then he did it three more times with three different
-        players. Four separate historic reaches on one roster isn't bad luck. That's a
-        philosophy, and it's a bad one.</p>
-      </div>
-      <details class="picks">
-        <summary>All 15 picks</summary>
-        <div class="pick-table-wrap">
-        <table class="pick-table">
-          <thead><tr><th>Pick</th><th>Player</th><th>Pos</th><th>Rank</th><th>&Delta;</th></tr></thead>
-          <tbody>
-<tr><td class="c-pick">1.006</td><td class="c-name">Christian McCaffrey</td><td class="c-pos">RB</td><td class="c-rank">4</td><td class="c-delta"><span class="d-pos">+2</span></td></tr>
-<tr><td class="c-pick">2.019</td><td class="c-name">Kenneth Walker</td><td class="c-pos">RB</td><td class="c-rank">35</td><td class="c-delta"><span class="d-neg">-16</span></td></tr>
-<tr><td class="c-pick">3.030</td><td class="c-name">Kyren Williams</td><td class="c-pos">RB</td><td class="c-rank">14</td><td class="c-delta"><span class="d-pos">+16</span></td></tr>
-<tr><td class="c-pick">4.043</td><td class="c-name">Cam Skattebo</td><td class="c-pos">RB</td><td class="c-rank">107</td><td class="c-delta"><span class="d-neg">-64</span></td></tr>
-<tr><td class="c-pick">5.054</td><td class="c-name">Sam LaPorta</td><td class="c-pos">TE</td><td class="c-rank">144</td><td class="c-delta"><span class="d-neg">-90</span></td></tr>
-<tr><td class="c-pick">6.067</td><td class="c-name">Jayden Daniels</td><td class="c-pos">QB</td><td class="c-rank">525</td><td class="c-delta"><span class="d-neg">-458</span></td></tr>
-<tr><td class="c-pick">7.078</td><td class="c-name">Parker Washington</td><td class="c-pos">WR</td><td class="c-rank">80</td><td class="c-delta"><span class="d-neg">-2</span></td></tr>
-<tr><td class="c-pick">8.091</td><td class="c-name">Chris Godwin</td><td class="c-pos">WR</td><td class="c-rank">231</td><td class="c-delta"><span class="d-neg">-140</span></td></tr>
-<tr><td class="c-pick">9.102</td><td class="c-name">Seattle Seahawks</td><td class="c-pos">DEF</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">10.115</td><td class="c-name">Jayden Reed</td><td class="c-pos">WR</td><td class="c-rank">325</td><td class="c-delta"><span class="d-neg">-210</span></td></tr>
-<tr><td class="c-pick">11.126</td><td class="c-name">Deebo Samuel</td><td class="c-pos">WR</td><td class="c-rank">76</td><td class="c-delta"><span class="d-pos">+50</span></td></tr>
-<tr><td class="c-pick">12.139</td><td class="c-name">Tyler Allgeier</td><td class="c-pos">RB</td><td class="c-rank">111</td><td class="c-delta"><span class="d-pos">+28</span></td></tr>
-<tr><td class="c-pick">13.150</td><td class="c-name">Brenton Strange</td><td class="c-pos">TE</td><td class="c-rank">130</td><td class="c-delta"><span class="d-pos">+20</span></td></tr>
-<tr><td class="c-pick">14.163</td><td class="c-name">Mike Washington</td><td class="c-pos">RB</td><td class="c-rank">&mdash;</td><td class="c-delta"><span class="d-null">n/a</span></td></tr>
-<tr><td class="c-pick">15.174</td><td class="c-name">Jalen Nailor</td><td class="c-pos">WR</td><td class="c-rank">192</td><td class="c-delta"><span class="d-neg">-18</span></td></tr>
-          </tbody>
-        </table>
+        <div class="team-body">
+          <p>Christian McCaffrey at six was a gift. What Slot 6 did with that gift was spend round
+            six on Jayden Daniels &mdash; years ahead of when the rest of the room was ready to
+            talk about him &mdash; then follow it with Chris Godwin and Jayden Reed picks that
+            played out like a receiver graveyard tour. A draft that peaked on pick one and kept
+            driving past every exit after that.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Christian McCaffrey</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R6</span><b>Jayden Daniels</b> &middot; QB</span>
+            <span class="pick-chip"><span class="r">R8</span><b>Chris Godwin</b> &middot; WR</span>
+          </div>
         </div>
-      </details>
-    </div>
+      </div>
 
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-mid">B</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 7</span></div>
+        </div>
+        <div class="team-body">
+          <p>Jaxon Smith-Njigba at seven, Josh Jacobs in round three, Trevor Lawrence as a QB2
+            nobody saw coming in round nine &mdash; this is a team that made zero big swings and
+            zero big mistakes, which in this league counts as its own kind of chaos. Somewhere in
+            the middle of a draft full of wrecks, Slot 7 just drafted well and didn't even have
+            the decency to make it entertaining.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Jaxon Smith-Njigba</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R3</span><b>Josh Jacobs</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R9</span><b>Trevor Lawrence</b> &middot; QB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-good">A</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 8</span></div>
+        </div>
+        <div class="team-body">
+          <p>De'Von Achane and James Cook to open is a run game so complete it should come with a
+            warranty. Then, inexplicably, one tight end wasn't enough, or two &mdash; Kyle Pitts,
+            Dallas Goedert, Juwan Johnson, and Dalton Schultz all landed here, like someone was
+            cornering the position for a future trade embargo. Whatever the plan was, it worked:
+            best draft in the league, run by someone who apparently just really likes tight ends.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>De'Von Achane</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R2</span><b>James Cook</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R5</span><b>Kyle Pitts</b> &middot; TE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-mid">B</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 9</span></div>
+        </div>
+        <div class="team-body">
+          <p>Amon-Ra St. Brown and Derrick Henry back to back is a start with no real complaints,
+            and most of what follows keeps that going. Tucker Kraft in round five as an
+            early-tight-end swing didn't pan out the way it was drawn up, but Jared Goff quietly
+            winning value in round eleven made up for it without anyone noticing.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Amon-Ra St. Brown</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R5</span><b>Tucker Kraft</b> &middot; TE</span>
+            <span class="pick-chip"><span class="r">R11</span><b>Jared Goff</b> &middot; QB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-mid">C+</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 10</span></div>
+        </div>
+        <div class="team-body">
+          <p>CeeDee Lamb at ten and Omarion Hampton in round two both came with a price tag that
+            made the rest of the room lean back in their chairs. Neither pick is indefensible,
+            just early. Jake Ferguson in round eight quietly being the best value on the roster is
+            the tell that this team's real strength is patience &mdash; nobody found out until the
+            receivers started underperforming.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>CeeDee Lamb</b> &middot; WR</span>
+            <span class="pick-chip"><span class="r">R2</span><b>Omarion Hampton</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R8</span><b>Jake Ferguson</b> &middot; TE</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-mid">C</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 11</span></div>
+        </div>
+        <div class="team-body">
+          <p>Saquon Barkley and Chase Brown gave this roster a legitimate running back floor
+            before anyone got cute. Then round three happened and Lamar Jackson got the call
+            &mdash; a swing so early it left the rest of the QB class still shopping for a ride
+            home. Woody Marks turning up as a round-fourteen contributor is the save that keeps
+            this from being a real disaster.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Saquon Barkley</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R3</span><b>Lamar Jackson</b> &middot; QB</span>
+            <span class="pick-chip"><span class="r">R14</span><b>Woody Marks</b> &middot; RB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-card">
+        <div class="team-head">
+          <div class="grade-badge grade-bad">C&minus;</div>
+          <div class="team-id"><span class="team-slot">Draft Slot</span><span class="team-slot-num">Slot 12</span></div>
+        </div>
+        <div class="team-body">
+          <p>Ashton Jeanty and A.J. Brown is a fine start, dragged down by a roster that
+            apparently decided quarterback was a lottery ticket worth buying twice &mdash; Bo Nix
+            in round nine, then Kyler Murray in round fourteen for reasons that remain a mystery
+            to everyone at the table, including, one suspects, Slot 12 itself. Stefon Diggs
+            quietly outplaying his price in round ten deserved a better supporting cast.</p>
+          <div class="pick-chips">
+            <span class="pick-chip"><span class="r">R1</span><b>Ashton Jeanty</b> &middot; RB</span>
+            <span class="pick-chip"><span class="r">R9</span><b>Bo Nix</b> &middot; QB</span>
+            <span class="pick-chip"><span class="r">R14</span><b>Kyler Murray</b> &middot; QB</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </section>
 
-  <div class="colophon">
-    Draft 1398935084572143616 &middot; mock #4, slot 8 &middot; graded vs. data/bigboard/2025.csv
-    (2025 value season) via <code>sleeper-agent draft recap</code> &middot; team labels are
-    slot numbers, not real names &mdash; Sleeper mock drafts carry no league/owner data &middot;
-    it's a mock, so no bragging rights yet. Real draft grades land Saturday.
-  </div>
+  <footer>
+    <p>Grades are sports-radio opinion, not a spreadsheet printout &mdash; weighed against the
+      room, not published as a scoreboard. Mock draft, Only Gold league, 2026 season. No refunds,
+      no re-drafts, no take-backs.</p>
+  </footer>
 
 </div>
