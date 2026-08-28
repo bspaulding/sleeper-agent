@@ -6,7 +6,7 @@ description: Sit in on a live draft (real or mock) on the user's behalf — watc
 # draft
 
 An agent can't attach to `draft board`'s default Textual TUI — it's interactive and blocking.
-Use two long-running background processes instead of a human watching the screen.
+Run it as a single background, non-interactive watcher instead.
 
 ## Prerequisites
 
@@ -18,50 +18,37 @@ Use two long-running background processes instead of a human watching the screen
     unstated).
   - Real draft: `--league-id <id> --me` (or `--roster-id <n>`).
 
-## 1. Board watcher — the recommendation feed
+## Watching the draft
 
 ```
-sleeper-agent draft board --draft-id <id> --draft-slot <n> --num-teams <n> \
+sleeper-agent draft board --draft-id <id> --draft-slot <n> --num-teams <n> --notify-my-turn \
   > /path/to/scratch/board_watch.log 2>&1
 ```
 
 Run via Bash `run_in_background: true`. No `--once`. Stdout must be a file, not a tty —
-`cmd_draft_board` checks `sys.stdout.isatty()` and auto-selects the plain `watch_board` loop
-(5s poll, re-renders only when picks change) instead of the TUI when it isn't one. Every render
-already carries NEED/SURPLUS/FLEX and tier tags against our current roster.
+`cmd_draft_board` auto-selects the plain `watch_board` loop (5s poll, re-renders only when picks
+change) instead of the TUI. `--notify-my-turn` adds a `YOUR TURN: pick N (round R)` line the
+moment the next unmade pick is ours, alongside the normal NEED/SURPLUS/FLEX/tier-tagged board.
 
-## 2. Turn-alert watcher — the timing signal
-
-The board watcher's plain-text render has no "your turn" banner — that logic lives only in the
-TUI's app class. Poll `GET https://api.sleeper.app/v1/draft/<id>/picks` directly (cheap, no
-bigboard load, no CLI startup) and compute the next unmade pick's owning slot with snake math:
-
-```
-round = (pick_no - 1) // num_teams + 1
-pos_in_round = pick_no - (round - 1) * num_teams
-slot = pos_in_round if round is odd else num_teams - pos_in_round + 1
-```
-
-Emit one line per new pick, and one `OUR TURN: pick N (round R)` line the first time the next
-unmade pick's slot matches ours — dedupe on pick number. Wrap this in `Monitor` so its stdout
-lines arrive as notifications.
+Wrap this same command in `Monitor`, filtering for `YOUR TURN`. One process, one Monitor — no
+separate picks poller, no hand-rolled snake-math script.
 
 ## During the draft
 
-- Plain `PICK ...` notification: context only, no action.
-- `OUR TURN` notification: read the tail of the board watcher's log file. Don't re-invoke the
-  CLI — that's a full process start plus a Sleeper API refetch while a pick clock is running.
-  Take the top-ranked `NEED`-tagged row; if none are `NEED`, take the top row overall. State the
-  pick and one line of reasoning, then stop.
+`YOUR TURN` notification: read the tail of the watcher's log file — it's already fresh. Don't
+re-invoke the CLI. Take the top-ranked `NEED`-tagged row; if none are `NEED`, take the top row
+overall. State the pick and one line of reasoning, then stop.
 
-## DEF gap
+## Defenses — no data, don't go hunting for it
 
-`data/bigboard/<season>.csv` has zero DEF rows. Team defenses aren't in the bigboard build, so
-`draft board` never recommends one even while DEF sits at 0/1 NEED. Pick a defense by outside
-judgment when it's still open and remaining board value has flattened out, or a run on DEF
-starts. Tracked in `todo.md`.
+`data/bigboard/<season>.csv` has zero DEF rows. `draft board` will never surface a defense even
+though DEF sits at 0/1 NEED. Don't spend draft time searching for defense data or projections —
+there isn't any in this pipeline. Use general judgment instead: recent real-season defensive
+performance (pressure rate, takeaways) is enough. Reasonable timing: once remaining board rows
+have gone SURPLUS with converging near-replacement value, or a visible run on defenses starts.
+Don't wait for the last pick — autopick or another team can take the one you want.
 
 ## After the draft
 
-Stop both watchers. Log the real draft with `decisions new --kind draft ...`. Fold any new
-tool gaps or strategy lessons into this file or `wiki/team/draft-strategy.md`.
+Stop the watcher. Log the real draft with `decisions new --kind draft ...`. Fold any new tool
+gaps or strategy lessons into this file or `wiki/team/draft-strategy.md`.

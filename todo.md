@@ -16,9 +16,6 @@
   **Thornton**. The scheduled `sleeper-agent: pre-draft news sweep` Routine (fires
   Saturday 1:00pm PT, 2hrs ahead of the 3pm PT draft) should pick these up automatically —
   check its report before the draft in case it didn't.
-- **`data/bigboard/<season>.csv` has zero DEF rows — `draft board` can never recommend a
-  defense.** DEF sits at 0/1 NEED all draft and the board never surfaces a single DEF candidate.
-  Needs a DEF ranking source feeding `bigboard build` before Saturday.
 - **VORP has no projected-output signal — fundamental, needs its own spec, not a quick fix.**
   Confirmed via `cli/src/sleeper_agent/stats/vorp.py::compute_vorp`: it is purely retrospective,
   built only from a completed `--value-season`'s actual weekly stats — there is no projections
@@ -42,5 +39,3 @@
 - Watch Hunt/Ertz FA signings: if either lands somewhere, re-run
   `sleeper players sync` + `wiki sync-frontmatter` so they stop being silently
   dropped by `filter_rostered`.
-- `draft board` has no machine-readable "it's your turn now" signal. A `--notify-my-turn` mode
-  would remove the need for a second poller reimplementing `slot_for_pick`. Not urgent.
