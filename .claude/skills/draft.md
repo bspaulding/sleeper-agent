@@ -31,7 +31,7 @@ sleeper-agent draft board --draft-id <id> --draft-slot <n> --num-teams <n> --not
 
 Wrap that whole pipeline directly in `Monitor` (`persistent: true`). No `--once`, no separate
 Bash task. Stdout must be a file, not a tty — `cmd_draft_board` auto-selects the plain
-`watch_board` loop (5s poll, re-renders only when picks change) instead of the TUI. `--notify-my-
+`watch_board` loop (1s poll, re-renders only when picks change) instead of the TUI. `--notify-my-
 turn` adds a `YOUR TURN: pick N (round R)` line the moment the next unmade pick is ours,
 alongside the normal NEED/SURPLUS/FLEX/tier-tagged board. Grepping *without* the `tee` stage
 loses the full board — only the matched line reaches Monitor's event stream, and the next

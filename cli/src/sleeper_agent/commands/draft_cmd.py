@@ -105,7 +105,8 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         "--poll-seconds",
         type=float,
         default=1.0,
-        help="TUI picks-endpoint poll interval (seconds). Default 1.0 — ~60 req/min, well under Sleeper's ~1000 req/min budget.",
+        help="Picks-endpoint poll interval (seconds), for both the TUI and the non-tty "
+        "watch loop. Default 1.0 — ~60 req/min, well under Sleeper's ~1000 req/min budget.",
     )
     board_parser.add_argument(
         "--show-picks",
@@ -495,6 +496,7 @@ def cmd_draft_board(
             context.draft_id,
             context.bigboard_rows,
             base_url=base_url,
+            poll_seconds=args.poll_seconds,
             max_iterations=max_watch_iterations,
             my_roster_id=context.my_roster_id,
             my_draft_slot=turn_detection_slot,

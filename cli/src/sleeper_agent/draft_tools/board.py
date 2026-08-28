@@ -292,9 +292,9 @@ def watch_board(
     *,
     base_url: str = SLEEPER_BASE_URL,
     # Sleeper's documented limit is ~1000 req/min before risking an IP block; one GET per
-    # poll at 5s is ~12 req/min (~1% of budget), so there's no rate-limit reason to poll
+    # poll at 1s is ~60 req/min (~6% of budget), so there's no rate-limit reason to poll
     # slower — see .claude/skills/draft.md's "During the draft" section.
-    poll_seconds: float = 5.0,
+    poll_seconds: float = 1.0,
     sleep: Callable[[float], None] = time.sleep,
     max_iterations: int | None = None,
     # Plain `print` fully block-buffers stdout when it isn't a tty (i.e. whenever

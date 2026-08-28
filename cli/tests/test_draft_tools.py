@@ -535,7 +535,7 @@ def test_watch_board_only_rerenders_when_drafted_ids_change() -> None:
     )
 
     assert len(rendered_calls) == 2
-    assert sleeps == [5.0, 5.0]
+    assert sleeps == [1.0, 1.0]
 
 
 def test_watch_board_annotates_when_my_roster_id_given(tmp_path: Path) -> None:
