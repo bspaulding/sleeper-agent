@@ -54,6 +54,13 @@ performance (pressure rate, takeaways) is enough. Reasonable timing: once remain
 have gone SURPLUS with converging near-replacement value, or a visible run on defenses starts.
 Don't wait for the last pick — autopick or another team can take the one you want.
 
+Before overriding to DEF, check the current top of the board first: DEF is never a ranked
+comparison (zero data means it can't be), so a defense-run/convergence signal alone can still
+be wrong if a clearly above-replacement skill player (roughly top-10 rank, rookies included —
+see [[2026-08-28-draft-mock-draft-5-slot8]]) is still sitting there. DEF is far more streamable
+in-season than a rostered skill player; take the skill player and defer DEF one round rather than
+reach for it reflexively once a run starts.
+
 ## After the draft
 
 Stop the watcher. Log the real draft with `decisions new --kind draft ...`. Fold any new tool
