@@ -64,6 +64,27 @@ def make_pick(
     )
 
 
+def make_pick_no(
+    pick_no: int,
+    *,
+    draft_slot: int = 1,
+    player_id: str | None = None,
+) -> DraftPick:
+    return DraftPick(
+        draft_id="did",
+        round=1,
+        pick_no=pick_no,
+        draft_slot=draft_slot,
+        roster_id=None,
+        player_id=player_id or f"p{pick_no}",
+        is_keeper=False,
+        picked_by="u1",
+        player_name=f"Player {pick_no}",
+        player_position="RB",
+        player_team="SF",
+    )
+
+
 def test_keeper_history_never_kept_before_is_eligible_at_last_round_minus_one() -> None:
     picks_by_season = {"2025": [make_pick(4, is_keeper=False)]}
 
@@ -655,6 +676,118 @@ def test_watch_board_threads_injury_statuses_through_to_render_board() -> None:
     )
 
     assert "[INJ: IR]" in rendered_calls[0]
+
+
+def test_watch_board_notifies_when_next_pick_is_my_slot() -> None:
+    board = make_bigboard()
+    notify_calls: list[str] = []
+    picks = [make_pick_no(n, draft_slot=((n - 1) % 12) + 1) for n in range(1, 8)]
+
+    watch_board(
+        "did",
+        board,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=lambda _s: None,
+        fetch_picks=lambda draft_id, *, base_url: picks,
+        my_draft_slot=8,
+        notify_my_turn=True,
+        num_teams=12,
+        total_picks=180,
+        notify=notify_calls.append,
+    )
+
+    assert notify_calls == ["YOUR TURN: pick 8 (round 1)"]
+
+
+def test_watch_board_does_not_notify_when_not_my_turn() -> None:
+    board = make_bigboard()
+    notify_calls: list[str] = []
+    picks = [make_pick_no(n, draft_slot=((n - 1) % 12) + 1) for n in range(1, 7)]
+
+    watch_board(
+        "did",
+        board,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=lambda _s: None,
+        fetch_picks=lambda draft_id, *, base_url: picks,
+        my_draft_slot=8,
+        notify_my_turn=True,
+        num_teams=12,
+        total_picks=180,
+        notify=notify_calls.append,
+    )
+
+    assert notify_calls == []
+
+
+def test_watch_board_notify_my_turn_disabled_by_default() -> None:
+    board = make_bigboard()
+    notify_calls: list[str] = []
+    picks = [make_pick_no(n, draft_slot=((n - 1) % 12) + 1) for n in range(1, 8)]
+
+    watch_board(
+        "did",
+        board,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=lambda _s: None,
+        fetch_picks=lambda draft_id, *, base_url: picks,
+        my_draft_slot=8,
+        num_teams=12,
+        total_picks=180,
+        notify=notify_calls.append,
+    )
+
+    assert notify_calls == []
+
+
+def test_watch_board_notify_my_turn_fires_once_per_pick() -> None:
+    board = make_bigboard()
+    notify_calls: list[str] = []
+    picks = [make_pick_no(n, draft_slot=((n - 1) % 12) + 1) for n in range(1, 8)]
+    call_log: list[list[DraftPick]] = [picks, picks, picks]
+
+    def fake_fetch(draft_id: str, *, base_url: str) -> list[DraftPick]:
+        return call_log.pop(0)
+
+    watch_board(
+        "did",
+        board,
+        sleep=lambda _seconds: None,
+        max_iterations=3,
+        render=lambda _s: None,
+        fetch_picks=fake_fetch,
+        my_draft_slot=8,
+        notify_my_turn=True,
+        num_teams=12,
+        total_picks=180,
+        notify=notify_calls.append,
+    )
+
+    assert notify_calls == ["YOUR TURN: pick 8 (round 1)"]
+
+
+def test_watch_board_notify_my_turn_needs_my_draft_slot() -> None:
+    board = make_bigboard()
+    notify_calls: list[str] = []
+    picks = [make_pick_no(n, draft_slot=((n - 1) % 12) + 1) for n in range(1, 8)]
+
+    watch_board(
+        "did",
+        board,
+        sleep=lambda _seconds: None,
+        max_iterations=1,
+        render=lambda _s: None,
+        fetch_picks=lambda draft_id, *, base_url: picks,
+        notify_my_turn=True,
+        num_teams=12,
+        total_picks=180,
+        notify=notify_calls.append,
+    )
+
+    assert notify_calls == []
 
 
 def make_draft(

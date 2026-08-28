@@ -308,6 +308,15 @@ def watch_board(
     requirement: RosterRequirement | None = None,
     team_changes: dict[str, TeamChange] | None = None,
     injury_statuses: dict[str, str] | None = None,
+    # Machine-readable "it's your turn" signal for an unattended watcher (an
+    # agent, not a human reading the TUI) — see .claude/skills/draft.md. Needs
+    # my_draft_slot + num_teams + total_picks to compute; silently does
+    # nothing if any are missing, same no-annotation-by-default convention as
+    # my_roster_id/my_draft_slot elsewhere in this module.
+    notify_my_turn: bool = False,
+    num_teams: int | None = None,
+    total_picks: int | None = None,
+    notify: Callable[[str], None] = _flush_print,
 ) -> None:
     previous_drafted_ids: frozenset[str] | None = None
     iteration = 0
@@ -325,6 +334,20 @@ def watch_board(
                 injury_statuses=injury_statuses,
             )
             render(rendered)
+            if (
+                notify_my_turn
+                and my_draft_slot is not None
+                and num_teams is not None
+                and total_picks is not None
+            ):
+                picks_by_no = {pick.pick_no: pick for pick in picks}
+                next_pick_no = next_unmade_pick_no(picks_by_no, total_picks)
+                if (
+                    next_pick_no is not None
+                    and slot_for_pick(next_pick_no, num_teams) == my_draft_slot
+                ):
+                    round_number = (next_pick_no - 1) // num_teams + 1
+                    notify(f"YOUR TURN: pick {next_pick_no} (round {round_number})")
             previous_drafted_ids = drafted_ids
         iteration += 1
         if max_iterations is None or iteration < max_iterations:

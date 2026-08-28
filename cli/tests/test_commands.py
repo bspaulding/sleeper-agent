@@ -2263,6 +2263,59 @@ def test_cmd_draft_board_non_tty_defaults_to_line_watch_loop(
     assert "A" in out
 
 
+def test_cmd_draft_board_notify_my_turn_prints_your_turn_line(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """--notify-my-turn on the non-tty watch loop prints a machine-readable
+    YOUR TURN line the moment the next unmade pick belongs to our slot."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            # slot 1 -> roster_id 5; with no picks yet, pick 1 (round 1) is slot 1's.
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        once=False,
+        poll_seconds=1.0,
+        show_picks=False,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=1,
+        notify_my_turn=True,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url, max_watch_iterations=1
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "YOUR TURN: pick 1 (round 1)" in out
+
+
 def test_cmd_draft_board_tty_dispatches_to_tui(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

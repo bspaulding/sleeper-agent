@@ -138,6 +138,17 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     board_parser.add_argument(
+        "--notify-my-turn",
+        action="store_true",
+        help=(
+            "In the non-tty plain watch loop, print a 'YOUR TURN: pick N (round R)' "
+            "line the moment the next unmade pick belongs to us — a machine-readable "
+            "signal for an unattended watcher (see .claude/skills/draft.md). Requires "
+            "--draft-slot (or --me/--roster-id resolving to a slot in this draft's "
+            "slot_to_roster_id map); no-ops otherwise. Has no effect on --once or the TUI."
+        ),
+    )
+    board_parser.add_argument(
         "--exclude-players",
         default=None,
         help=(
@@ -413,6 +424,27 @@ def cmd_draft_keepers(
     return 0
 
 
+def _resolve_turn_detection_slot(context: DraftContext) -> int | None:
+    """`my_draft_slot` if given directly, else derived from `my_roster_id`
+    via this draft's `slot_to_roster_id` map (needed for --me/--roster-id
+    without --draft-slot). Returns None, silently, if neither resolves —
+    callers that need turn detection are responsible for warning; this is
+    shared by both the TUI and the non-tty --notify-my-turn path.
+    """
+    if context.my_draft_slot is not None:
+        return context.my_draft_slot
+    if context.my_roster_id is None:
+        return None
+    return next(
+        (
+            slot
+            for slot, roster_id in context.draft.slot_to_roster_id.items()
+            if roster_id == context.my_roster_id
+        ),
+        None,
+    )
+
+
 def cmd_draft_board(
     args: argparse.Namespace,
     *,
@@ -446,18 +478,34 @@ def cmd_draft_board(
 
     tty = is_tty() if is_tty is not None else sys.stdout.isatty()
     if not tty:
+        notify_my_turn = getattr(args, "notify_my_turn", False)
+        turn_detection_slot = _resolve_turn_detection_slot(context)
+        if (
+            notify_my_turn
+            and turn_detection_slot is None
+            and context.my_roster_id is not None
+        ):
+            print(
+                f"warning: roster_id {context.my_roster_id} is not in this draft's "
+                f"slot_to_roster_id (mapped slots: "
+                f"{sorted(context.draft.slot_to_roster_id)}) — --notify-my-turn has "
+                "nothing to match against. Pass --draft-slot to fix."
+            )
         watch_board(
             context.draft_id,
             context.bigboard_rows,
             base_url=base_url,
             max_iterations=max_watch_iterations,
             my_roster_id=context.my_roster_id,
-            my_draft_slot=context.my_draft_slot,
+            my_draft_slot=turn_detection_slot,
             requirement=context.requirement
             if context.my_roster_id is not None
             else None,
             team_changes=context.team_changes,
             injury_statuses=context.injury_statuses,
+            notify_my_turn=notify_my_turn,
+            num_teams=context.draft.num_teams,
+            total_picks=context.draft.rounds * context.draft.num_teams,
         )
         return 0
 
@@ -483,18 +531,9 @@ def _run_board_tui(
         )
         return 1
 
-    turn_detection_slot = context.my_draft_slot
+    turn_detection_slot = _resolve_turn_detection_slot(context)
     if turn_detection_slot is None and context.my_roster_id is not None:
-        turn_detection_slot = next(
-            (
-                slot
-                for slot, roster_id in context.draft.slot_to_roster_id.items()
-                if roster_id == context.my_roster_id
-            ),
-            None,
-        )
-        if turn_detection_slot is None:
-            print(
+        print(
                 f"warning: roster_id {context.my_roster_id} is not in this draft's "
                 f"slot_to_roster_id (mapped slots: "
                 f"{sorted(context.draft.slot_to_roster_id)}) — streaming picks "
