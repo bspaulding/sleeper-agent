@@ -1,6 +1,7 @@
 ---
-last_updated: '2026-08-23'
-source: 2026 keeper decision (decisions/2026/2026-08-23-keeper-diggs-r7-darnold-r14.md)
+last_updated: '2026-08-28'
+source: 2026 keeper decision (decisions/2026/2026-08-23-keeper-diggs-r7-darnold-r14.md),
+  revised (decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md)
 ---
 
 # Keeper strategy — standing method
@@ -37,17 +38,25 @@ a keeper is +EV only if he beats the replacement pick at that slot. Then take
 the pair with the highest combined surplus.
 
 Round baselines shift year to year — recompute from the current VORP board
-(sorted descending, mapped to snake slots). 2026's table (from 2025 VORP):
+(sorted descending, mapped to snake slots), **and re-recompute any time the
+underlying VORP data changes** (see Known traps below — this happened for
+real in 2026). 2026's table (from 2025 VORP, post-2026-08-27 postseason-VORP
+fix):
 
 | Round | Picks | Avg VORP | Round | Picks | Avg VORP |
 |---|---|---|---|---|---|
-| R1 | 1–12 | 207.0 | R9 | 97–108 | −9.4 |
-| R2 | 13–24 | 123.1 | R10 | 109–120 | −26.4 |
-| R3 | 25–36 | 83.1 | R11 | 121–132 | −39.0 |
-| R4 | 37–48 | 50.3 | R12 | 133–144 | −46.8 |
-| R5 | 49–60 | 33.2 | R13 | 145–156 | −54.4 |
-| R6 | 61–72 | 23.9 | R14 | 157–168 | −62.9 |
-| R7 | 73–84 | 14.1 | R15 | 169–180 | −74.0 |
+| R1 | 1–12 | 195.2 | R9 | 97–108 | 1.1 |
+| R2 | 13–24 | 106.0 | R10 | 109–120 | −15.2 |
+| R3 | 25–36 | 73.1 | R11 | 121–132 | −24.9 |
+| R4 | 37–48 | 47.6 | R12 | 133–144 | −35.8 |
+| R5 | 49–60 | 37.6 | R13 | 145–156 | −43.5 |
+| R6 | 61–72 | 28.1 | R14 | 157–168 | −49.5 |
+| R7 | 73–84 | 14.6 | R15 | 169–180 | −57.5 |
+
+(Prior table, superseded 2026-08-28: R1 207.0, R3 83.1, R5 33.2, R7 14.1, R8
+2.2, R14 −62.9, R15 −74.0 — built on VORP data that silently included
+postseason games. Kept here as a reminder of how much a data-pipeline bug can
+move these numbers.)
 
 ## Known traps
 
@@ -65,6 +74,36 @@ Round baselines shift year to year — recompute from the current VORP board
 - **FA/trade ADP resets cut both ways:** they also mean acquiring a star via
   trade does NOT carry his old discount — traded players cost ADP − 1 to
   keep, usually full retail for good players.
+- **Re-run the whole analysis after any VORP/board-data fix, before the
+  deadline, even if a decision already looked final.** The 2026-08-23 pick of
+  Darnold at R14 was correct given the data at the time, but the 2026-08-27
+  postseason-VORP fix (`decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md`)
+  changed his VORP from +7.0 to −30.5 (his team played 4 extra playoff games
+  that were silently counted as "season" stats). A stale decision built on
+  fixed-later data doesn't self-correct — treat any stats/VORP/bigboard
+  pipeline fix as a trigger to re-run `draft keepers` and re-check surplus,
+  not just a data-quality footnote. See `decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md`.
+- **A late-round surplus that's positive only because the baseline is bad is
+  a weaker signal than absolute production.** Concretely: check whether the
+  player's own VORP is itself positive (real, current production) before
+  trusting a surplus number built off a deeply negative R13+ baseline — a
+  below-replacement player can still show "surplus" purely because the
+  alternative pick is worse. Prefer a smaller surplus backed by real
+  production over a larger surplus that's mostly baseline artifact.
+- **The current roster snapshot (`value roster --me`) is not "who's on the
+  2026 team" — it's "who's on the roster today."** Every non-kept player,
+  regardless of position, returns to the open draft pool at the live draft.
+  Don't reason "we don't need to keep a player at position X because we
+  already have player Y at position X" unless Y is *also* being kept —
+  otherwise both return to the pool together and the position ends up
+  covered by neither.
+- **Positions differ in how bad their in-season replacement really is.** A
+  1-QB league has many streamable/waiver-viable backup QBs; a true every-down
+  RB has no equivalent waiver safety net. When a marginal late-round keeper
+  slot is close between a QB and a difference-making RB/WR, this asymmetry
+  favors keeping the skill-position player even at a roughly tied surplus
+  number — the real opportunity cost of losing the QB is smaller than the
+  bare baseline implies.
 
 ## League-wide projection
 

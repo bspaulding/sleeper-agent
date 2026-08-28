@@ -1,0 +1,108 @@
+---
+date: '2026-08-28'
+kind: keeper
+season: '2026'
+week: null
+status: recommended
+players_involved:
+  - Sam Darnold
+  - Quinshon Judkins
+  - Stefon Diggs
+  - Bo Nix
+related_wiki:
+  - wiki/team/keeper-strategy.md
+  - wiki/league/season-2026.md
+  - wiki/league/projected-keepers-2026.md
+---
+
+## Summary
+
+Revisits `decisions/2026/2026-08-23-keeper-diggs-r7-darnold-r14.md` after the
+2026-08-27 postseason-VORP fix (`decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md`)
+regenerated the 2025 VORP board that decision's surplus math was built on. **Recommendation:
+keep Diggs (R7), swap Darnold (R14) out for Quinshon Judkins (R8).** Not yet executed in
+Sleeper — today (2026-08-28) is the keeper deadline, so this needs to be set in the app before
+end of day.
+
+## Reasoning
+
+**Why re-open this at all.** The Aug 23 decision computed keeper surplus from VORP figures that
+included postseason games (the bug fixed 2026-08-27). Darnold's team won the Super Bowl, so his
+old total included ~4 extra playoff games — his surplus number was built on inflated input and
+needed to be re-checked once the underlying data changed, same as any other derived analysis.
+
+**Recomputed round baselines** (2025 VORP board, corrected, 12-team snake):
+
+| Round | Old baseline (pre-fix) | New baseline (post-fix) |
+|---|---|---|
+| R7 | 14.1 | 14.6 |
+| R8 | 2.2 | 7.0 |
+| R14 | −62.9 | −49.5 |
+| R15 | −74.0 | −57.5 |
+
+**Recomputed surplus** (fresh `draft keepers --me --season 2026`):
+
+| Player | Cost | VORP old → new | Surplus old → new |
+|---|---|---|---|
+| Stefon Diggs | R7 | 62.3 → 38.1 | +48.2 → **+23.5** |
+| Sam Darnold | R14/R15* | 7.0 → −30.5 | +69.9 → **+19.0 (R14) / +27.0 (R15)** |
+| Quinshon Judkins | R8 | (rejected pre-fix, +25.3) → 34.1 | +25.3 → **+27.1** |
+
+\* CLI's `KeeperEligibleUndraftedDefault` still hard-codes R15 for undrafted/FA players
+(`todo.md` tracks replacing it with a real ADP lookup); the house ADP−1 rule was applied by hand
+in the Aug 23 decision to get R14. Not re-derived here since it doesn't change the conclusion
+either way.
+
+**Why Judkins over Darnold, given the surplus numbers are close either way:**
+
+- Darnold's surplus is positive only because the R14/R15 baseline is very low — his own
+  corrected production is now **below replacement** (−30.5 VORP). This is exactly the
+  "late-round surpluses are inflated" trap `wiki/team/keeper-strategy.md` already warns about:
+  check absolute production, not just the surplus number, especially at cheap late-round cost.
+- Judkins' surplus is positive because he is an actually-productive, currently-healthy starting
+  RB (+34.1 VORP) — real value, not a baseline artifact.
+- **Judkins' injury flag (left open by `2026-08-27-bigboard-injury-status-review.md`) is now
+  resolved.** That review couldn't tell whether ambiguous search hits about a "season-ending"
+  injury were current or leftover noise. A fresh, date-scoped search today confirms the
+  season-ending fibula fracture/ankle dislocation was his **2025** injury; the current 2026 issue
+  is a minor "nagging" ailment, and Browns HC Todd Monken says he's "not worried" and doesn't
+  expect Judkins to miss the opener
+  ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/todd-monken-quinshon-judkins-dealing-with-nagging-injury-out-as-a-precaution),
+  [SI](https://www.si.com/onsi/fantasy/injuries/quinshon-judkins-injury-rb-receives-positive-fantasy-update-after-missing-practice)).
+- **Positional streamability asymmetry**, not captured by the surplus formula: this is a 1-QB
+  league, and a 1-QB league has many streamable/waiver-viable backup QBs league-wide — the true
+  opportunity cost of not keeping a QB is lower than the bare R14/R15 baseline implies. There is
+  no equivalent RB streaming safety net for an every-down back like Judkins; losing him to the
+  pool is a real, hard-to-replace loss. This cuts in Judkins' favor even where the mechanical
+  surplus numbers are roughly tied.
+
+**A wrong argument considered and rejected:** an earlier pass at this analysis argued Darnold
+was unnecessary because "we already have a starter in Bo Nix" (31.9 VORP, healthy, confirmed
+DEN starter). That's **incorrect** — Nix is not being kept (his own surplus is −5.7, negative, so
+he's correctly not a keeper candidate), which means he returns to the open draft pool at the live
+draft exactly like any other non-kept player, Darnold included. The current roster snapshot
+(`value roster --me`) reflects who's on the roster *today*, not who's guaranteed to be on the
+2026 team after the draft. This does not change the recommendation (see the production-quality
+and streamability arguments above, which hold independent of Nix), but it was a real error in
+reasoning and is recorded here so the same mistake isn't repeated: **don't treat an
+other-position player's presence on the current roster as "coverage" for a positional need
+unless that player is also being kept.**
+
+## Data
+
+- `draft keepers --me --season 2026`, run 2026-08-28 against the post-fix `data/vorp/2025.parquet`.
+- Round baselines: `data/bigboard/2025.csv` (post-fix), sorted by rank, averaged in 12-pick buckets.
+- `value roster --me --season 2025`: QB total_vorp=1.4 (n=2: Nix 31.9, Darnold −30.5), RB
+  total_vorp=75.1 (n=4: Henderson 71.5, Judkins 34.1, Hunt 10.7, Wilson −41.2), WR
+  total_vorp=−152.4 (n=6, weakest position on the roster), TE total_vorp=−6.7 (n=2).
+- `wiki/players/12512-quinshon-judkins.md`, `wiki/players/4098-kareem-hunt.md` (unsigned FA, no
+  team — excluded from consideration despite a nominally high surplus), `wiki/players/1339-zach-ertz.md`
+  (unsigned FA + ACL recovery — excluded), `wiki/players/4943-sam-darnold.md`,
+  `wiki/players/11563-bo-nix.md`.
+- Fresh 2026-08-28 web search on Judkins' current injury status (sources linked above).
+
+## Outcome
+
+Recommended, not yet executed. Action needed **today (2026-08-28, the keeper deadline)**: update
+the keeper selection in Sleeper from Darnold to Judkins, then flip this entry's `status` to
+`executed` and confirm against the draft object's `is_keeper` flags once available.

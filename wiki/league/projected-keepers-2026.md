@@ -12,7 +12,16 @@ owner-judgment priors. **Projections, not facts** — owners choose their own;
 refresh after the Aug 28 lock and verify against the draft object's
 `is_keeper` picks before trusting it on draft day.
 
-Our own locks (executed): Diggs R7, Darnold R14.
+Our own locks: Diggs R7, Judkins R8 — **revised 2026-08-28**
+(`decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md`), swapped out from the original
+Diggs R7 / Darnold R14 executed 2026-08-23 after a VORP-data fix changed Darnold's value from
++7.0 to −30.5. Recommended, not yet set in Sleeper.
+
+**Scope note:** this whole table was computed 2026-08-23, before the 2026-08-27 postseason-VORP
+fix (`decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md`) that prompted our own
+revision above. Other rosters' rows haven't been re-run against the corrected VORP data and may
+have shifted the same way ours did — treat rows 1–4 and 6–12 as stale until re-run, not as
+confirmed.
 
 | Roster | Projected keeps | Also considered | Notes |
 |---|---|---|---|
@@ -20,7 +29,7 @@ Our own locks (executed): Diggs R7, Darnold R14.
 | 2 | Kenneth Walker III (R3), Wan'Dale Robinson (FA→ADP−1) | Corum, Johnston | KWalker obvious; FA cost depends on ADP lookup |
 | 3 | Jaylen Warren (R6), RJ Harvey (R4) | Michael Wilson (FA) | **A.J. Brown likely released to pool** (R2 cost too rich) |
 | 4 | Javonte Williams (R8), Jaxon Smith-Njigba (R1) | Montgomery R3, Egbuka (FA) | Javonte +100 surplus; CeeDee Lamb ineligible |
-| 5 | **Diggs (R7), Darnold (R14)** — locked | — | executed 2026-08-23 |
+| 5 | **Diggs (R7), Judkins (R8)** | Darnold (R14) | revised 2026-08-28, see decision log |
 | 6 | Jonathan Taylor (R1), Zay Flowers (R5) | Fannin Jr. (FA, TE) could beat Flowers | Jefferson/Achane ineligible |
 | 7 | Trevor Lawrence (FA→ADP−1), Chris Olave (R5) | Caleb Williams R6 close third | Lawrence was a waiver add with 77.9 vorp — ADP rule makes him a steal |
 | 8 | Matthew Stafford (FA→ADP−1), George Pickens (R4) | Rico Dowdle (FA) | Stafford +90–150 surplus under ADP rule; Gibbs ineligible |
