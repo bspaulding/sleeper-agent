@@ -2,12 +2,6 @@
 
 ## Before the draft (Saturday, Aug 29)
 
-- Easter Egg / Fun Draft reviewer: Yahoo Fantasy Used to have these draft grade
-  reports they would email out after the draft. It would be fun to have a tongue-in-cheek
-  reviewer for the whole league, driven by an llm skill. We would want it to look at each
-  resulting roster post draft, and use our own rankings + some LLM persona to write a quick
-  graded (A-F) review of each drafter. It could also grant some superlative "trophies"
-  to certain players.
 - Verify our `is_keeper` flags (Diggs/Darnold) once they appear on the draft
   object's `/picks` endpoint (not visible pre-lock as of Aug 23), and diff
   `wiki/league/projected-keepers-2026.md` against the real inserted set.
