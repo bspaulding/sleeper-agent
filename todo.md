@@ -5,11 +5,6 @@
 - Verify our `is_keeper` flags (Diggs/Darnold) once they appear on the draft
   object's `/picks` endpoint (not visible pre-lock as of Aug 23), and diff
   `wiki/league/projected-keepers-2026.md` against the real inserted set.
-- Follow up on the three cases the 2026-08-27 injury-status review left open (see
-  `decisions/2026/2026-08-27-bigboard-injury-status-review.md`): **Judkins**, **Olave**,
-  **Thornton**. The scheduled `sleeper-agent: pre-draft news sweep` Routine (fires
-  Saturday 1:00pm PT, 2hrs ahead of the 3pm PT draft) should pick these up automatically —
-  check its report before the draft in case it didn't.
 - **VORP has no projected-output signal — fundamental, needs its own spec, not a quick fix.**
   Confirmed via `cli/src/sleeper_agent/stats/vorp.py::compute_vorp`: it is purely retrospective,
   built only from a completed `--value-season`'s actual weekly stats — there is no projections
