@@ -10,6 +10,7 @@ so it falls back to the plain line-based `watch_board` loop.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -40,6 +41,13 @@ from sleeper_agent.draft_tools.keepers import (
     infer_total_rounds,
     rank_keeper_candidates,
 )
+from sleeper_agent.draft_tools.recap import (
+    DraftNotCompleteError,
+    build_team_recaps,
+    check_draft_complete,
+    recap_to_dict,
+    render_recap_text,
+)
 from sleeper_agent.models.sleeper import Draft, DraftPick
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.draft import (
@@ -52,7 +60,7 @@ from sleeper_agent.sleeper_client.draft import (
     keeper_history,
 )
 from sleeper_agent.sleeper_client.http import SLEEPER_BASE_URL
-from sleeper_agent.sleeper_client.league import fetch_league
+from sleeper_agent.sleeper_client.league import fetch_league, fetch_rosters, fetch_users
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats.sync import IDS_SCHEMA_VERSION, WEEKLY_SCHEMA_VERSION
 from sleeper_agent.storage.parquet_store import read_table
@@ -160,6 +168,19 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     board_parser.set_defaults(func=cmd_draft_board)
+
+    recap_parser = draft_subparsers.add_parser(
+        "recap", help="Post-draft recap data: picks joined against the big board"
+    )
+    recap_parser.add_argument("--draft-id", required=True)
+    recap_parser.add_argument("--value-season", default=None)
+    recap_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Machine-readable output for the draft-recap skill. Default is a "
+        "human-readable per-team table.",
+    )
+    recap_parser.set_defaults(func=cmd_draft_recap)
 
 
 def _read_vorp(root: Path, season: str) -> pl.DataFrame | None:
@@ -422,6 +443,71 @@ def cmd_draft_keepers(
                 )
             case _:  # pragma: no cover - KeeperStatus is exhaustive over the four cases above
                 raise AssertionError(f"unreachable: {candidate.status!r}")
+    return 0
+
+
+def _team_names_by_slot(draft: Draft, *, base_url: str) -> dict[int, str]:
+    """Real team names for a league draft (`draft.league_id` non-empty);
+    empty dict for a mock draft, where `build_team_recaps` falls back to
+    `"Slot N"` labels on its own.
+    """
+    if not draft.league_id:
+        return {}
+    rosters = fetch_rosters(draft.league_id, base_url=base_url)
+    users = fetch_users(draft.league_id, base_url=base_url)
+    user_by_id = {user.user_id: user for user in users}
+    owner_by_roster_id = {roster.roster_id: roster.owner_id for roster in rosters}
+    names: dict[int, str] = {}
+    for slot, roster_id in draft.slot_to_roster_id.items():
+        owner_id = owner_by_roster_id.get(roster_id)
+        user = user_by_id.get(owner_id) if owner_id is not None else None
+        if user is not None:
+            names[slot] = user.team_name or user.display_name
+    return names
+
+
+def cmd_draft_recap(
+    args: argparse.Namespace,
+    *,
+    repo_root: Path | None = None,
+    base_url: str = SLEEPER_BASE_URL,
+    today: Callable[[], date] = date.today,
+) -> int:
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    if args.value_season is None:
+        value_season = str(today().year - 1)
+        print(
+            f"--value-season not given; defaulting to {value_season} "
+            "(current year minus 1, the most recently completed season pre-season)"
+        )
+    else:
+        value_season = args.value_season
+
+    draft = fetch_draft(args.draft_id, base_url=base_url)
+    picks = fetch_draft_picks(args.draft_id, base_url=base_url)
+    try:
+        check_draft_complete(draft, picks)
+    except DraftNotCompleteError as exc:
+        print(str(exc))
+        return 1
+
+    try:
+        bigboard_rows = load_bigboard(root, value_season)
+    except (
+        BigboardNotBuiltError,
+        BigboardUnresolvedRowError,
+        BigboardMalformedError,
+    ) as exc:
+        print(str(exc))
+        return 1
+
+    team_names = _team_names_by_slot(draft, base_url=base_url)
+    teams = build_team_recaps(picks, bigboard_rows, team_names)
+
+    if args.json:
+        print(json.dumps(recap_to_dict(draft, value_season, teams)))
+    else:
+        print(render_recap_text(teams))
     return 0
 
 

@@ -1790,10 +1790,12 @@ def _draft_object_payload(
     *,
     rounds: int = 15,
     teams: int = 12,
+    league_id: str = "",
 ) -> dict[str, object]:
     return {
         "draft_id": draft_id,
         "type": "snake",
+        "league_id": league_id,
         "settings": {
             "rounds": rounds,
             "teams": teams,
@@ -3338,3 +3340,413 @@ def test_cmd_trade_propose_reports_no_candidates_found(
     out = capsys.readouterr().out
     assert exit_code == 0
     assert "no candidate trades found" in out
+
+
+# --- draft recap ------------------------------------------------------------
+
+
+def _rosters_payload() -> list[dict[str, object]]:
+    return [
+        {
+            "roster_id": 5,
+            "owner_id": "u5",
+            "league_id": "lid1",
+            "players": [],
+            "starters": [],
+            "settings": {},
+        },
+        {
+            "roster_id": 6,
+            "owner_id": "u6",
+            "league_id": "lid1",
+            "players": [],
+            "starters": [],
+            "settings": {},
+        },
+    ]
+
+
+def _users_payload() -> list[dict[str, object]]:
+    return [
+        {
+            "user_id": "u5",
+            "display_name": "brad",
+            "metadata": {"team_name": "Only Gold's Finest"},
+        },
+        {"user_id": "u6", "display_name": "aaron", "metadata": {}},
+    ]
+
+
+def _recap_pick_payload(
+    *,
+    round_: int,
+    pick_no: int,
+    draft_slot: int,
+    roster_id: int | None,
+    player_id: str,
+    is_keeper: bool = False,
+    first_name: str = "",
+    last_name: str = "",
+    position: str = "",
+) -> dict[str, object]:
+    return {
+        "draft_id": "did1",
+        "round": round_,
+        "pick_no": pick_no,
+        "draft_slot": draft_slot,
+        "roster_id": roster_id,
+        "player_id": player_id,
+        "is_keeper": is_keeper,
+        "picked_by": None,
+        "metadata": {
+            "first_name": first_name,
+            "last_name": last_name,
+            "position": position,
+            "team": "",
+        },
+    }
+
+
+def test_cmd_draft_recap_json_resolves_real_team_names_for_a_league_draft(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A One", "B Two"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(
+                    draft_id="did1",
+                    slot_to_roster_id={"1": 5, "2": 6},
+                    rounds=1,
+                    teams=2,
+                    league_id="lid1",
+                )
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=1,
+                        draft_slot=1,
+                        roster_id=5,
+                        player_id="1",
+                        first_name="A",
+                        last_name="One",
+                        position="RB",
+                    ),
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=2,
+                        draft_slot=2,
+                        roster_id=6,
+                        player_id="2",
+                        first_name="B",
+                        last_name="Two",
+                        position="WR",
+                    ),
+                ]
+            )
+        if request.path == "/league/lid1/rosters":
+            return json_response(_rosters_payload())
+        if request.path == "/league/lid1/users":
+            return json_response(_users_payload())
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season="2025", json=True)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    payload = json.loads(out)
+    assert payload["draft_id"] == "did1"
+    assert payload["value_season"] == "2025"
+    team_names = {t["draft_slot"]: t["team_name"] for t in payload["teams"]}
+    assert team_names == {1: "Only Gold's Finest", 2: "aaron"}
+    slot1 = next(t for t in payload["teams"] if t["draft_slot"] == 1)
+    assert slot1["picks"][0]["value_delta"] == 0
+
+
+def test_cmd_draft_recap_falls_back_to_slot_names_for_a_mock_draft(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A One"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(draft_id="did1", rounds=1, teams=1)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=1,
+                        draft_slot=1,
+                        roster_id=None,
+                        player_id="1",
+                        first_name="A",
+                        last_name="One",
+                        position="RB",
+                    )
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season="2025", json=True)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["teams"][0]["team_name"] == "Slot 1"
+    assert payload["teams"][0]["roster_id"] is None
+
+
+def test_cmd_draft_recap_json_nulls_are_explicit_for_unranked_players(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A One"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(draft_id="did1", rounds=1, teams=1)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=1,
+                        draft_slot=1,
+                        roster_id=5,
+                        player_id="def1",
+                        first_name="Pittsburgh",
+                        last_name="Steelers",
+                        position="DEF",
+                    )
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season="2025", json=True)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    pick = payload["teams"][0]["picks"][0]
+    assert pick["board_rank"] is None
+    assert pick["value_delta"] is None
+
+
+def test_cmd_draft_recap_default_output_is_human_readable_text(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A One"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(draft_id="did1", rounds=1, teams=1)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=1,
+                        draft_slot=1,
+                        roster_id=5,
+                        player_id="1",
+                        first_name="A",
+                        last_name="One",
+                        position="RB",
+                    )
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season="2025", json=False)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "A One" in out
+    assert "Δ=+0" in out
+
+
+def test_cmd_draft_recap_reports_incomplete_draft(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(draft_id="did1", rounds=2, teams=2)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1, pick_no=1, draft_slot=1, roster_id=5, player_id="1"
+                    )
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season="2025", json=False)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "did1" in out
+    assert "1/4" in out
+
+
+def test_cmd_draft_recap_reports_missing_bigboard(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(draft_id="did1", rounds=1, teams=1)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1, pick_no=1, draft_slot=1, roster_id=5, player_id="1"
+                    )
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season="2025", json=False)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not found" in out
+
+
+def test_cmd_draft_recap_defaults_value_season_when_omitted(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A One"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(draft_id="did1", rounds=1, teams=1)
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=1,
+                        draft_slot=1,
+                        roster_id=5,
+                        player_id="1",
+                        first_name="A",
+                        last_name="One",
+                        position="RB",
+                    )
+                ]
+            )
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season=None, json=True)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args,
+            repo_root=repo_root,
+            base_url=base_url,
+            today=lambda: date(2026, 1, 1),
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "defaulting to 2025" in out
+    payload = json.loads(out.splitlines()[-1])
+    assert payload["value_season"] == "2025"
+
+
+def test_draft_recap_subcommand_is_registered() -> None:
+    from sleeper_agent.main import build_parser
+
+    parser = build_parser()
+    args = parser.parse_args(["draft", "recap", "--draft-id", "did1"])
+
+    assert args.func is draft_cmd.cmd_draft_recap
+    assert args.draft_id == "did1"
+    assert args.value_season is None
+    assert args.json is False
