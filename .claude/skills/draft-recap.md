@@ -28,7 +28,7 @@ convention as `draft board`. This prints one JSON object: per team (`draft_slot`
 means the player was still on the board later than their rank deserved (good value), negative
 means they were reached for ahead of their rank. A `null` `board_rank`/`vorp`/`value_delta` means
 the big board has no row for that player (mainly DEF) — leave it as "no data," don't invent a
-number.
+number. None of these fields are for the reader — see below.
 
 ## Write the recap
 
@@ -37,27 +37,38 @@ way too much fun. Roast and praise equally hard, but good-natured: this is a rea
 people you know, not strangers, so the target is ribbing, not mean-spirited. Stay in character
 for every team's write-up, not just the extremes.
 
-**Lean on the bit, not the box score.** The JSON data is there to find the *material* — the one
-absurd reach, the one lucky steal, the one roster quirk worth razzing — not to be recited.
-(Confirmed 2026-08-28, after the first real run read as too spreadsheet-y: cut the
-number-dropping hard.) A team's write-up should read like a comedian riffing on a draft, not an
-analyst's notes with jokes bolted on. Concretely: **at most one stat per team** (one `Δ`, one
-rank, whatever's funniest — not both, and never a running tally of five picks in a row), and
-spend the rest of the sentences on the bit: a scenario, a voice, a comparison, an insult with
-some craft to it. If a team's whole story is "every pick was fine," don't summarize that
-flatly — find the *angle* that's funny about a team with nothing to make fun of.
+**Never expose `board_rank`, `vorp`, `value_delta`, or `mean_value_delta` — not as a number, not
+as an ordinal ("ranked 291st"), not in a table column, nowhere.** (Confirmed 2026-08-28: this
+document gets shared around the league for fun. It is not the place to publish our actual
+rankings — the specific numbers are our analysis, and printing them hands the whole league a
+readout of exactly how we rank every player, which is exactly the kind of edge a fun report card
+should never leak.) Use the JSON purely as *research* to find the material — the one absurd
+reach, the one lucky steal, the one roster quirk worth razzing — then translate it into
+qualitative, non-numeric commentary: "a massive reach," "fell further than it should have," "the
+best player left on the board," never "our board had him 291st" or "+43.6 value per pick." A
+pick-by-pick table, if you build one, shows round/pick/player/position only — never a rank or
+delta column. Round and pick number are fine to cite anywhere (that's just what happened in the
+draft, public to the whole league); anything that's *our* number is not.
+
+**Lean on the bit, not the box score.** Even kept fully qualitative, don't over-explain — a team's
+write-up should read like a comedian riffing on a draft, not an analyst's notes with jokes bolted
+on. Spend the sentences on the bit: a scenario, a voice, a comparison, an insult with some craft
+to it. If a team's whole story is "every pick was fine," don't summarize that flatly — find the
+*angle* that's funny about a team with nothing to make fun of.
 
 **Grades**: one A-F letter grade per team. Anchor loosely to that team's `mean_value_delta` —
-real signal, not decoration — but don't linearly map it to a grade, and don't show your work.
+real signal, not decoration — but don't linearly map it to a grade, and never show your work.
 Weigh it against your own read of roster construction the way a human draft analyst would, then
-mostly keep that reasoning invisible; the reader sees the verdict and the joke, not the math.
-Call out `is_keeper` picks as a keeper decision made seasons ago, not this draft's judgment call
-— but only if it's actually funny to; skip it otherwise. 2-4 sentences per team, mostly bit.
+keep all of that reasoning invisible; the reader sees the verdict and the joke, never the number
+behind it. Call out `is_keeper` picks as a keeper decision made seasons ago, not this draft's
+judgment call — but only if it's actually funny to; skip it otherwise. 2-4 sentences per team,
+mostly bit.
 
 **Trophies**: 3-6 freeform superlative awards across the whole league — invent them fresh each
 run, there's no fixed list. Each should still be traceable to something real in the data (don't
-invent a pick that didn't happen), but the trophy *name* and the one-liner around it are where
-the effort goes — a flat "Team X had the best value" is a stat, not a trophy.
+invent a pick that didn't happen), but ground it in the pick itself (name, round, position), not
+in a number from our board. The trophy *name* and the one-liner around it are where the effort
+goes — a flat "Team X had the best value" is a stat, not a trophy, and it's also a leak.
 
 ## Build and ship the report card
 
