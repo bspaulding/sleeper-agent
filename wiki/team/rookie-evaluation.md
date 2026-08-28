@@ -108,15 +108,28 @@ specifically — not evidence the round-1 filter itself is loosening.
 Rookie QB fantasy relevance is driven almost entirely by rushing floor (a passing-only rookie QB
 rarely has standalone value in year one) and, per the table above, is even more concentrated in
 round 1 than any other position. Low-priority for this league specifically: a single required QB
-slot with no superflex means a QB2 speculative stash competes for a bench spot against RB/WR/TE
-depth that has a much higher chance of mattering in-season in a *best-ball* format where there's
-no way to actively stream a hot waiver-wire QB into the lineup (see below).
+slot with no superflex means a speculative rookie QB2 stash competes for a bench spot against
+RB/WR/TE depth — and unlike a rookie WR/RB/TE bet, a QB stash doesn't need to be *speculative* at
+all, since this league's active FAAB waivers (`waiver recommend`, `.claude/skills/waivers.md`)
+make a known, signed veteran streaming option a lower-variance use of the same roster spot in
+most cases (see below).
 
 ## Best-ball framing for this league
 
-This league is `best_ball: true` (`wiki/team/roster-philosophy.md`'s roster grid) with no
-in-season lineup management modeled by this codebase — the same fact `draft-strategy.md` uses to
-lean the RB strategy spectrum toward Hero-RB rather than Zero-RB applies here too:
+This league is `best_ball: true` (`wiki/team/roster-philosophy.md`'s roster grid): Sleeper
+auto-optimizes the *weekly starting lineup* from the current roster, so no start/sit decisions are
+needed. **This is purely a lineup-setting mechanic — it does not restrict in-season roster
+transactions.** This league has fully active FAAB waivers (`waiver_type: 2`, budget 100/season)
+and a trade deadline (week 11), both modeled by this codebase (`waiver recommend`,
+`freeagent recommend`, `.claude/skills/waivers.md`, `.claude/skills/free-agents.md`) — a
+misjudged bench bet can be corrected in-season via a waiver claim or free-agent swap, same as in
+any actively-managed league. (An earlier version of this section claimed otherwise — "no
+in-season lineup management modeled" was true only in the narrow sense that nothing needs
+week-to-week start/sit management; it was wrongly generalized into "no in-season management at
+all," which contradicts this league's own settings and this repo's own waiver/free-agent tooling.
+Corrected 2026-08-28.) With that said, the fact `draft-strategy.md` uses to lean the RB strategy
+spectrum toward Hero-RB rather than Zero-RB still applies here too — auto-optimized scoring
+rewards rostering ceiling regardless of whether a player would've been "started" that week:
 
 - Best-ball-specific guidance frames rookies as **situational-upside plays**: "opportunity is
   king" for a single redraft season, versus dynasty formats where raw talent has years to pay off

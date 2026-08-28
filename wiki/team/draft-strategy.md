@@ -51,12 +51,28 @@ injury/role-loss risk of the skill positions.
   scarcity premium for a top player), then pivot to WR/QB/TE depth, treating the rest of the RB
   room as bench lottery tickets rather than a second early investment.
 
-**Which fits this league:** this is a **best-ball** league (`league.settings.best_ball`) with no
-in-season waiver-wire management modeled by this codebase (`PROJECT_PLAN.md`'s best-ball note).
-That cuts against a pure Zero-RB bet, which leans on being able to actively stream RB
-replacements off waivers all season — a lever this team doesn't really pull. A Hero-RB-leaning
-approach (one strong early RB, then broaden) is a more natural fit than either extreme, but this
-is a starting hypothesis to test against the next mock draft, not a hard rule yet.
+**Which fits this league:** this league has `best_ball: true` (`league.settings.best_ball`), but
+that only means Sleeper auto-optimizes the weekly starting lineup — it does **not** mean waivers
+are unavailable. **Corrected 2026-08-28:** an earlier version of this note claimed "no in-season
+waiver-wire management modeled by this codebase" and used that to argue against Zero-RB. That's
+wrong — `PROJECT_PLAN.md` explicitly describes this as "a regular league (waivers, trades,
+keepers, in-season transactions all enabled)," this league runs active FAAB waivers
+(`waiver_type: 2`, budget 100/season), and this codebase has working tooling for exactly this
+(`waiver recommend`, `freeagent recommend`, `.claude/skills/waivers.md`,
+`.claude/skills/free-agents.md`). Streaming RB replacements off waivers is a real, available
+lever here.
+
+The actual, data-grounded case against a pure Zero-RB bet in this league is different: per
+`decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md`, RB's replacement level in
+this league's VORP data is structurally worse than WR's in points-per-game terms (~8.4 ppg vs.
+~10.5 ppg) — meaning a *streamed* waiver-wire RB is more likely to land at true replacement level
+(or below) than a streamed WR would, since RB touches concentrate more heavily with rostered
+starters across a 12-team league, leaving thinner scraps on the wire. That's a real scarcity
+argument for leaning Hero-RB over Zero-RB, grounded in this league's actual VORP baselines — not
+because streaming is impossible, but because what's left to stream at RB specifically tends to be
+worse. A Hero-RB-leaning approach (one strong early RB, then broaden) is still a reasonable
+starting hypothesis on that basis, but it should be tested against the next mock draft for the
+right reason, not the wrong one.
 
 ## Tiered drafting and positional runs
 

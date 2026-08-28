@@ -80,10 +80,23 @@ frameworks here are qualitative and example-driven:
 
 ## Why this matters for this league specifically
 
-Same best-ball framing as `rookie-evaluation.md`: no in-season lineup management means a
-misjudged role-changer costs a full season of a bench/FLEX slot rather than a bad single week, so
-getting the "did the opportunity actually materialize" read right before the Aug 29 draft matters
-more than it would in an actively-managed league where a bad bet can be cut after a few weeks.
+**Corrected 2026-08-28** (previously overstated — see `wiki/team/rookie-evaluation.md`'s
+best-ball framing section for the same fix): `best_ball: true` only means Sleeper auto-optimizes
+the weekly starting lineup — it does not remove this league's active FAAB waivers or trade
+deadline (both modeled by this codebase: `waiver recommend`, `freeagent recommend`,
+`.claude/skills/waivers.md`, `.claude/skills/free-agents.md`). A misjudged role-changer bet *can*
+be cut in-season via a waiver claim or free-agent swap, same as in any actively-managed league —
+this is not a season-long, un-correctable cost.
+
+What best-ball *does* change here is smaller and more specific: in a normal (manual-lineup)
+league, benching a misjudged role-changer the moment his usage looks wrong costs nothing — no
+transaction needed. Here, correcting it requires an actual roster move (a waiver claim, possibly
+costing FAAB, or a free-agent add competing with anyone else who's noticed the same thing), and
+whatever points he scored on your bench before you noticed and got the swap through are sunk
+regardless of best-ball's auto-optimization. So getting the "did the opportunity actually
+materialize" read right before the draft still matters — it avoids that transaction friction and
+head start on other owners — just not because a bad bet is otherwise stuck on the roster all
+year.
 
 ## Sources
 
