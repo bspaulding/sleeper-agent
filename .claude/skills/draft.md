@@ -20,24 +20,30 @@ Run it as a single background, non-interactive watcher instead.
 
 ## Watching the draft
 
+One process, one `Monitor` call — no separate Bash `run_in_background` process and no
+hand-rolled snake-math script. Pipe stdout through `tee` before grepping, so the full board
+survives to disk for the next step, then filter the same stream for the turn signal:
+
 ```
 sleeper-agent draft board --draft-id <id> --draft-slot <n> --num-teams <n> --notify-my-turn \
-  > /path/to/scratch/board_watch.log 2>&1
+  2>&1 | tee /path/to/scratch/board_watch.log | grep --line-buffered -E "YOUR TURN|Traceback|Error"
 ```
 
-Run via Bash `run_in_background: true`. No `--once`. Stdout must be a file, not a tty —
-`cmd_draft_board` auto-selects the plain `watch_board` loop (5s poll, re-renders only when picks
-change) instead of the TUI. `--notify-my-turn` adds a `YOUR TURN: pick N (round R)` line the
-moment the next unmade pick is ours, alongside the normal NEED/SURPLUS/FLEX/tier-tagged board.
-
-Wrap this same command in `Monitor`, filtering for `YOUR TURN`. One process, one Monitor — no
-separate picks poller, no hand-rolled snake-math script.
+Wrap that whole pipeline directly in `Monitor` (`persistent: true`). No `--once`, no separate
+Bash task. Stdout must be a file, not a tty — `cmd_draft_board` auto-selects the plain
+`watch_board` loop (5s poll, re-renders only when picks change) instead of the TUI. `--notify-my-
+turn` adds a `YOUR TURN: pick N (round R)` line the moment the next unmade pick is ours,
+alongside the normal NEED/SURPLUS/FLEX/tier-tagged board. Grepping *without* the `tee` stage
+loses the full board — only the matched line reaches Monitor's event stream, and the next
+step's "read the log tail" has nothing to read (found the hard way in
+[[2026-08-27-draft-mock-draft-4-slot8]], worked around that run with repeated `--once` calls).
 
 ## During the draft
 
-`YOUR TURN` notification: read the tail of the watcher's log file — it's already fresh. Don't
-re-invoke the CLI. Take the top-ranked `NEED`-tagged row; if none are `NEED`, take the top row
-overall. State the pick and one line of reasoning, then stop.
+`YOUR TURN` notification: read the tail of the tee'd log file — it's already fresh (the plain
+watcher re-renders the whole board on every change, so the last render in the file is current).
+Don't re-invoke the CLI. Take the top-ranked `NEED`-tagged row; if none are `NEED`, take the top
+row overall. State the pick and one line of reasoning, then stop.
 
 ## Defenses — no data, don't go hunting for it
 
