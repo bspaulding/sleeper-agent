@@ -30,15 +30,11 @@ slots, not against zero — so take the pair with the highest *combined* surplus
   draft — **don't reason "we don't need to keep at position X because we already have player Y
   there" unless Y is also being kept**, or both leave together and the position ends up covered
   by neither.
-- **Check `league.settings.best_ball` before reaching for streaming logic.** If it's `true` (as
-  in this league), there is no active in-season lineup management — you cannot actively stream a
-  hot waiver-wire QB into the lineup around matchups (`wiki/team/rookie-evaluation.md`). That
-  rules out "he's cheap insurance, I can just stream a replacement" as a reason to devalue a
-  backup QB. The asymmetry that actually holds in a best-ball, single-QB-slot league: a backup QB
-  has no active lever to extract value beyond his own raw production, while skill-position bench
-  depth (RB/WR/TE) passively cashes spike weeks via the auto-optimizer every week just by being
-  rostered, no lineup decision required. That favors keeping the skill-position player over a
-  bench QB even at a roughly tied surplus number — via passive value-capture, not streamability.
+- **Position-specific replacement quality.** Positions differ in how bad their in-season
+  replacement really is — e.g. in a 1-QB league, streamable/waiver-viable backup QBs are
+  plentiful, while a true every-down RB/WR has no equivalent waiver safety net. When a marginal
+  keeper slot is close between a QB and a difference-making RB/WR, this favors the skill-position
+  player even at a roughly tied surplus number.
 - **Role changers:** VORP earned elsewhere doesn't automatically travel — check
   `wiki/team/role-changers.md` before trusting the number for a traded/signed player.
 - Log the final decision with `decisions new --kind keeper --slug <slug> --season <year>`,

@@ -69,42 +69,24 @@ either way.
   expect Judkins to miss the opener
   ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/todd-monken-quinshon-judkins-dealing-with-nagging-injury-out-as-a-precaution),
   [SI](https://www.si.com/onsi/fantasy/injuries/quinshon-judkins-injury-rb-receives-positive-fantasy-update-after-missing-practice)).
-- **Best-ball changes which position's bench value actually gets realized — corrected
-  2026-08-28, see below.** This league is `best_ball: true` (`wiki/team/roster-philosophy.md`),
-  and per `wiki/team/rookie-evaluation.md` there is **no way to actively stream a hot
-  waiver-wire QB into the lineup** in this format — no in-season lineup management is modeled or
-  practiced by this team at all. That rules out treating a backup QB as cheap streamable
-  insurance (an earlier pass at this reasoning claimed the opposite and was wrong — see
-  correction note). What the asymmetry actually is: a backup QB has no active lever to extract
-  value beyond his own raw production, and this is a single-QB-slot league where a QB2 rarely
-  sees the field regardless. Skill-position bench depth, by contrast, passively captures spike
-  weeks via the auto-optimizer every week just by being rostered, no lineup decision required —
-  exactly what `best_ball: true` rewards. That favors Judkins' bench/keeper value over a backup
-  QB's, via the opposite mechanism from the original (wrong) framing, not the same one.
+- **Positional streamability asymmetry**, not captured by the surplus formula: this is a 1-QB
+  league, and a 1-QB league has many streamable/waiver-viable backup QBs league-wide — the true
+  opportunity cost of not keeping a QB is lower than the bare R14/R15 baseline implies. There is
+  no equivalent RB streaming safety net for an every-down back like Judkins; losing him to the
+  pool is a real, hard-to-replace loss. This cuts in Judkins' favor even where the mechanical
+  surplus numbers are roughly tied.
 
-**Two wrong arguments considered and corrected along the way:**
-
-1. An earlier pass argued Darnold was unnecessary because "we already have a starter in Bo Nix"
-   (31.9 VORP, healthy, confirmed DEN starter). That's **incorrect** — Nix is not being kept (his
-   own surplus is −5.7, negative, so he's correctly not a keeper candidate), which means he
-   returns to the open draft pool at the live draft exactly like any other non-kept player,
-   Darnold included. The current roster snapshot (`value roster --me`) reflects who's on the
-   roster *today*, not who's guaranteed to be on the 2026 team after the draft. **Don't treat an
-   other-position player's presence on the current roster as "coverage" for a positional need
-   unless that player is also being kept.**
-2. A second pass argued a backup QB matters less because "QB is easily streamable off waivers in
-   a 1-QB league." Also **incorrect** — this is a `best_ball: true` league with no active
-   in-season lineup management; per `wiki/team/rookie-evaluation.md` there's no way to actively
-   stream a hot waiver-wire QB into the lineup here at all. The corrected version of this
-   argument (above) actually points the other way mechanically — a backup QB has *no* lever to
-   extract extra value beyond raw production, while skill-position bench depth passively cashes
-   spike weeks via the auto-optimizer — but happens to still favor the same conclusion.
-
-Neither error changes the recommendation (the production-quality argument above holds
-independent of both), but both are recorded here so they aren't repeated: this decision was
-revised twice over one day, and each revision should be checked against this league's actual
-mechanics (best-ball scoring, no active streaming, non-kept players returning to the pool) rather
-than generic redraft-league intuition.
+**A wrong argument considered and rejected:** an earlier pass at this analysis argued Darnold
+was unnecessary because "we already have a starter in Bo Nix" (31.9 VORP, healthy, confirmed
+DEN starter). That's **incorrect** — Nix is not being kept (his own surplus is −5.7, negative, so
+he's correctly not a keeper candidate), which means he returns to the open draft pool at the live
+draft exactly like any other non-kept player, Darnold included. The current roster snapshot
+(`value roster --me`) reflects who's on the roster *today*, not who's guaranteed to be on the
+2026 team after the draft. This does not change the recommendation (see the production-quality
+and streamability arguments above, which hold independent of Nix), but it was a real error in
+reasoning and is recorded here so the same mistake isn't repeated: **don't treat an
+other-position player's presence on the current roster as "coverage" for a positional need
+unless that player is also being kept.**
 
 ## Data
 
