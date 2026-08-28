@@ -97,13 +97,20 @@ move these numbers.)
   already have player Y at position X" unless Y is *also* being kept —
   otherwise both return to the pool together and the position ends up
   covered by neither.
-- **Positions differ in how bad their in-season replacement really is.** A
-  1-QB league has many streamable/waiver-viable backup QBs; a true every-down
-  RB has no equivalent waiver safety net. When a marginal late-round keeper
-  slot is close between a QB and a difference-making RB/WR, this asymmetry
-  favors keeping the skill-position player even at a roughly tied surplus
-  number — the real opportunity cost of losing the QB is smaller than the
-  bare baseline implies.
+- **This is a `best_ball: true` league — don't reach for standard-redraft
+  streaming logic.** An earlier version of this note claimed a 1-QB league's
+  backup QBs are cheap because they're "easily streamable off waivers." That's
+  wrong for this format specifically: per `wiki/team/rookie-evaluation.md`,
+  best-ball has no active in-season lineup management, so there's no way to
+  actively stream a hot waiver-wire QB into the lineup here at all. The
+  correct version of the asymmetry runs the other way: a backup QB has *no*
+  lever to extract value beyond his own raw production (he rarely sees the
+  field in a single-QB-slot league regardless), while skill-position bench
+  depth passively cashes spike weeks via the auto-optimizer every week just
+  by being rostered — no lineup decision required, which is exactly what
+  `best_ball: true` rewards. When a marginal late-round keeper slot is close
+  between a QB and a difference-making RB/WR, that favors the skill-position
+  player, via this mechanism, not a streaming argument.
 
 ## League-wide projection
 
