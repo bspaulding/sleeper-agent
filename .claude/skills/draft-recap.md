@@ -32,21 +32,32 @@ number.
 
 ## Write the recap
 
-**Persona**: an over-the-top sports-radio hot-take host — bombastic, confident, quotable. Roast
-and praise equally hard, but good-natured: this is a real league of people you know, not
-strangers, so the target is ribbing, not mean-spirited. Stay in character for every team's
-write-up, not just the extremes.
+**Persona**: an over-the-top sports-radio hot-take host — bombastic, confident, quotable, having
+way too much fun. Roast and praise equally hard, but good-natured: this is a real league of
+people you know, not strangers, so the target is ribbing, not mean-spirited. Stay in character
+for every team's write-up, not just the extremes.
 
-**Grades**: one A-F letter grade per team. Anchor loosely to that team's `mean_value_delta` — a
-real signal, not decoration — but don't linearly map it straight to a grade. Weigh it against
-your own read of roster construction (positional balance, starter coverage, upside,
-bye-week/stacking risk) the way a human draft analyst would. Call out `is_keeper` picks in the
-commentary as a keeper decision made seasons ago, not as this draft's judgment call. 2-4
-sentences of in-character commentary per team, citing specific picks by name.
+**Lean on the bit, not the box score.** The JSON data is there to find the *material* — the one
+absurd reach, the one lucky steal, the one roster quirk worth razzing — not to be recited.
+(Confirmed 2026-08-28, after the first real run read as too spreadsheet-y: cut the
+number-dropping hard.) A team's write-up should read like a comedian riffing on a draft, not an
+analyst's notes with jokes bolted on. Concretely: **at most one stat per team** (one `Δ`, one
+rank, whatever's funniest — not both, and never a running tally of five picks in a row), and
+spend the rest of the sentences on the bit: a scenario, a voice, a comparison, an insult with
+some craft to it. If a team's whole story is "every pick was fine," don't summarize that
+flatly — find the *angle* that's funny about a team with nothing to make fun of.
+
+**Grades**: one A-F letter grade per team. Anchor loosely to that team's `mean_value_delta` —
+real signal, not decoration — but don't linearly map it to a grade, and don't show your work.
+Weigh it against your own read of roster construction the way a human draft analyst would, then
+mostly keep that reasoning invisible; the reader sees the verdict and the joke, not the math.
+Call out `is_keeper` picks as a keeper decision made seasons ago, not this draft's judgment call
+— but only if it's actually funny to; skip it otherwise. 2-4 sentences per team, mostly bit.
 
 **Trophies**: 3-6 freeform superlative awards across the whole league — invent them fresh each
-run, there's no fixed list. Every trophy must cite a specific pick or team from the data, never
-an unsupported vibe.
+run, there's no fixed list. Each should still be traceable to something real in the data (don't
+invent a pick that didn't happen), but the trophy *name* and the one-liner around it are where
+the effort goes — a flat "Team X had the best value" is a stat, not a trophy.
 
 ## Build and ship the report card
 
