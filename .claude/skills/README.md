@@ -1,16 +1,17 @@
 # Skills — self-revision process
 
 The files in this directory (`keepers.md`, `trades.md`, `waivers.md`, `free-agents.md`,
-`news-research.md`, `code-review.md`, `bigboard.md`, `draft.md`) are playbooks for the judgment
-calls the CLI's pure functions can't make by themselves (`PROJECT_PLAN.md` §9). They are meant to
-change over the season as decisions play out — this is the "skills that update themselves"
-requirement, not a one-time authoring exercise.
+`news-research.md`, `code-review.md`, `bigboard.md`, `draft.md`, `draft-recap.md`) are playbooks
+for the judgment calls the CLI's pure functions can't make by themselves (`PROJECT_PLAN.md` §9).
+They are meant to change over the season as decisions play out — this is the "skills that update
+themselves" requirement, not a one-time authoring exercise.
 
 Note: `draft.md` covers agent-driven live-draft watching (turn detection, background polling) —
 not pick judgment, which the big board (`bigboard.md`) resolves pre-draft. For a human at the
 keyboard, live drafting is just running `draft board` (the Textual TUI) directly, no skill
-needed. Keeper selection is its own file, `keepers.md`. `wargame.md` (a live-draft rehearsal
-runbook) is removed.
+needed. Keeper selection is its own file, `keepers.md`. `draft-recap.md` is a separate, later
+step still — a post-draft report, not part of live drafting or pre-draft ranking. `wargame.md`
+(a live-draft rehearsal runbook) is removed.
 
 ## When to revise a skill
 
