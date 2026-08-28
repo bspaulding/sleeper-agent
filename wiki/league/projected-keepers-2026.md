@@ -12,10 +12,10 @@ owner-judgment priors. **Projections, not facts** — owners choose their own;
 refresh after the Aug 28 lock and verify against the draft object's
 `is_keeper` picks before trusting it on draft day.
 
-Our own locks: Diggs R7, Judkins R8 — **revised 2026-08-28**
-(`decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md`), swapped out from the original
-Diggs R7 / Darnold R14 executed 2026-08-23 after a VORP-data fix changed Darnold's value from
-+7.0 to −30.5. Recommended, not yet set in Sleeper.
+Our own locks (executed 2026-08-28): Diggs R7, Judkins R8 — revised
+(`decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md`) from the original Diggs R7 /
+Darnold R14 executed 2026-08-23, after a VORP-data fix changed Darnold's value from +7.0 to
+−30.5.
 
 **Scope note:** this whole table was computed 2026-08-23, before the 2026-08-27 postseason-VORP
 fix (`decisions/2026/2026-08-27-bigboard-season-type-postseason-fix.md`) that prompted our own

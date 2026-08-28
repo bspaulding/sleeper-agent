@@ -3,7 +3,7 @@ date: '2026-08-28'
 kind: keeper
 season: '2026'
 week: null
-status: recommended
+status: executed
 players_involved:
   - Sam Darnold
   - Quinshon Judkins
@@ -103,6 +103,6 @@ unless that player is also being kept.**
 
 ## Outcome
 
-Recommended, not yet executed. Action needed **today (2026-08-28, the keeper deadline)**: update
-the keeper selection in Sleeper from Darnold to Judkins, then flip this entry's `status` to
-`executed` and confirm against the draft object's `is_keeper` flags once available.
+Executed — keeper selection updated in Sleeper from Darnold to Judkins on 2026-08-28, ahead of
+the deadline. Still to confirm: `is_keeper` flags on the draft object's `/picks` endpoint once
+they appear close to draft night (same caveat as the original 2026-08-23 decision).

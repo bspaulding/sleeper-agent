@@ -35,9 +35,9 @@ the linked decision entries for full reasoning and the verbatim keeper-rule conf
 darnold-r14.md`): Stefon Diggs (R7), Sam Darnold (R14). Our draft slot: 8 of 12.**
 
 **Revised 2026-08-28** (see `decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md`):
-after a VORP-data fix changed Darnold's value from +7.0 to −30.5, the recommendation is
-**Stefon Diggs (R7), Quinshon Judkins (R8)** — swapping out Darnold. Status: recommended, not
-yet set in Sleeper as of this writing; must be done before the Aug 28 deadline.
+after a VORP-data fix changed Darnold's value from +7.0 to −30.5, the locks are now
+**Stefon Diggs (R7), Quinshon Judkins (R8)** — swapped in for Darnold and executed in Sleeper on
+2026-08-28, ahead of the deadline.
 
 This matches what `sleeper_client/draft.py`'s `keeper_history` already computes
 (`cost = last_round - 1`, `KeeperIneligibleCostBelowRoundOne` at cost 0,
