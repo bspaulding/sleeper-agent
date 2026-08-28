@@ -8,9 +8,6 @@
 
 ## In-season
 
-- Re-run `adp sync` before any live keeper/trade decision that needs a fresh
-  ADP-reset number (`draft keepers`'s ADP-reset cost uses whatever snapshot
-  was last synced, not a live lookup).
 - Sync `stats --season 2026` once nflverse starts publishing weekly files
   (currently 404 pre-season — verified 2026-08-23), then `stats vorp --season
   2026`. Until then `players.parquet`'s live `injury_status` tags are the only
