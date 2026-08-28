@@ -385,5 +385,3 @@ def next_unmade_pick_no(
 
 def picks_in_order(picks_by_no: dict[int, DraftPick]) -> list[DraftPick]:
     return [picks_by_no[pick_no] for pick_no in sorted(picks_by_no)]
-
-

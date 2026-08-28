@@ -1118,6 +1118,7 @@ def test_render_board_omits_moved_tag_when_no_team_changes_given() -> None:
 
     assert "[MOVED" not in rendered
 
+
 # --- DraftBoardModel (TUI pick-merge + board derivation) -----------------
 
 

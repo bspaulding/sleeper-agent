@@ -536,12 +536,12 @@ def _run_board_tui(
     turn_detection_slot = _resolve_turn_detection_slot(context)
     if turn_detection_slot is None and context.my_roster_id is not None:
         print(
-                f"warning: roster_id {context.my_roster_id} is not in this draft's "
-                f"slot_to_roster_id (mapped slots: "
-                f"{sorted(context.draft.slot_to_roster_id)}) — streaming picks "
-                "without turn detection (no MY PICK markers, no your-turn "
-                "banner). Pass --draft-slot to fix."
-            )
+            f"warning: roster_id {context.my_roster_id} is not in this draft's "
+            f"slot_to_roster_id (mapped slots: "
+            f"{sorted(context.draft.slot_to_roster_id)}) — streaming picks "
+            "without turn detection (no MY PICK markers, no your-turn "
+            "banner). Pass --draft-slot to fix."
+        )
 
     model = DraftBoardModel(
         context.bigboard_rows,
@@ -579,5 +579,3 @@ def _render_context_board(
         team_changes=context.team_changes,
         injury_statuses=context.injury_statuses,
     )
-
-

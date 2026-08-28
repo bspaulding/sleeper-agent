@@ -44,9 +44,7 @@ def _bigboard(n: int) -> list[BigboardRow]:
     ]
 
 
-def _pick(
-    pick_no: int, draft_slot: int, *, player_id: str | None = None
-) -> DraftPick:
+def _pick(pick_no: int, draft_slot: int, *, player_id: str | None = None) -> DraftPick:
     return DraftPick(
         draft_id="d1",
         round=1,
