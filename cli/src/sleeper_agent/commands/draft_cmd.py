@@ -36,9 +36,11 @@ from sleeper_agent.draft_tools.board import (
 )
 from sleeper_agent.draft_tools.board_app import DraftBoardApp, DraftBoardModel
 from sleeper_agent.draft_tools.keepers import (
+    DEFAULT_NUM_TEAMS,
     KeeperCandidate,
     build_season_chain,
     infer_total_rounds,
+    load_latest_adp,
     rank_keeper_candidates,
 )
 from sleeper_agent.draft_tools.recap import (
@@ -385,6 +387,10 @@ def cmd_draft_keepers(
     season_chain, picks_by_season = build_season_chain(root, args.season)
     total_rounds = infer_total_rounds(season_chain, picks_by_season)
 
+    adp_snapshot = load_latest_adp(root)
+    adp_pick_by_player_id = adp_snapshot[1] if adp_snapshot is not None else None
+    adp_snapshot_date = adp_snapshot[0] if adp_snapshot is not None else None
+
     value_season = args.value_season or str(int(args.season) - 1)
     vorp_df = _read_vorp(root, value_season)
     vorp_by_id: dict[str, float] = {}
@@ -402,7 +408,14 @@ def cmd_draft_keepers(
             name=name_by_id.get(player_id, player_id),
             position=position_by_id.get(player_id),
             status=keeper_history(
-                player_id, roster.roster_id, season_chain, picks_by_season, total_rounds
+                player_id,
+                roster.roster_id,
+                season_chain,
+                picks_by_season,
+                total_rounds,
+                adp_pick_by_player_id=adp_pick_by_player_id,
+                adp_snapshot_date=adp_snapshot_date,
+                num_teams=DEFAULT_NUM_TEAMS,
             ),
             vorp_season=vorp_by_id.get(player_id),
         )
@@ -423,16 +436,25 @@ def cmd_draft_keepers(
                     f"  ELIGIBLE  {candidate.name:<25} cost=R{cost} (last drafted/kept R{last_round}) "
                     f"vorp={vorp_display}"
                 )
-            case KeeperEligibleUndraftedDefault(cost_round=cost):
+            case KeeperEligibleUndraftedDefault(
+                cost_round=cost, adp_pick=adp_pick, adp_snapshot_date=adp_date
+            ):
                 vorp_display = (
                     f"{candidate.vorp_season:.1f}"
                     if candidate.vorp_season is not None
                     else "n/a"
                 )
-                print(
-                    f"  ELIGIBLE  {candidate.name:<25} cost=R{cost} "
-                    f"(no draft history — defaulted to last round) vorp={vorp_display}"
-                )
+                if adp_pick is not None:
+                    print(
+                        f"  ELIGIBLE  {candidate.name:<25} cost=R{cost} "
+                        f"(ADP-reset: pick #{adp_pick} as of {adp_date}) "
+                        f"vorp={vorp_display}"
+                    )
+                else:
+                    print(
+                        f"  ELIGIBLE  {candidate.name:<25} cost=R{cost} "
+                        f"(no draft history — defaulted to last round) vorp={vorp_display}"
+                    )
             case KeeperIneligibleMaxYearsReached(consecutive_kept_seasons=n):
                 print(
                     f"  ineligible {candidate.name:<24} kept {n} consecutive seasons already (max reached)"

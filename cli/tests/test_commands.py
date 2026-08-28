@@ -11,6 +11,7 @@ import polars as pl
 import pytest
 
 from sleeper_agent.commands import (
+    adp_cmd,
     decisions_cmd,
     draft_cmd,
     freeagent_cmd,
@@ -378,6 +379,52 @@ def test_cmd_stats_sync_prints_summary(
 
     assert exit_code == 0
     assert "synced stats for 2025" in capsys.readouterr().out
+
+
+def test_cmd_adp_sync_prints_summary(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.adp.sync import AdpSyncResult
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    write_table(
+        pl.DataFrame({"player_id": ["1"], "name": ["Test Player"], "position": ["QB"]}),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    def fake_sync_adp(
+        adp_dir: Path, players_df: pl.DataFrame, *, retrieved_date: str
+    ) -> AdpSyncResult:
+        return AdpSyncResult(
+            retrieved_date=retrieved_date,
+            total_rows=3,
+            matched_rows=2,
+            unmatched_names=["Some Guy"],
+        )
+
+    args = argparse.Namespace()
+    exit_code = adp_cmd.cmd_adp_sync(
+        args,
+        repo_root=repo_root,
+        today=lambda: date(2026, 8, 28),
+        sync_adp=fake_sync_adp,
+    )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "synced ADP snapshot 2026-08-28: 2/3 rows matched" in out
+    assert "unmatched: Some Guy" in out
+
+
+def test_cmd_adp_sync_requires_synced_players(tmp_path: Path) -> None:
+    repo_root = make_repo_root(tmp_path)
+    args = argparse.Namespace()
+
+    with pytest.raises(adp_cmd.PlayersNotSyncedError):
+        adp_cmd.cmd_adp_sync(args, repo_root=repo_root)
 
 
 def test_cmd_stats_draft_picks_sync_prints_summary(

@@ -5,22 +5,12 @@
 - Verify our `is_keeper` flags (Diggs/Darnold) once they appear on the draft
   object's `/picks` endpoint (not visible pre-lock as of Aug 23), and diff
   `wiki/league/projected-keepers-2026.md` against the real inserted set.
-- **VORP has no projected-output signal — fundamental, needs its own spec, not a quick fix.**
-  Confirmed via `cli/src/sleeper_agent/stats/vorp.py::compute_vorp`: it is purely retrospective,
-  built only from a completed `--value-season`'s actual weekly stats — there is no projections
-  data source anywhere in the pipeline. Needed: (a) a projections data feed/sync (same shape as
-  the existing nflverse weekly-stats sync), (b) a `vorp_projected` metric (VORP over replacement
-  using projected rather than realized season output) alongside today's realized-stats VORP, (c)
-  a decision on how `bigboard build`/live `draft board` blend or choose between the two (and
-  whether this changes the bigboard spec's "VORP stays purely quantitative" constraint). Scope as
-  a new doc under `docs/superpowers/specs/`, not a one-line change.
 
 ## In-season
 
-- Replace `KeeperEligibleUndraftedDefault`'s hard R15 fallback with the
-  clarified rule (traded/FA players reset to current DraftSharks
-  Sleeper/PPR/12-team ADP − 1): needs an ADP lookup integration plus a way to
-  pin/reference the ADP snapshot used at keep time.
+- Re-run `adp sync` before any live keeper/trade decision that needs a fresh
+  ADP-reset number (`draft keepers`'s ADP-reset cost uses whatever snapshot
+  was last synced, not a live lookup).
 - Sync `stats --season 2026` once nflverse starts publishing weekly files
   (currently 404 pre-season — verified 2026-08-23), then `stats vorp --season
   2026`. Until then `players.parquet`'s live `injury_status` tags are the only

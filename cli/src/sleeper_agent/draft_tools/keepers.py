@@ -20,6 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from sleeper_agent.adp.sync import latest_adp_snapshot
 from sleeper_agent.config import data_dir
 from sleeper_agent.models.sleeper import DraftPick
 from sleeper_agent.sleeper_client import sync as sleeper_sync
@@ -31,6 +32,25 @@ from sleeper_agent.sleeper_client.draft import (
 from sleeper_agent.storage.parquet_store import read_table
 
 DEFAULT_TOTAL_ROUNDS = 15  # this league's confirmed real setting, PROJECT_PLAN.md §3
+DEFAULT_NUM_TEAMS = 12  # this league's confirmed real setting, PROJECT_PLAN.md §3
+
+
+def load_latest_adp(root: Path) -> tuple[str, dict[str, int]] | None:
+    """Latest synced ADP snapshot (`adp sync`) as `(retrieved_date,
+    {sleeper_id: adp_pick})`, for `keeper_history`'s ADP-reset branch. None
+    when no snapshot has been synced yet — callers fall back to
+    `keeper_history`'s flat `total_rounds` default.
+    """
+    result = latest_adp_snapshot(data_dir(root) / "adp")
+    if result is None:
+        return None
+    retrieved_date, df = result
+    pick_by_sleeper_id = {
+        row["sleeper_id"]: row["adp_pick"]
+        for row in df.to_dicts()
+        if row["sleeper_id"] is not None
+    }
+    return retrieved_date, pick_by_sleeper_id
 
 
 def build_season_chain(

@@ -22,6 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command")
 
     from sleeper_agent.commands import (
+        adp_cmd,
         decisions_cmd,
         draft_cmd,
         freeagent_cmd,
@@ -42,6 +43,7 @@ def build_parser() -> argparse.ArgumentParser:
     waiver_cmd.add_subcommands(subparsers)
     freeagent_cmd.add_subcommands(subparsers)
     trade_cmd.add_subcommands(subparsers)
+    adp_cmd.add_subcommands(subparsers)
 
     return parser
 

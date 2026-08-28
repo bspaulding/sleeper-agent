@@ -151,6 +151,56 @@ def test_keeper_history_no_draft_record_defaults_to_last_round() -> None:
     assert status == KeeperEligibleUndraftedDefault(cost_round=TOTAL_ROUNDS)
 
 
+def test_keeper_history_no_draft_record_uses_adp_reset_when_snapshot_covers_player() -> (
+    None
+):
+    # ADP pick 175 in a 12-team league -> round ceil(175/12) = 15 -> cost R14.
+    status = keeper_history(
+        "1",
+        5,
+        ["2025", "2024"],
+        {},
+        TOTAL_ROUNDS,
+        adp_pick_by_player_id={"1": 175},
+        adp_snapshot_date="2026-08-23",
+        num_teams=12,
+    )
+
+    assert status == KeeperEligibleUndraftedDefault(
+        cost_round=14, adp_pick=175, adp_snapshot_date="2026-08-23"
+    )
+
+
+def test_keeper_history_no_draft_record_adp_reset_ineligible_when_cost_hits_zero() -> None:
+    # ADP pick 5 in a 12-team league -> round 1 -> cost would be R0.
+    status = keeper_history(
+        "1",
+        5,
+        ["2025"],
+        {},
+        TOTAL_ROUNDS,
+        adp_pick_by_player_id={"1": 5},
+        num_teams=12,
+    )
+
+    assert status == KeeperIneligibleCostBelowRoundOne(last_round=1)
+
+
+def test_keeper_history_no_draft_record_falls_back_to_total_rounds_when_player_not_in_snapshot() -> (
+    None
+):
+    status = keeper_history(
+        "1",
+        5,
+        ["2025"],
+        {},
+        TOTAL_ROUNDS,
+        adp_pick_by_player_id={"999": 40},
+    )
+
+    assert status == KeeperEligibleUndraftedDefault(cost_round=TOTAL_ROUNDS)
+
+
 def test_keeper_history_walks_past_seasons_with_no_matching_pick_to_find_the_most_recent() -> (
     None
 ):
