@@ -37,6 +37,15 @@ slots, not against zero — so take the pair with the highest *combined* surplus
   player even at a roughly tied surplus number.
 - **Role changers:** VORP earned elsewhere doesn't automatically travel — check
   `wiki/team/role-changers.md` before trusting the number for a traded/signed player.
+- **Cross-check any high-surplus candidate against real external ADP before trusting the
+  internal number**, especially right after a bigboard methodology change (VORP shrinkage,
+  a demotion/promotion pass) — the internal round baseline can swing hard without the
+  player's real market value moving at all (2026-08-29: TreVeyon Henderson's surplus swung
+  −2.3 → +43.9 purely from two hand-pinned QBs with awful raw 2025 stats landing in his cost
+  round's bucket). If a candidate's keeper cost round is *earlier* than his real ADP round,
+  that's a red flag, not a bargain — he may simply fall to a normal pick anyway. See
+  `wiki/team/keeper-strategy.md`'s Known traps and
+  `decisions/2026/2026-08-29-keeper-recheck-post-vorp-shrinkage-adp-crosscheck.md`.
 - Log the final decision with `decisions new --kind keeper --slug <slug> --season <year>`,
   filling in Summary/Reasoning/Data with the specific players, costs, and why (including why any
   top-ranked-by-tool candidate was passed over, if one was).

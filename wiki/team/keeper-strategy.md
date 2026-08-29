@@ -1,7 +1,8 @@
 ---
-last_updated: '2026-08-28'
+last_updated: '2026-08-29'
 source: 2026 keeper decision (decisions/2026/2026-08-23-keeper-diggs-r7-darnold-r14.md),
-  revised (decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md)
+  revised (decisions/2026/2026-08-28-keeper-swap-darnold-to-judkins.md),
+  reconfirmed (decisions/2026/2026-08-29-keeper-recheck-post-vorp-shrinkage-adp-crosscheck.md)
 ---
 
 # Keeper strategy — standing method
@@ -40,23 +41,33 @@ the pair with the highest combined surplus.
 Round baselines shift year to year — recompute from the current VORP board
 (sorted descending, mapped to snake slots), **and re-recompute any time the
 underlying VORP data changes** (see Known traps below — this happened for
-real in 2026). 2026's table (from 2025 VORP, post-2026-08-27 postseason-VORP
-fix):
+real in 2026, twice). 2026's table (`data/bigboard/2025.csv` rank order,
+joined to `data/vorp/2025.parquet`'s **raw** `vorp_season` — not the board's
+own `vorp` column, which since 2026-08-29 stores the position-reliability-
+shrunk value for cross-position sort purposes only, see Known traps):
 
 | Round | Picks | Avg VORP | Round | Picks | Avg VORP |
 |---|---|---|---|---|---|
-| R1 | 1–12 | 195.2 | R9 | 97–108 | 1.1 |
-| R2 | 13–24 | 106.0 | R10 | 109–120 | −15.2 |
-| R3 | 25–36 | 73.1 | R11 | 121–132 | −24.9 |
-| R4 | 37–48 | 47.6 | R12 | 133–144 | −35.8 |
-| R5 | 49–60 | 37.6 | R13 | 145–156 | −43.5 |
-| R6 | 61–72 | 28.1 | R14 | 157–168 | −49.5 |
-| R7 | 73–84 | 14.6 | R15 | 169–180 | −57.5 |
+| R1 | 1–12 | 194.8 | R9 | 97–108 | −5.8 |
+| R2 | 13–24 | 97.1 | R10 | 109–120 | −37.0 |
+| R3 | 25–36 | 27.6 | R11 | 121–132 | −19.8 |
+| R4 | 37–48 | 59.3 | R12 | 133–144 | −19.8 |
+| R5 | 49–60 | 38.4 | R13 | 145–156 | −33.8 |
+| R6 | 61–72 | −16.3 | R14 | 157–168 | −35.8 |
+| R7 | 73–84 | 17.7 | R15 | 169–180 | −54.9 |
+| R8 | 85–96 | −8.5 | R16 | 181–192 | −59.4 |
 
-(Prior table, superseded 2026-08-28: R1 207.0, R3 83.1, R5 33.2, R7 14.1, R8
+(Prior table, superseded 2026-08-29: R1 195.2, R3 73.1, R5 37.6, R7 14.6, R8
+7.0, R14 −49.5, R15 −57.5 — computed before this session's VORP-shrinkage,
+news-sweep, and demotion passes reordered the board. R3 moved the most
+(73.1 → 27.6) because two hand-pinned elite QBs — Lamar Jackson, Joe Burrow —
+now sit in that rank band on situation/potential despite deeply negative raw
+2025 production; not a bug, see
+`decisions/2026/2026-08-29-keeper-recheck-post-vorp-shrinkage-adp-crosscheck.md`.
+Before that, superseded 2026-08-28: R1 207.0, R3 83.1, R5 33.2, R7 14.1, R8
 2.2, R14 −62.9, R15 −74.0 — built on VORP data that silently included
-postseason games. Kept here as a reminder of how much a data-pipeline bug can
-move these numbers.)
+postseason games. Kept here as a reminder of how much a data-pipeline fix or
+a board-methodology change can move these numbers.)
 
 ## Known traps
 
@@ -104,6 +115,24 @@ move these numbers.)
   favors keeping the skill-position player even at a roughly tied surplus
   number — the real opportunity cost of losing the QB is smaller than the
   bare baseline implies.
+- **Always cross-check a large internal-surplus number against real external
+  ADP before trusting it, especially right after any bigboard methodology
+  change.** The internal round baseline (our own VORP-sorted board, averaged
+  per 12-pick bucket) is a proxy for "what a real draft pick at that slot is
+  worth" — it can diverge sharply from where the market actually drafts a
+  player, and a board-methodology change (VORP shrinkage, a demotion/
+  promotion pass) can swing it hard without the player's real market value
+  moving at all. Concretely (2026-08-29): TreVeyon Henderson's internal
+  surplus swung from −2.3 (2026-08-23) to +43.9 after this session's
+  VORP-shrinkage pass moved the R3 baseline, purely because two hand-pinned
+  QBs with terrible 2025 raw production now occupy that rank band — not
+  because Henderson's real value changed. His actual 2026 ADP (~R6) never
+  moved, so keeping him at his R3 cost would have meant paying three rounds
+  above market for a player likely to just fall to our natural pick anyway.
+  Check every high-surplus candidate's real ADP against his keeper cost round
+  before acting on the internal number — if internal cost is earlier/cheaper
+  than real ADP, that's a red flag, not a bargain. See
+  `decisions/2026/2026-08-29-keeper-recheck-post-vorp-shrinkage-adp-crosscheck.md`.
 
 ## League-wide projection
 
