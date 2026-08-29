@@ -13,9 +13,3 @@
   real-season signal) so `draft board` can surface DEF rows like every other
   position instead of punting to end-of-draft judgment — user ask from
   `decisions/2026/2026-08-29-draft-mock-draft-7-slot8.md` point (e).
-- Settled (2026-08-29): mocks never filter `--exclude-players` for league
-  keepers — not all of them, not even our own. Only the real draft accounts
-  for keepers. Not codified in `.claude/skills/draft.md` (user preference —
-  keep as a decision-log-level rule, not baked into the skill); nothing left
-  to do here beyond following it next time. See
-  `decisions/2026/2026-08-29-draft-mock-draft-7-slot8.md` point (c).
