@@ -1,0 +1,380 @@
+<title>2026 Big Board</title>
+<style>
+  body { font-family: Georgia, "Times New Roman", serif; font-size: 11px; margin: 20px; color: #111; background: #ccc; }
+  h1 { font-family: Arial, Helvetica, sans-serif; font-size: 18px; margin: 0 0 4px 0; }
+  p.note { font-family: Arial, Helvetica, sans-serif; font-size: 11px; line-height: 1.4; color: #444; margin: 0 0 14px 0; }
+  h2 { font-family: Arial, Helvetica, sans-serif; font-size: 15px; margin: 28px 0 4px 0; }
+
+  /* .page is sized to the *content* area only (page size minus 0.4in margin
+     on every side) - the 0.4in margin itself comes from @page below (real print
+     dialogs) or the browser/printer's own default margin (headless/CLI printing, which
+     typically ignores @page margin and imposes ~0.4in regardless). Either way there is
+     exactly one margin layer, not two. */
+  .page {
+    width: 7.7in;
+    height: 10.2in;
+    box-sizing: border-box;
+    background: #fff;
+    margin: 0 auto 16px auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .page:not(:last-child) { page-break-after: always; break-after: page; }
+  .cols { display: flex; gap: 16px; align-items: flex-start; }
+  .cols table { width: 361.6px; border-collapse: collapse; table-layout: fixed; }
+  .cols col.c-rank { width: 27px; }
+  .cols col.c-pos { width: 26px; }
+  .cols col.c-vorp { width: 40px; }
+  .cols td, .cols th {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9px;
+    line-height: 1.3;
+    padding: 1px 3px;
+    border: 1px solid #999;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cols th { background: #eee; }
+  .cols tr:nth-child(even) { background: #f7f7f7; }
+  .cols tr.kept { color: #555; }
+  .cols tr.kept td:nth-child(2) { text-decoration: line-through; }
+  .kept-note { font-size: 8px; text-decoration: none; color: #555; }
+  .pagenum {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9px;
+    color: #888;
+  }
+
+  table.appendix { border-collapse: collapse; width: 100%; }
+  table.appendix th, table.appendix td { border: 1px solid #999; padding: 2px 6px; text-align: left; vertical-align: top; }
+  table.appendix th { font-family: Arial, Helvetica, sans-serif; background: #eee; }
+  table.appendix tr:nth-child(even) { background: #f7f7f7; }
+
+  @media print {
+    body { background: #fff; }
+    @page { size: letter portrait; margin: 0.4in; }
+    .page { box-shadow: none; margin: 0; }
+    h2 { break-before: page; }
+  }
+</style>
+
+<div class="page">
+<h1>2026 Big Board</h1>
+<p class="note">Generated 2026-08-28 from data/bigboard/2025.csv, in rank order, top 250 of 616 (12 teams x 15 rounds = 180 picks, minus 17 keepers = 163 open picks, plus buffer). Struck-through rows are 2026 keepers (already off the draft board, not draftable). Names marked * have a rationale note in the appendix. Full board is in the CSV if you need to go deeper.</p>
+<div class="cols">
+<table><colgroup><col class="c-rank"><col class="c-name"><col class="c-pos"><col class="c-vorp"></colgroup>
+<tr><th>Rk</th><th>Name</th><th>Pos</th><th>VORP</th></tr>
+<tr><td>1</td><td>Bijan Robinson</td><td>RB</td><td>238.1</td></tr>
+<tr><td>2</td><td>Jahmyr Gibbs</td><td>RB</td><td>232.2</td></tr>
+<tr class="kept"><td>3</td><td>Jonathan Taylor <span class="kept-note">KEPT — tayspa</span></td><td>RB</td><td>227.6</td></tr>
+<tr><td>4</td><td>Christian McCaffrey*</td><td>RB</td><td>280.9</td></tr>
+<tr><td>5</td><td>Puka Nacua</td><td>WR</td><td>203.8</td></tr>
+<tr><td>6</td><td>Jaxon Smith-Njigba</td><td>WR</td><td>188.7</td></tr>
+<tr><td>7</td><td>De&#x27;Von Achane</td><td>RB</td><td>187.1</td></tr>
+<tr><td>8</td><td>James Cook</td><td>RB</td><td>169.5</td></tr>
+<tr><td>9</td><td>Trey McBride</td><td>TE</td><td>168.6</td></tr>
+<tr><td>10</td><td>Amon-Ra St. Brown</td><td>WR</td><td>151.8</td></tr>
+<tr><td>11</td><td>Chase Brown</td><td>RB</td><td>146.9</td></tr>
+<tr><td>12</td><td>Derrick Henry</td><td>RB</td><td>146.8</td></tr>
+<tr><td>13</td><td>Ja&#x27;Marr Chase</td><td>WR</td><td>142.4</td></tr>
+<tr><td>14</td><td>Kyren Williams</td><td>RB</td><td>129.6</td></tr>
+<tr class="kept"><td>15</td><td>George Pickens <span class="kept-note">KEPT — Grandpa Tod</span></td><td>WR</td><td>119.7</td></tr>
+<tr><td>16</td><td>Travis Etienne</td><td>RB</td><td>118.2</td></tr>
+<tr class="kept"><td>17</td><td>Javonte Williams <span class="kept-note">KEPT — Emily’s Fancier Team</span></td><td>RB</td><td>109.1</td></tr>
+<tr><td>18</td><td>Josh Jacobs</td><td>RB</td><td>103.4</td></tr>
+<tr><td>19</td><td>Saquon Barkley</td><td>RB</td><td>97.6</td></tr>
+<tr class="kept"><td>20</td><td>Chris Olave <span class="kept-note">KEPT — Redzone &amp; BBQ</span></td><td>WR</td><td>96.8</td></tr>
+<tr><td>21</td><td>D&#x27;Andre Swift</td><td>RB</td><td>94.9</td></tr>
+<tr><td>22</td><td>Josh Allen</td><td>QB</td><td>91.7</td></tr>
+<tr><td>23</td><td>Lamar Jackson*</td><td>QB</td><td>-61.1</td></tr>
+<tr><td>24</td><td>Joe Burrow*</td><td>QB</td><td>-146.5</td></tr>
+<tr><td>25</td><td>Kenny Gainwell</td><td>RB</td><td>86.6</td></tr>
+<tr class="kept"><td>26</td><td>Rico Dowdle <span class="kept-note">KEPT — Grandpa Tod</span></td><td>RB</td><td>81.6</td></tr>
+<tr><td>27</td><td>Jaylen Warren</td><td>RB</td><td>81.4</td></tr>
+<tr><td>28</td><td>Ashton Jeanty*</td><td>RB</td><td>110.4</td></tr>
+<tr class="kept"><td>29</td><td>Drake Maye <span class="kept-note">KEPT — Aaron’s Fancy Team</span></td><td>QB</td><td>77.0</td></tr>
+<tr><td>30</td><td>Matthew Stafford</td><td>QB</td><td>75.5</td></tr>
+<tr class="kept"><td>31</td><td>Zay Flowers <span class="kept-note">KEPT — tayspa</span></td><td>WR</td><td>74.1</td></tr>
+<tr><td>32</td><td>Breece Hall</td><td>RB</td><td>74.0</td></tr>
+<tr><td>33</td><td>RJ Harvey</td><td>RB</td><td>71.9</td></tr>
+<tr><td>34</td><td>TreVeyon Henderson</td><td>RB</td><td>71.5</td></tr>
+<tr><td>35</td><td>Trevor Lawrence</td><td>QB</td><td>67.3</td></tr>
+<tr><td>36</td><td>Kyle Pitts</td><td>TE</td><td>63.5</td></tr>
+<tr class="kept"><td>37</td><td>Kenneth Walker III <span class="kept-note">KEPT — Silveir Lining</span></td><td>RB</td><td>56.2</td></tr>
+<tr><td>38</td><td>Nico Collins</td><td>WR</td><td>55.0</td></tr>
+<tr><td>39</td><td>Garrett Wilson*</td><td>WR</td><td>-72.7</td></tr>
+<tr><td>40</td><td>Tony Pollard</td><td>RB</td><td>53.1</td></tr>
+<tr><td>41</td><td>Davante Adams</td><td>WR</td><td>50.7</td></tr>
+<tr><td>42</td><td>Michael Wilson</td><td>WR</td><td>48.4</td></tr>
+<tr><td>43</td><td>A.J. Brown</td><td>WR</td><td>48.1</td></tr>
+<tr><td>44</td><td>Jameson Williams</td><td>WR</td><td>47.7</td></tr>
+<tr><td>45</td><td>Jeremiyah Love*</td><td>RB</td><td>Rd1</td></tr>
+<tr><td>46</td><td>Courtland Sutton</td><td>WR</td><td>47.5</td></tr>
+<tr><td>47</td><td>Rhamondre Stevenson</td><td>RB</td><td>46.1</td></tr>
+<tr><td>48</td><td>Travis Kelce</td><td>TE</td><td>45.9</td></tr>
+<tr><td>49</td><td>Wan&#x27;Dale Robinson</td><td>WR</td><td>45.7</td></tr>
+<tr><td>50</td><td>Jadarian Price*</td><td>RB</td><td>Rd1</td></tr>
+<tr><td>51</td><td>Jake Ferguson</td><td>TE</td><td>42.8</td></tr>
+<tr><td>52</td><td>Tetairoa McMillan</td><td>WR</td><td>41.2</td></tr>
+<tr><td>53</td><td>Tyler Warren</td><td>TE</td><td>41.2</td></tr>
+<tr><td>54</td><td>Caleb Williams</td><td>QB</td><td>40.8</td></tr>
+<tr><td>55</td><td>Harold Fannin Jr.</td><td>TE</td><td>40.1</td></tr>
+<tr><td>56</td><td>Dak Prescott</td><td>QB</td><td>39.9</td></tr>
+</table>
+<table><colgroup><col class="c-rank"><col class="c-name"><col class="c-pos"><col class="c-vorp"></colgroup>
+<tr><th>Rk</th><th>Name</th><th>Pos</th><th>VORP</th></tr>
+<tr><td>57</td><td>Tee Higgins</td><td>WR</td><td>39.4</td></tr>
+<tr class="kept"><td>58</td><td>Stefon Diggs <span class="kept-note">KEPT — Deflate the Bay (US)</span></td><td>WR</td><td>38.1</td></tr>
+<tr><td>59</td><td>Dallas Goedert</td><td>TE</td><td>37.8</td></tr>
+<tr><td>60</td><td>Juwan Johnson</td><td>TE</td><td>34.6</td></tr>
+<tr class="kept"><td>61</td><td>Quinshon Judkins <span class="kept-note">KEPT — Deflate the Bay (US)</span></td><td>RB</td><td>34.1</td></tr>
+<tr><td>62</td><td>David Montgomery</td><td>RB</td><td>32.2</td></tr>
+<tr><td>63</td><td>Bo Nix</td><td>QB</td><td>31.9</td></tr>
+<tr><td>64</td><td>Daniel Jones*</td><td>QB</td><td>-48.5</td></tr>
+<tr><td>65</td><td>Jayden Daniels*</td><td>QB</td><td>-166.6</td></tr>
+<tr><td>66</td><td>Hunter Henry</td><td>TE</td><td>31.5</td></tr>
+<tr><td>67</td><td>Drake London</td><td>WR</td><td>30.7</td></tr>
+<tr><td>68</td><td>Malik Nabers*</td><td>WR</td><td>-115.1</td></tr>
+<tr><td>69</td><td>Dalton Schultz</td><td>TE</td><td>30.4</td></tr>
+<tr><td>70</td><td>Michael Pittman</td><td>WR</td><td>30.2</td></tr>
+<tr><td>71</td><td>DeVonta Smith</td><td>WR</td><td>29.6</td></tr>
+<tr><td>72</td><td>Justin Jefferson</td><td>WR</td><td>29.3</td></tr>
+<tr><td>73</td><td>Mike Evans*</td><td>WR</td><td>-87.4</td></tr>
+<tr><td>74</td><td>Brock Bowers</td><td>TE</td><td>28.9</td></tr>
+<tr><td>75</td><td>CeeDee Lamb</td><td>WR</td><td>28.7</td></tr>
+<tr><td>76</td><td>Tyrone Tracy Jr.</td><td>RB</td><td>26.1</td></tr>
+<tr><td>77</td><td>Jalen Hurts</td><td>QB</td><td>24.1</td></tr>
+<tr><td>78</td><td>Jared Goff</td><td>QB</td><td>24.1</td></tr>
+<tr><td>79</td><td>Emeka Egbuka</td><td>WR</td><td>23.5</td></tr>
+<tr><td>80</td><td>Carnell Tate*</td><td>WR</td><td>Rd1</td></tr>
+<tr><td>81</td><td>Jaylen Waddle</td><td>WR</td><td>21.9</td></tr>
+<tr><td>82</td><td>Colston Loveland</td><td>TE</td><td>17.8</td></tr>
+<tr><td>83</td><td>Deebo Samuel Sr.</td><td>WR</td><td>16.0</td></tr>
+<tr><td>84</td><td>Justin Herbert</td><td>QB</td><td>16.0</td></tr>
+<tr><td>85</td><td>Brock Purdy*</td><td>QB</td><td>-96.5</td></tr>
+<tr><td>86</td><td>DK Metcalf</td><td>WR</td><td>15.0</td></tr>
+<tr><td>87</td><td>George Kittle</td><td>TE</td><td>14.2</td></tr>
+<tr><td>88</td><td>Parker Washington</td><td>WR</td><td>12.5</td></tr>
+<tr><td>89</td><td>Alec Pierce</td><td>WR</td><td>11.1</td></tr>
+<tr><td>90</td><td>Makai Lemon*</td><td>WR</td><td>Rd1</td></tr>
+<tr><td>91</td><td>Kyle Monangai</td><td>RB</td><td>11.0</td></tr>
+<tr><td>92</td><td>Patrick Mahomes</td><td>QB</td><td>10.8</td></tr>
+<tr><td>93</td><td>Kareem Hunt</td><td>RB</td><td>10.7</td></tr>
+<tr><td>94</td><td>Keenan Allen</td><td>WR</td><td>10.5</td></tr>
+<tr><td>95</td><td>Kenyon Sadiq*</td><td>TE</td><td>Rd1</td></tr>
+<tr><td>96</td><td>Woody Marks</td><td>RB</td><td>9.4</td></tr>
+<tr><td>97</td><td>Ladd McConkey</td><td>WR</td><td>8.7</td></tr>
+<tr><td>98</td><td>De&#x27;Zhaun Stribling*</td><td>WR</td><td>Rd2</td></tr>
+<tr><td>99</td><td>Rachaad White</td><td>RB</td><td>7.3</td></tr>
+<tr><td>100</td><td>Jacory Croskey-Merritt</td><td>RB</td><td>6.6</td></tr>
+<tr><td>101</td><td>Troy Franklin</td><td>WR</td><td>5.9</td></tr>
+<tr><td>102</td><td>Jakobi Meyers</td><td>WR</td><td>4.6</td></tr>
+<tr><td>103</td><td>Bucky Irving</td><td>RB</td><td>3.8</td></tr>
+<tr><td>104</td><td>Jauan Jennings</td><td>WR</td><td>2.1</td></tr>
+<tr><td>105</td><td>Quentin Johnston</td><td>WR</td><td>0.0</td></tr>
+<tr><td>106</td><td>Zach Charbonnet*</td><td>RB</td><td>45.7</td></tr>
+<tr><td>107</td><td>DJ Moore</td><td>WR</td><td>0.0</td></tr>
+<tr><td>108</td><td>AJ Barner</td><td>TE</td><td>0.0</td></tr>
+<tr><td>109</td><td>Omarion Hampton</td><td>RB</td><td>0.0</td></tr>
+<tr><td>110</td><td>KC Concepcion*</td><td>WR</td><td>Rd1</td></tr>
+<tr><td>111</td><td>Baker Mayfield</td><td>QB</td><td>0.0</td></tr>
+<tr><td>112</td><td>Khalil Shakir</td><td>WR</td><td>-4.8</td></tr>
+</table>
+</div>
+<div class="pagenum">Page 1 of 3</div>
+</div>
+<div class="page">
+<div class="cols">
+<table><colgroup><col class="c-rank"><col class="c-name"><col class="c-pos"><col class="c-vorp"></colgroup>
+<tr><th>Rk</th><th>Name</th><th>Pos</th><th>VORP</th></tr>
+<tr><td>113</td><td>Jordan Mason</td><td>RB</td><td>-5.8</td></tr>
+<tr class="kept"><td>114</td><td>Romeo Doubs <span class="kept-note">KEPT — momsrock (ineligible)</span></td><td>WR</td><td>-6.8</td></tr>
+<tr><td>115</td><td>Cam Skattebo</td><td>RB</td><td>-7.0</td></tr>
+<tr><td>116</td><td>Chuba Hubbard</td><td>RB</td><td>-9.3</td></tr>
+<tr><td>117</td><td>Denzel Boston*</td><td>WR</td><td>Rd2</td></tr>
+<tr><td>118</td><td>Tre Tucker</td><td>WR</td><td>-10.5</td></tr>
+<tr><td>119</td><td>Tyler Allgeier</td><td>RB</td><td>-12.7</td></tr>
+<tr class="kept"><td>120</td><td>Blake Corum <span class="kept-note">KEPT — Silveir Lining</span></td><td>RB</td><td>-13.5</td></tr>
+<tr><td>121</td><td>Rashid Shaheed</td><td>WR</td><td>-14.6</td></tr>
+<tr><td>122</td><td>Oronde Gadsden II</td><td>TE</td><td>-14.9</td></tr>
+<tr><td>123</td><td>Aaron Jones</td><td>RB</td><td>-16.0</td></tr>
+<tr><td>124</td><td>Mark Andrews</td><td>TE</td><td>-16.3</td></tr>
+<tr><td>125</td><td>Colby Parkinson</td><td>TE</td><td>-16.5</td></tr>
+<tr><td>126</td><td>Omar Cooper*</td><td>WR</td><td>Rd1</td></tr>
+<tr><td>127</td><td>Kimani Vidal</td><td>RB</td><td>-17.8</td></tr>
+<tr><td>128</td><td>Theo Johnson</td><td>TE</td><td>-19.5</td></tr>
+<tr><td>129</td><td>J.K. Dobbins</td><td>RB</td><td>-19.8</td></tr>
+<tr><td>130</td><td>Zach Ertz</td><td>TE</td><td>-20.9</td></tr>
+<tr><td>131</td><td>Dalton Kincaid</td><td>TE</td><td>-21.2</td></tr>
+<tr class="kept"><td>132</td><td>Rashee Rice <span class="kept-note">KEPT — Emily’s Fancier Team</span></td><td>WR</td><td>-22.1</td></tr>
+<tr><td>133</td><td>Chig Okonkwo</td><td>TE</td><td>-23.3</td></tr>
+<tr><td>134</td><td>Tyjae Spears</td><td>RB</td><td>-24.0</td></tr>
+<tr><td>135</td><td>Cade Otton</td><td>TE</td><td>-25.1</td></tr>
+<tr><td>136</td><td>Rome Odunze</td><td>WR</td><td>-26.1</td></tr>
+<tr><td>137</td><td>Devin Singletary</td><td>RB</td><td>-26.9</td></tr>
+<tr><td>138</td><td>Brenton Strange</td><td>TE</td><td>-29.3</td></tr>
+<tr class="kept"><td>139</td><td>Tucker Kraft <span class="kept-note">KEPT — Team Questionable</span></td><td>TE</td><td>-30.1</td></tr>
+<tr><td>140</td><td>Sam Darnold</td><td>QB</td><td>-30.5</td></tr>
+<tr><td>141</td><td>Alvin Kamara</td><td>RB</td><td>-33.0</td></tr>
+<tr><td>142</td><td>Brian Thomas Jr.</td><td>WR</td><td>-33.4</td></tr>
+<tr><td>143</td><td>Pat Freiermuth</td><td>TE</td><td>-33.7</td></tr>
+<tr><td>144</td><td>Josh Downs</td><td>WR</td><td>-33.8</td></tr>
+<tr><td>145</td><td>Marquise Brown</td><td>WR</td><td>-34.5</td></tr>
+<tr><td>146</td><td>T.J. Hockenson</td><td>TE</td><td>-34.5</td></tr>
+<tr><td>147</td><td>Ty Johnson</td><td>RB</td><td>-35.4</td></tr>
+<tr><td>148</td><td>Michael Carter</td><td>RB</td><td>-36.7</td></tr>
+<tr><td>149</td><td>Jordan Addison</td><td>WR</td><td>-37.1</td></tr>
+<tr><td>150</td><td>Jaxson Dart</td><td>QB</td><td>-37.3</td></tr>
+<tr class="kept"><td>151</td><td>Christian Watson <span class="kept-note">KEPT — Redzone &amp; BBQ</span></td><td>WR</td><td>-39.8</td></tr>
+<tr><td>152</td><td>Sam LaPorta</td><td>TE</td><td>-40.4</td></tr>
+<tr><td>153</td><td>Emanuel Wilson</td><td>RB</td><td>-41.2</td></tr>
+<tr><td>154</td><td>Bam Knight</td><td>RB</td><td>-41.8</td></tr>
+<tr><td>155</td><td>Kaelon Black*</td><td>RB</td><td>Rd3</td></tr>
+<tr><td>156</td><td>Jordan Love</td><td>QB</td><td>-42.8</td></tr>
+<tr><td>157</td><td>Dawson Knox</td><td>TE</td><td>-43.6</td></tr>
+<tr><td>158</td><td>Germie Bernard*</td><td>WR</td><td>Rd2</td></tr>
+<tr><td>159</td><td>Chris Rodriguez Jr.</td><td>RB</td><td>-43.7</td></tr>
+<tr><td>160</td><td>Chimere Dike</td><td>WR</td><td>-44.1</td></tr>
+<tr class="kept"><td>161</td><td>Luther Burden III <span class="kept-note">KEPT — Team Questionable</span></td><td>WR</td><td>-44.3</td></tr>
+<tr><td>162</td><td>Sean Tucker</td><td>RB</td><td>-44.3</td></tr>
+<tr><td>163</td><td>Marvin Harrison Jr.</td><td>WR</td><td>-44.4</td></tr>
+<tr><td>164</td><td>Evan Engram</td><td>TE</td><td>-44.5</td></tr>
+<tr class="kept"><td>165</td><td>Bhayshul Tuten <span class="kept-note">KEPT — Aaron’s Fancy Team</span></td><td>RB</td><td>-46.1</td></tr>
+<tr><td>166</td><td>Jacoby Brissett</td><td>QB</td><td>-46.5</td></tr>
+<tr><td>167</td><td>Dylan Sampson</td><td>RB</td><td>-47.1</td></tr>
+<tr><td>168</td><td>Nick Chubb</td><td>RB</td><td>-47.4</td></tr>
+<tr><td>169</td><td>Kayshon Boutte</td><td>WR</td><td>-48.1</td></tr>
+<tr><td>170</td><td>Isiah Pacheco</td><td>RB</td><td>-48.4</td></tr>
+<tr><td>171</td><td>Jerry Jeudy</td><td>WR</td><td>-50.5</td></tr>
+<tr><td>172</td><td>Aaron Rodgers</td><td>QB</td><td>-50.8</td></tr>
+<tr><td>173</td><td>Bryce Young</td><td>QB</td><td>-52.9</td></tr>
+<tr><td>174</td><td>Cooper Kupp</td><td>WR</td><td>-53.9</td></tr>
+</table>
+<table><colgroup><col class="c-rank"><col class="c-name"><col class="c-pos"><col class="c-vorp"></colgroup>
+<tr><th>Rk</th><th>Name</th><th>Pos</th><th>VORP</th></tr>
+<tr><td>175</td><td>Jake Tonges</td><td>TE</td><td>-54.0</td></tr>
+<tr><td>176</td><td>Malik Washington</td><td>WR</td><td>-54.5</td></tr>
+<tr><td>177</td><td>Fernando Mendoza*</td><td>QB</td><td>Rd1</td></tr>
+<tr><td>178</td><td>Gunnar Helm</td><td>TE</td><td>-55.6</td></tr>
+<tr><td>179</td><td>Elic Ayomanor</td><td>WR</td><td>-55.7</td></tr>
+<tr><td>180</td><td>Samaje Perine</td><td>RB</td><td>-55.8</td></tr>
+<tr><td>181</td><td>Terry McLaurin</td><td>WR</td><td>-58.0</td></tr>
+<tr><td>182</td><td>Jordyn Tyson*</td><td>WR</td><td>Rd1</td></tr>
+<tr><td>183</td><td>Ryan Flournoy</td><td>WR</td><td>-58.2</td></tr>
+<tr><td>184</td><td>Mason Taylor</td><td>TE</td><td>-58.4</td></tr>
+<tr><td>185</td><td>Darren Waller</td><td>TE</td><td>-58.6</td></tr>
+<tr><td>186</td><td>Mack Hollins</td><td>WR</td><td>-58.8</td></tr>
+<tr><td>187</td><td>David Njoku</td><td>TE</td><td>-61.0</td></tr>
+<tr><td>188</td><td>Ty Simpson*</td><td>QB</td><td>Rd1</td></tr>
+<tr><td>189</td><td>Jeremy McNichols</td><td>RB</td><td>-62.0</td></tr>
+<tr><td>190</td><td>Jonnu Smith</td><td>TE</td><td>-62.1</td></tr>
+<tr><td>191</td><td>Xavier Worthy</td><td>WR</td><td>-62.3</td></tr>
+<tr><td>192</td><td>Isaiah Davis</td><td>RB</td><td>-64.5</td></tr>
+<tr><td>193</td><td>Cole Kmet</td><td>TE</td><td>-68.6</td></tr>
+<tr><td>194</td><td>Keon Coleman</td><td>WR</td><td>-68.8</td></tr>
+<tr><td>195</td><td>C.J. Stroud</td><td>QB</td><td>-69.4</td></tr>
+<tr><td>196</td><td>Noah Fant</td><td>TE</td><td>-69.5</td></tr>
+<tr><td>197</td><td>Justice Hill</td><td>RB</td><td>-70.5</td></tr>
+<tr><td>198</td><td>Jalen Nailor</td><td>WR</td><td>-71.5</td></tr>
+<tr><td>199</td><td>Ray Davis</td><td>RB</td><td>-71.6</td></tr>
+<tr><td>200</td><td>Darius Slayton</td><td>WR</td><td>-72.4</td></tr>
+<tr><td>201</td><td>Brashard Smith</td><td>RB</td><td>-72.4</td></tr>
+<tr><td>202</td><td>Darnell Washington</td><td>TE</td><td>-72.9</td></tr>
+<tr><td>203</td><td>Brian Robinson</td><td>RB</td><td>-73.2</td></tr>
+<tr><td>204</td><td>Michael Mayer</td><td>TE</td><td>-73.5</td></tr>
+<tr><td>205</td><td>Xavier Hutchinson</td><td>WR</td><td>-74.2</td></tr>
+<tr><td>206</td><td>Devin Neal</td><td>RB</td><td>-75.7</td></tr>
+<tr><td>207</td><td>Tyler Higbee</td><td>TE</td><td>-76.2</td></tr>
+<tr><td>208</td><td>DeMario Douglas</td><td>WR</td><td>-76.4</td></tr>
+<tr><td>209</td><td>Emari Demercado</td><td>RB</td><td>-76.4</td></tr>
+<tr><td>210</td><td>Mike Gesicki</td><td>TE</td><td>-76.6</td></tr>
+<tr><td>211</td><td>Marvin Mims Jr.</td><td>WR</td><td>-77.2</td></tr>
+<tr><td>212</td><td>Tez Johnson</td><td>WR</td><td>-79.8</td></tr>
+<tr><td>213</td><td>Kendrick Bourne</td><td>WR</td><td>-80.1</td></tr>
+<tr><td>214</td><td>Keaton Mitchell</td><td>RB</td><td>-80.3</td></tr>
+<tr><td>215</td><td>Jalen Coker</td><td>WR</td><td>-80.8</td></tr>
+<tr><td>216</td><td>Ollie Gordon II</td><td>RB</td><td>-81.6</td></tr>
+<tr><td>217</td><td>Tank Bigsby</td><td>RB</td><td>-81.9</td></tr>
+<tr><td>218</td><td>Andrei Iosivas</td><td>WR</td><td>-82.3</td></tr>
+<tr><td>219</td><td>Xavier Legette</td><td>WR</td><td>-82.9</td></tr>
+<tr><td>220</td><td>Adonai Mitchell</td><td>WR</td><td>-83.3</td></tr>
+<tr><td>221</td><td>Tommy Tremble</td><td>TE</td><td>-83.4</td></tr>
+<tr><td>222</td><td>Greg Dulcich</td><td>TE</td><td>-83.5</td></tr>
+<tr><td>223</td><td>Davis Allen</td><td>TE</td><td>-84.5</td></tr>
+<tr><td>224</td><td>Isaiah Likely</td><td>TE</td><td>-84.6</td></tr>
+<tr><td>225</td><td>Cam Ward</td><td>QB</td><td>-85.3</td></tr>
+<tr><td>226</td><td>Calvin Austin III</td><td>WR</td><td>-86.0</td></tr>
+<tr><td>227</td><td>Jaylen Wright</td><td>RB</td><td>-86.5</td></tr>
+<tr><td>228</td><td>KaVontae Turpin</td><td>WR</td><td>-86.7</td></tr>
+<tr><td>229</td><td>Olamide Zaccheaus</td><td>WR</td><td>-87.4</td></tr>
+<tr><td>230</td><td>Audric Estimé</td><td>RB</td><td>-87.6</td></tr>
+<tr><td>231</td><td>Daniel Bellinger</td><td>TE</td><td>-87.7</td></tr>
+<tr><td>232</td><td>Austin Hooper</td><td>TE</td><td>-88.0</td></tr>
+<tr><td>233</td><td>Elijah Higgins</td><td>TE</td><td>-88.2</td></tr>
+<tr><td>234</td><td>Sterling Shepard</td><td>WR</td><td>-89.2</td></tr>
+<tr><td>235</td><td>Chris Godwin Jr.</td><td>WR</td><td>-89.2</td></tr>
+<tr><td>236</td><td>Darnell Mooney</td><td>WR</td><td>-89.9</td></tr>
+</table>
+</div>
+<div class="pagenum">Page 2 of 3</div>
+</div>
+<div class="page">
+<div class="cols">
+<table><colgroup><col class="c-rank"><col class="c-name"><col class="c-pos"><col class="c-vorp"></colgroup>
+<tr><th>Rk</th><th>Name</th><th>Pos</th><th>VORP</th></tr>
+<tr><td>237</td><td>Tyquan Thornton</td><td>WR</td><td>-91.4</td></tr>
+<tr><td>238</td><td>Jerome Ford</td><td>RB</td><td>-92.1</td></tr>
+<tr><td>239</td><td>Josh Oliver</td><td>TE</td><td>-92.3</td></tr>
+<tr><td>240</td><td>Ja&#x27;Tavion Sanders</td><td>TE</td><td>-93.3</td></tr>
+<tr><td>241</td><td>Geno Smith</td><td>QB</td><td>-94.0</td></tr>
+<tr><td>242</td><td>Jackson Hawes</td><td>TE</td><td>-94.6</td></tr>
+<tr><td>243</td><td>Malik Davis</td><td>RB</td><td>-95.1</td></tr>
+</table>
+<table><colgroup><col class="c-rank"><col class="c-name"><col class="c-pos"><col class="c-vorp"></colgroup>
+<tr><th>Rk</th><th>Name</th><th>Pos</th><th>VORP</th></tr>
+<tr><td>244</td><td>Terrance Ferguson</td><td>TE</td><td>-95.2</td></tr>
+<tr><td>245</td><td>Zavier Scott</td><td>RB</td><td>-95.5</td></tr>
+<tr><td>246</td><td>Isaac TeSlaa</td><td>WR</td><td>-96.3</td></tr>
+<tr><td>247</td><td>Dontayvion Wicks</td><td>WR</td><td>-96.4</td></tr>
+<tr><td>248</td><td>Greg Dortch</td><td>WR</td><td>-97.1</td></tr>
+<tr><td>249</td><td>Pat Bryant</td><td>WR</td><td>-97.4</td></tr>
+<tr><td>250</td><td>Ameer Abdullah</td><td>RB</td><td>-97.8</td></tr>
+</table>
+</div>
+<div class="pagenum">Page 3 of 3</div>
+</div>
+
+<h2>Appendix: Rationale notes</h2>
+<table class="appendix">
+<tr><th>Rank</th><th>Name</th><th>Rationale</th></tr>
+<tr><td>4</td><td>Christian McCaffrey</td><td>[INJURY REVIEW 2026-08-27: moved #1 -&gt; #4 (behind Bijan/Gibbs/Taylor) — persistent, unresolved calf/soft-tissue &quot;tightness&quot; since 2026-08-10, still not fully practicing as of 2026-08-20; echoes the downplayed-calf-that-became-a-lost-half-season pattern from 2024 (out until Wk10). Raw VORP reflects peak-healthy production, not this recurring durability risk.]</td></tr>
+<tr><td>23</td><td>Lamar Jackson</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 181 -&gt; here. Raw season-total VORP punished him for missing 4 of 17 games in 2025 (13 GP, vorp_season -61.1) despite a strong per-game rate once playing (vorp_per_game +0.48). Ravens beat reporters describe him as &quot;100% healthy&quot; and sharper than ever in 2026 camp. Historically a top-2-3 fantasy QB in full seasons on passing + rushing floor alone -- placed right behind Josh Allen.]</td></tr>
+<tr><td>24</td><td>Joe Burrow</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 458 -&gt; here. Grade 3 turf toe + surgery limited him to 8 games in 2025 (vorp_season -146.5, the single worst season-vs-per-game distortion on the board). Fully cleared for 2026, &quot;no nagging injuries,&quot; full camp participant. Elite full-season ceiling (league-leading TD form in recent healthy years) -- placed just behind Lamar Jackson, ahead of Drake Maye.]</td></tr>
+<tr><td>28</td><td>Ashton Jeanty</td><td>[INJURY REVIEW 2026-08-27: moved #17 -&gt; #26 — fresh right ankle sprain suffered 2026-08-25 (2 days before draft); ESPN reports it&#x27;s believed low- rather than high-ankle and not major, but explicitly flags a real chance he sits Week 1 and that a high-ankle read could linger into the season. Re-check status night-of if any further update lands.]</td></tr>
+<tr><td>39</td><td>Garrett Wilson</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 196 -&gt; here. Knee injury (IR in November) cost him the back half of 2025. Fully cleared, &quot;back healthy and ready,&quot; expected to be the Jets&#x27; clear #1 target under new OC Frank Reich -- the strongest, least-hedged positive signal of any player in this review. Placed alongside Nico Collins/Davante Adams as a full-value WR1/2.]</td></tr>
+<tr><td>45</td><td>Jeremiyah Love</td><td>Consensus #1 rookie overall; clear immediate RB1 role in ARI (light committee risk from Allgeier/Conner) — placed near the RB24 landmark (2025 data: rank 44 ≈ 46.5 vorp), reflecting round-1 RB&#x27;s 71.4% top-24 historical hit rate plus a genuinely uncontested-enough opportunity profile.</td></tr>
+<tr><td>50</td><td>Jadarian Price</td><td>R1 pick (Seattle, last pick of round 1) into a wide-open backfield — Kenneth Walker III departed, Zach Charbonnet recovering from ACL — the single best pure opportunity-share situation in this rookie class per wiki/team/rookie-evaluation.md&#x27;s RB secondary signal; placed just behind Love, still inside the RB24 band.</td></tr>
+<tr><td>64</td><td>Daniel Jones</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 163 -&gt; here. Torn Achilles in Week 14 2025 cost him the final stretch (13 GP, vorp_season -48.5). Re-signed as the Colts&#x27; starter and a full training-camp participant; reports call 2025 (pre-injury) a &quot;renaissance&quot; year, top-7 in completion % and yards/attempt. Placed near Bo Nix -- kept conservative given Achilles recoveries are historically inconsistent and his per-game VORP bump (+1.45) was modest, not elite.]</td></tr>
+<tr><td>65</td><td>Jayden Daniels</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 525 -&gt; here. Missed 10 games in 2025 across three separate injuries (knee, hamstring, elbow), cratering season-total VORP (-166.6) despite a positive per-game rate. GM says he&#x27;s &quot;already jump-started&quot; recovery and looked strong in camp. 2024 Offensive Rookie of the Year with a rushing floor like Hurts&#x27;s -- placed in the Hurts/Goff tier rather than higher, given three distinct 2025 injuries read as more fragility risk than Jackson&#x27;s or Burrow&#x27;s single-injury profile.]</td></tr>
+<tr><td>68</td><td>Malik Nabers</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 291 -&gt; here. Season-ending torn ACL (+ meniscus damage) 4 games into 2025. Team says &quot;reasonable to assume&quot; a Week 1 2026 return, but Nabers himself won&#x27;t commit to a date (&quot;no target date, just stacking days&quot;). Elite talent (rookie-year target monster) but real recovery-timeline risk -- placed solidly WR2 (Drake London/Michael Pittman neighborhood) rather than at his pre-injury WR1 talent level.]</td></tr>
+<tr><td>73</td><td>Mike Evans</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 224 -&gt; here. Two separate significant injuries in 2025 (hamstring strain, broken collarbone) limited him to 8 games. Signed with SF (now Purdy&#x27;s receiver, also moved in this review) and plans to play Week 1 barring a minor camp groin issue. Kept conservative -- age 33 plus a multi-injury 2025 (not one bad-luck game) is a real risk profile, not just a one-off. Placed near Justin Jefferson/CeeDee Lamb, a modest bump only.]</td></tr>
+<tr><td>80</td><td>Carnell Tate</td><td>R1 (pick 4 overall, elite draft capital), frontrunner for WR1 volume in TEN despite &#x27;mild risk&#x27; (new coaching staff, year-2 QB) — placed just above the WR24 landmark (rank 70 ≈ 22.5 vorp), consensus #2 rookie overall.</td></tr>
+<tr><td>85</td><td>Brock Purdy</td><td>[INJURY REVIEW 2026-08-28: moved from season-VORP rank 244 -&gt; here. Started this whole review -- turf toe injury held him to 9 games in 2025 (season-total VORP -96.5) despite the best per-game rate of any player in this review (21.0 ppg, vorp_per_game +4.22, ahead of Jackson/Stroud/Rodgers/Geno Smith). Fully recovered per his own camp comments, and now throwing to a new receiver (Mike Evans, also moved in this review). Placed as a mid-tier QB1 near Herbert/Mahomes, not higher -- his ceiling reads as efficient-and-healthy, not truly elite.]</td></tr>
+<tr><td>90</td><td>Makai Lemon</td><td>R1 to PHI (pick 20) — inherits a share of A.J. Brown&#x27;s vacated 121 targets but not a clean 1-for-1 replacement given the crowded WR room; consensus #4 rookie overall, placed in the WR24-36 band reflecting shared-target risk.</td></tr>
+<tr><td>95</td><td>Kenyon Sadiq</td><td>R1 TE (pick 16, NYJ) — round-1 TE carries the strongest positional hit rate in the whole rookie-evaluation framework (81.8% top-24, 54.5% top-12) and he&#x27;s specifically flagged for immediate impact; placed just below the TE12 landmark (rank 80 ≈ 13.1 vorp, Brock Bowers), reflecting strong-likely-TE1-of-class upside without assuming the guaranteed outcome.</td></tr>
+<tr><td>98</td><td>De&#x27;Zhaun Stribling</td><td>R2 pick, but consensus fantasy ranking (#5 overall rookie) ranks him ABOVE several round-1 WRs (Tyson, Concepcion, Boston, Cooper) on situational/landing-spot grounds — exactly the &#x27;weight landing spot over pure draft capital&#x27; override wiki/team/rookie-evaluation.md&#x27;s best-ball framing calls for. Placed ahead of the round-1 WRs it out-ranks in consensus.</td></tr>
+<tr><td>106</td><td>Zach Charbonnet</td><td>[INJURY REVIEW 2026-08-27: moved #48 -&gt; #100 — remains on PUP as of late Aug camp reports recovering from a Jan-2026-playoffs torn ACL; still on PUP at the 53-man cutdown forces a minimum 4-game absence, real risk of missing a meaningful chunk of the season behind Kenneth Walker III.]</td></tr>
+<tr><td>110</td><td>KC Concepcion</td><td>R1 to CLE (consensus #7 rookie overall) — placed in the WR24-36 band behind the higher-consensus R1 WRs, ahead of teammate Boston per consensus ordering.</td></tr>
+<tr><td>117</td><td>Denzel Boston</td><td>R1 to CLE alongside Concepcion (consensus #8 rookie overall) — two round-1 rookie WRs sharing one offense tempers each other&#x27;s target share relative to a clean WR1 situation; placed just behind Concepcion per consensus.</td></tr>
+<tr><td>126</td><td>Omar Cooper</td><td>R1 to NYJ (consensus #10 rookie overall) — &#x27;ceiling may not be as high as others... physical and accountable&#x27; framing (modest 53/623/4 projection) argues for a real-but-unspectacular floor play; placed at the lower end of the round-1 WR cluster, still ahead of the WR48 landmark.</td></tr>
+<tr><td>155</td><td>Kaelon Black</td><td>R3 RB (SF) — RB is this evaluation framework&#x27;s most forgiving position (day-2/3 capital &#x27;comparable to R1 at the top-36 tier&#x27; per wiki/team/rookie-evaluation.md), and he&#x27;s a surprisingly strong consensus #17 rookie overall for a day-3 pick; placed near the RB36-48 band rather than left at replacement level.</td></tr>
+<tr><td>158</td><td>Germie Bernard</td><td>R2 WR (SF, Stribling&#x27;s teammate) but absent from the consensus rookie top-20 unlike Stribling/Boston — no standout situational report found; placed as a marginal WR depth flier just behind Black, not meaningfully elevated above his round-2 baseline.</td></tr>
+<tr><td>177</td><td>Fernando Mendoza</td><td>R1 QB (LV) — consensus top rookie QB (#12 overall, &#x27;no quarterback cracks the top 10&#x27;) and round-1 QB carries the single strongest positional hit-rate signal in the whole framework (84% of fantasy-relevant rookie QBs are R1), but this league&#x27;s single-QB/no-superflex format explicitly deprioritizes QB investment per wiki/team/rookie-evaluation.md — placed as a late speculative stash, not chased up the board.</td></tr>
+<tr><td>182</td><td>Jordyn Tyson</td><td>R1 (pick 8, NO) — elite pre-injury college profile and the single best per-game production projection among rookie WRs (CBS: 61/869/4), but a late-2025 hamstring injury tempers consensus rank (#6) below Tate/Lemon/Stribling; placed accordingly, still solidly inside the WR24-36 band. [INJURY REVIEW 2026-08-27: moved #96 -&gt; #177 — hamstring injury from an 2026-08 joint practice expected to cost roughly two months, likely opening the season on IR; too large a games-missed hit for a rookie WR&#x27;s speculative upside to justify the original rookie-round insertion slot.]</td></tr>
+<tr><td>188</td><td>Ty Simpson</td><td>R1 QB, but absent from the consensus rookie top-20 (Mendoza is the only QB to crack it) — no standout situational signal found and this league deprioritizes rookie QB value regardless; placed as the lowest-priority QB in this flagged batch.</td></tr>
+</table>

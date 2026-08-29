@@ -1,3 +1,24 @@
+---
+date: '2026-08-09'
+kind: draft
+season: '2026'
+week: null
+status: recommended
+players_involved:
+  - Lamar Jackson
+  - Joe Mixon
+  - Alvin Kamara
+  - James Conner
+  - Aaron Jones
+  - Baker Mayfield
+  - Najee Harris
+  - Jonnu Smith
+  - Zach Ertz
+  - Kareem Hunt
+  - Jerry Jeudy
+related_wiki: []
+---
+
 # Mock draft — 1392286240727908352 (--value-season 2024)
 
 Rehearsal mock draft ahead of the real 2026 draft (Sept 5). Ran `draft board --draft-id
