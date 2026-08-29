@@ -9,3 +9,11 @@
 - Watch Hunt/Ertz FA signings: if either lands somewhere, re-run
   `sleeper players sync` + `wiki sync-frontmatter` so they stop being silently
   dropped by `filter_rostered`.
+- Build a real DEF ranking pass (recent pressure rate / takeaways / other
+  real-season signal) so `draft board` can surface DEF rows like every other
+  position instead of punting to end-of-draft judgment — user ask from
+  `decisions/2026/2026-08-29-draft-mock-draft-7-slot8.md` point (e).
+- Don't default `draft board --exclude-players` to all confirmed league
+  keepers in the next mock — user pushback reversed that default from
+  mock #6; treat it as opt-in for a specific test, re-ask first. See
+  `decisions/2026/2026-08-29-draft-mock-draft-7-slot8.md` point (c).

@@ -55,6 +55,26 @@ and take the next-highest non-QB row as the real top-overall pick instead. Confi
 [[2026-08-29-draft-mock-draft-6-slot8]] — the fallback recommended a 3rd QB (Daniel Jones) purely
 on bigboard rank; user override: "3 QBs should never happen in a draft," took a rookie WR instead.
 
+**Same cap for any position on the top-overall fallback, TE included:** the QB logic above isn't
+QB-specific — once a position has a starter, one realistic bench/FLEX backup, and further depth
+stops being usable (a single-QB, single-flex-heavy league has near-zero marginal use for a 3rd
+QB or, just as much, a 6th TE), skip that position's rows in the top-overall fallback the same
+way. Confirmed live in [[2026-08-29-draft-mock-draft-7-slot8]]: with 5 TEs already rostered
+(McBride/Kelce/Goedert/Johnson/Henry), Dalton Schultz was next in board order — skipped in favor
+of RB/WR bench depth instead. No hard numeric cap defined yet (2 for QB, informally ~3-4 for
+TE/RB/WR depending on FLEX capacity) — use judgment on "would a 6th of these ever start or
+matter," same test as the QB rule.
+
+**A speculative injury-recovery bet still needs its NEED weighed against unfilled starter slots.**
+The primary "take the top NEED row" rule (not just the fallback) can also misfire: a bigboard row
+hand-curated high on a healthy-again ceiling story (e.g. Joe Burrow, re-ranked well above his
+season vorp of -146.5 per `2026-08-28-bigboard-injury-recovery-games-missed-review`) still reads
+as the top NEED row for an empty QB slot even while a real, uncontroversial starter slot (WR) sits
+at 0/2. Flagged in [[2026-08-29-draft-mock-draft-7-slot8]] — user: taking a QB there "seems weird"
+ahead of WR. No fix landed yet; when the top NEED row is a heavily speculative/injury-recovery bet
+with a strongly negative raw vorp, sanity-check it against whether a different still-empty starter
+slot has a solid, non-speculative option before locking it in.
+
 ## Defenses — no data, don't go hunting for it
 
 `data/bigboard/<season>.csv` has zero DEF rows. `draft board` will never surface a defense even
