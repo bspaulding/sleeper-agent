@@ -129,6 +129,26 @@ DEF-streaming recommender (rank available defenses by upcoming opponent offensiv
 be a more honest tool than trying to rank DEF pre-draft — a distinct feature from anything the
 `bigboard`/`draft board` pipeline does today.
 
+## Lessons from the 2026 real draft (live corrections, see [[2026-08-29-draft-real-draft-2026-retro]])
+
+- **The top-NEED-row rule has no live market-ADP check.** It happily recommends filling an empty
+  starter slot dozens of picks ahead of where the position actually goes (confirmed twice: a QB
+  reach ~55 picks ahead of ADP, caught only by manually cross-checking
+  `data/adp/<date>.parquet`). Before locking in a NEED-tagged pick for a position with real market
+  timing data (QB especially, given its own volatility), spot-check the top row's ADP against the
+  current pick number — a NEED tag alone isn't sufficient justification if ADP says it's still 30+
+  picks away.
+- **NEED/SURPLUS doesn't distinguish "empty slot" from "full but zero bench depth."** A position
+  at exactly hard_min (e.g. WR 2/2) reads identically to one deeply stocked (RB 5/2) even though
+  the former has no injury/bye cushion at all. When comparing a genuine NEED row against a
+  SURPLUS row from a position sitting exactly at its hard_min with no spare, weigh the latter's
+  thinness explicitly — it's a real gap the tag doesn't surface.
+- **Zero drafted defenses is a legitimate outcome, not just "defer the pick."** Given this
+  league's rules (no requirement to have a full roster before Week 1) and DEF's own
+  streaming-favors-matchup research (see below), it's fine to never draft a DEF at all and fill
+  the slot for free off waivers before kickoff — don't default to "grab one somewhere in the last
+  few rounds" just because the slot is required long-term.
+
 ## After the draft
 
 Stop the watcher. Log the real draft with `decisions new --kind draft ...`. Fold any new tool
