@@ -1,0 +1,514 @@
+<title>Only Gold Report Card</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#0d1015;
+    --bg-panel:#12161d;
+    --bg-card:#1b212b;
+    --bg-card-hover:#212834;
+    --rule:rgba(255,255,255,.09);
+    --rule-strong:rgba(255,255,255,.16);
+    --gold:#d9a441;
+    --gold-bright:#f0c363;
+    --gold-dim:#8a6a2c;
+    --text:#eef1f6;
+    --text-soft:#a7b0bd;
+    --text-faint:#6b7484;
+    --roast:#d1495b;
+    --roast-dim:#3a2226;
+    --praise:#5fa87c;
+    --praise-dim:#1f2f27;
+    --shadow: 0 20px 50px -25px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  html{color-scheme:dark;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      radial-gradient(1200px 500px at 15% -10%, rgba(217,164,65,.10), transparent 60%),
+      radial-gradient(900px 400px at 100% 0%, rgba(95,168,124,.06), transparent 55%);
+    color:var(--text);
+    font-family:'Work Sans', system-ui, -apple-system, sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+  .display{ font-family:'Anton', 'Work Sans', sans-serif; font-weight:400; letter-spacing:.01em; }
+  .mono{ font-family:'JetBrains Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.72rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--gold-bright);
+  }
+
+  a{ color:var(--gold-bright); }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    border-bottom:1px solid var(--rule);
+    padding:64px 0 44px;
+    background:
+      linear-gradient(180deg, rgba(217,164,65,.05), transparent 70%);
+  }
+  .masthead .kicker{ margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  .masthead .kicker::before{
+    content:''; width:8px; height:8px; border-radius:50%;
+    background:var(--gold); box-shadow:0 0 12px var(--gold);
+  }
+  .masthead h1{
+    font-size:clamp(2.6rem, 6vw, 5.2rem);
+    line-height:.96;
+    color:var(--text);
+  }
+  .masthead h1 em{
+    font-style:normal;
+    color:var(--gold-bright);
+    text-shadow:0 0 30px rgba(240,195,99,.35);
+  }
+  .masthead p.tagline{
+    max-width:60ch;
+    margin-top:18px;
+    font-size:1.15rem;
+    color:var(--text-soft);
+    font-style:italic;
+  }
+  .masthead .meta{
+    margin-top:28px;
+    display:flex; flex-wrap:wrap; gap:10px 28px;
+    font-size:.82rem; color:var(--text-faint);
+  }
+  .masthead .meta b{ color:var(--text-soft); font-weight:600; }
+
+  /* ---------- Section headers ---------- */
+  .section{ padding:56px 0; }
+  .section + .section{ border-top:1px solid var(--rule); }
+  .section-head{ margin-bottom:30px; }
+  .section-head h2{
+    font-size:clamp(1.7rem, 3vw, 2.4rem);
+    margin-top:6px;
+  }
+  .section-head p{ color:var(--text-soft); max-width:62ch; margin-top:10px; }
+
+  /* ---------- Trophies ---------- */
+  .trophy-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+    gap:18px;
+  }
+  .trophy{
+    background:var(--bg-card);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    padding:22px 22px 24px;
+    position:relative;
+    overflow:hidden;
+  }
+  .trophy::before{
+    content:'';
+    position:absolute; inset:0 0 auto 0; height:3px;
+    background:linear-gradient(90deg, var(--gold-dim), var(--gold-bright), var(--gold-dim));
+  }
+  .trophy .ribbon{
+    width:34px; height:34px; margin-bottom:14px;
+    display:block;
+  }
+  .trophy h3{
+    font-family:'Anton', sans-serif;
+    font-size:1.15rem;
+    letter-spacing:.01em;
+    color:var(--gold-bright);
+    margin-bottom:4px;
+    text-wrap:balance;
+  }
+  .trophy .winner{
+    font-size:.78rem;
+    color:var(--text-faint);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    margin-bottom:10px;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .trophy p{ color:var(--text-soft); font-size:.95rem; }
+
+  /* ---------- Team grid ---------- */
+  .team-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
+    gap:20px;
+  }
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--rule);
+    border-radius:8px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .card:hover{ background:var(--bg-card-hover); border-color:var(--rule-strong); }
+  .card-top{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+    margin-bottom:6px;
+  }
+  .card-top .slot{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.72rem;
+    color:var(--text-faint);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .card-top h3{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    font-size:1.5rem;
+    letter-spacing:.005em;
+    color:var(--text);
+  }
+  .grade-seal{
+    flex:none;
+    width:56px; height:56px;
+    border-radius:50%;
+    border:2px solid var(--gold-dim);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Anton', sans-serif;
+    font-size:1.6rem;
+    color:var(--gold-bright);
+    background:radial-gradient(circle at 30% 25%, rgba(240,195,99,.18), transparent 65%);
+  }
+  .grade-seal.grade-a{ border-color:var(--praise); color:var(--praise); background:radial-gradient(circle at 30% 25%, rgba(95,168,124,.22), transparent 65%); }
+  .grade-seal.grade-d{ border-color:var(--roast); color:var(--roast); background:radial-gradient(circle at 30% 25%, rgba(209,73,91,.2), transparent 65%); }
+
+  .card .bit{ color:var(--text-soft); font-size:.97rem; margin:14px 0 4px; }
+  .card .bit b{ color:var(--text); font-weight:600; }
+
+  .card details{ margin-top:16px; border-top:1px solid var(--rule); padding-top:12px; }
+  .card summary{
+    cursor:pointer;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.75rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--text-faint);
+    list-style:none;
+  }
+  .card summary::-webkit-details-marker{ display:none; }
+  .card summary::before{ content:'▸ '; color:var(--gold-dim); }
+  .card details[open] summary::before{ content:'▾ '; }
+  .picklist{ margin-top:12px; display:flex; flex-direction:column; gap:5px; }
+  .pickrow{
+    display:grid;
+    grid-template-columns:2.6em 3.2em 1fr auto;
+    gap:10px;
+    align-items:baseline;
+    font-size:.86rem;
+    padding:3px 0;
+  }
+  .pickrow .rd{ color:var(--text-faint); font-family:'JetBrains Mono', monospace; font-size:.78rem; }
+  .pickrow .pk{ color:var(--text-faint); font-family:'JetBrains Mono', monospace; font-size:.78rem; }
+  .pickrow .nm{ color:var(--text); }
+  .pickrow .pos{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.7rem;
+    color:var(--gold-bright);
+    background:rgba(217,164,65,.1);
+    border:1px solid rgba(217,164,65,.25);
+    border-radius:3px;
+    padding:1px 6px;
+    justify-self:start;
+  }
+  .keeper-tag{
+    font-size:.68rem;
+    color:var(--text-faint);
+    font-style:italic;
+    margin-left:6px;
+  }
+
+  /* ---------- Our team highlight ---------- */
+  .card.us{
+    border-color:var(--gold-dim);
+    background:linear-gradient(160deg, rgba(217,164,65,.09), var(--bg-card) 55%);
+  }
+  .card.us::after{
+    content:'YOU';
+    position:absolute;
+  }
+
+  footer{
+    padding:40px 0 60px;
+    color:var(--text-faint);
+    font-size:.82rem;
+  }
+  footer .mono{ color:var(--text-faint); }
+
+  @media (max-width:640px){
+    .masthead{ padding:44px 0 32px; }
+    .section{ padding:40px 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+
+<div class="masthead">
+  <div class="wrap">
+    <div class="kicker eyebrow">Only Gold Dynasty League &middot; Season 2026</div>
+    <h1 class="display">THE OFFICIAL<br><em>DRAFT REPORT CARD</em></h1>
+    <p class="tagline">Fifteen rounds. Twelve egos. One league that will not let anyone forget this for the next fifty-two weeks. Grades are final, roasts are earned, and yes, we're looking at you, Grandpa Tod.</p>
+    <div class="meta mono">
+      <span><b>12</b> teams</span>
+      <span><b>15</b> rounds</span>
+      <span><b>180</b> picks</span>
+      <span>Draft <b>#1389376972722835457</b></span>
+      <span>Filed <b>2026-08-29</b></span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Hardware</div>
+      <h2>The Trophy Case</h2>
+      <p>Awarded by a panel of one (the big board), based on nothing but vibes, receipts, and pick numbers.</p>
+    </div>
+    <div class="trophy-grid">
+
+      <div class="trophy">
+        <svg class="ribbon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="6" stroke="var(--gold-bright)" stroke-width="1.6"/><path d="M9 13.5L7 21l5-3 5 3-2-7.5" stroke="var(--gold-bright)" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <h3>The Iron Fist</h3>
+        <div class="winner">Deflate the Bay &middot; Slot 8</div>
+        <p>Only team in the entire league to run the board flat — every non-keeper pick landed later than it had any business falling. No panic, no reaches, just a cold, quiet demolition.</p>
+      </div>
+
+      <div class="trophy">
+        <svg class="ribbon" viewBox="0 0 24 24" fill="none"><path d="M4 4l16 16M4 20L20 4" stroke="var(--roast)" stroke-width="1.6"/><circle cx="12" cy="12" r="9" stroke="var(--roast)" stroke-width="1.6"/></svg>
+        <h3>The Reach Heard Round the League</h3>
+        <div class="winner">Grandpa Tod &middot; Round 7</div>
+        <p>Jayden Reed, seventh round, apropos of absolutely nothing. There were players on the board that had been drafted by other people's grandmothers by that point. A legendary, unprovoked reach.</p>
+      </div>
+
+      <div class="trophy">
+        <svg class="ribbon" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.4 5.1 5.6.6-4.1 3.9 1.1 5.6L12 15.6 6.9 18.2 8 12.6 3.9 8.7l5.6-.6L12 3z" stroke="var(--praise)" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <h3>Bargain Bin MVP</h3>
+        <div class="winner">Dalton Schultz &rarr; tayspa &middot; Round 14</div>
+        <p>A tight end this productive had zero business making it to the fourteenth round. tayspa didn't just find value at the buzzer — they found a starter wearing a bench player's nametag.</p>
+      </div>
+
+      <div class="trophy">
+        <svg class="ribbon" viewBox="0 0 24 24" fill="none"><path d="M12 20c4-3 7-6.2 7-10A7 7 0 105 10c0 3.8 3 7 7 10z" stroke="var(--gold-bright)" stroke-width="1.6"/></svg>
+        <h3>The One That Got Away</h3>
+        <div class="winner">Kenyon Sadiq &rarr; blindsqwirrels &middot; Round 15</div>
+        <p>Deflate the Bay had this exact name circled two picks earlier and talked themselves into someone else. blindsqwirrels swooped in on the very last round and grabbed the rookie tight end everyone else was quietly hoping would slip. It did not slip.</p>
+      </div>
+
+      <div class="trophy">
+        <svg class="ribbon" viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="16" rx="1.5" stroke="var(--gold-bright)" stroke-width="1.6"/><path d="M9 9h6M9 13h6M9 17h3" stroke="var(--gold-bright)" stroke-width="1.4"/></svg>
+        <h3>Sentimental Value</h3>
+        <div class="winner">Tom Brady &rarr; HanBlad &middot; Pick 180 (dead last)</div>
+        <p>With the literal final selection of a fifteen-round draft, HanBlad reached back through time and drafted a retired seven-time champion. No projected stats. No practical purpose. Simply: closure.</p>
+      </div>
+
+      <div class="trophy">
+        <svg class="ribbon" viewBox="0 0 24 24" fill="none"><path d="M12 3v9m0 0l4-4m-4 4l-4-4" stroke="var(--gold-bright)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 15h16v6H4z" stroke="var(--gold-bright)" stroke-width="1.6"/></svg>
+        <h3>Living Dangerously</h3>
+        <div class="winner">Deflate the Bay &middot; Zero defenses drafted</div>
+        <p>Every other team in the league drafted exactly one defense, most of them treating the position like a chore to get through. Deflate the Bay drafted none — a deliberate bet that the waiver wire in September will provide, and that a bench spot spent on a defense is a bench spot wasted.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">The Full Docket</div>
+      <h2>Every Team, Graded</h2>
+      <p>Click a team to expand their full 15-round paper trail. Grades weigh the whole draft, not just the pick you're already mad about.</p>
+    </div>
+
+    <div class="team-grid" id="teamgrid"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap mono">
+    Compiled from the live draft feed by sleeper-agent. Grades are our own read of roster construction and draft-day value — no receipts shown, no arguments accepted.
+  </div>
+</footer>
+
+<script>
+const TEAMS = [
+  {
+    name: "Redzone & BBQ", slot: 1, grade: "D+",
+    bit: "Three straight running backs to open felt like a plan right up until <b>Terry McLaurin</b> got scooped in round four, a full round before anyone sane was picking wideouts. Recovered a little with a Chris Olave keeper and a nice Dallas Goedert pull in round eleven, but the <b>Matthew Golden</b> reach in round ten never should have happened. Closed on a 49ers defense nobody was fighting them for.",
+    picks: [
+      ["1","Jahmyr Gibbs","RB"], ["2","Kyren Williams","RB"], ["3","Jeremiyah Love","RB"],
+      ["4","Terry McLaurin","WR"], ["5","Chris Olave","WR","keeper"], ["6","J.K. Dobbins","RB"],
+      ["7","Caleb Williams","QB"], ["8","Brock Purdy","QB"], ["9","Deebo Samuel","WR"],
+      ["10","Matthew Golden","WR"], ["11","Dallas Goedert","TE"], ["12","Isiah Pacheco","RB"],
+      ["13","James Conner","RB"], ["14","San Francisco 49ers","DEF"], ["15","Christian Watson","WR","keeper"]
+    ]
+  },
+  {
+    name: "Team Questionable", slot: 2, grade: "D+",
+    bit: "Bijan Robinson at pick two was about as clean a start as anyone got. Then rounds two through four turned into a wide receiver reach chain — Nabers, McMillan, Egbuka, one after another, each a little earlier than the last. A late-round QB swing on Tyler Shough didn't land, and the Chiefs defense arrived on the literal last pick, which is either commitment to the bit or just forgetting.",
+    picks: [
+      ["1","Bijan Robinson","RB"], ["2","Malik Nabers","WR"], ["3","Tetairoa McMillan","WR"],
+      ["4","Emeka Egbuka","WR"], ["5","Jadarian Price","RB"], ["6","RJ Harvey","RB"],
+      ["7","Jonathon Brooks","RB"], ["8","Tucker Kraft","TE","keeper"], ["9","Justin Herbert","QB"],
+      ["10","Rachaad White","RB"], ["11","Luther Burden","WR","keeper"], ["12","T.J. Hockenson","TE"],
+      ["13","Tyler Shough","QB"], ["14","Jalen Coker","WR"], ["15","Kansas City Chiefs","DEF"]
+    ]
+  },
+  {
+    name: "Barbara's Big Boys", slot: 3, grade: "D-",
+    bit: "Puka Nacua at three overall was a gift. Then it fell apart fast: <b>Omarion Hampton</b> in round two and a genuinely stunning <b>Marvin Harrison</b> reach in round six — both picked well ahead of where the room had them. A late Oronde Gadsden pickup was too little, too late for a draft that spent most of its capital paying retail-plus for players the market had already priced lower.",
+    picks: [
+      ["1","Puka Nacua","WR"], ["2","Omarion Hampton","RB"], ["3","Lamar Jackson","QB"],
+      ["4","David Montgomery","RB"], ["5","Ladd McConkey","WR"], ["6","Marvin Harrison","WR"],
+      ["7","Kenny Gainwell","RB"], ["8","Makai Lemon","WR"], ["9","Aaron Jones","RB"],
+      ["10","Isaiah Likely","TE"], ["11","Quentin Johnston","WR"], ["12","Philadelphia Eagles","DEF"],
+      ["13","Oronde Gadsden","TE"], ["14","Tank Bigsby","RB"], ["15","Braelon Allen","RB"]
+    ]
+  },
+  {
+    name: "momsrock", slot: 4, grade: "B+",
+    bit: "The quiet assassin of this draft. Ja'Marr Chase at four overall, then a whole lot of patient, correct value the rest of the way — capped by <b>Jake Ferguson</b> and <b>Jared Goff</b> both falling absurdly late in the double-digit rounds. No headline reaches, no drama, just a roster that quietly outperformed almost everyone in the room.",
+    picks: [
+      ["1","Ja'Marr Chase","WR"], ["2","A.J. Brown","WR"], ["3","Josh Jacobs","RB"],
+      ["4","Tyler Warren","TE"], ["5","DJ Moore","WR"], ["6","Rome Odunze","WR"],
+      ["7","Dak Prescott","QB"], ["8","Jordan Mason","RB"], ["9","Los Angeles Rams","DEF"],
+      ["10","Jake Ferguson","TE"], ["11","Romeo Doubs","WR","keeper"], ["12","Jakobi Meyers","WR"],
+      ["13","Jared Goff","QB"], ["14","Tyler Allgeier","RB"], ["15","Jonah Coleman","RB"]
+    ]
+  },
+  {
+    name: "blindsqwirrels", slot: 5, grade: "C",
+    bit: "Josh Allen at five felt like a slight reach and the middle rounds stayed choppy — a lot of picks that landed neither as steals nor disasters, just fine. Then the last two rounds turned into a heist: <b>Michael Wilson</b> in round eight and <b>Kenyon Sadiq</b>, the rookie tight end everyone wanted, in round fifteen. A draft that peaked exactly when it mattered least and most at the same time.",
+    picks: [
+      ["1","Josh Allen","QB"], ["2","Ashton Jeanty","RB"], ["3","DeVonta Smith","WR"],
+      ["4","George Kittle","TE"], ["5","Davante Adams","WR"], ["6","Chuba Hubbard","RB"],
+      ["7","DK Metcalf","WR"], ["8","Michael Wilson","WR"], ["9","Jordyn Tyson","WR"],
+      ["10","Seattle Seahawks","DEF"], ["11","Brian Robinson","RB"], ["12","Alvin Kamara","RB"],
+      ["13","Zach Charbonnet","RB"], ["14","Brashard Smith","RB"], ["15","Kenyon Sadiq","TE"]
+    ]
+  },
+  {
+    name: "Grandpa Tod", slot: 6, grade: "C+",
+    bit: "A genuinely strong draft with one enormous asterisk. Amon-Ra, Bowers, Henry, Pickens, Pollard — a clean, well-timed build for six straight rounds. Then round seven happened: <b>Jayden Reed</b>, chosen for reasons lost to history, the single biggest reach anyone made all draft. Closed with two separate defenses, because apparently one wasn't enough insurance against round seven ever happening again.",
+    picks: [
+      ["1","Amon-Ra St. Brown","WR"], ["2","Brock Bowers","TE"], ["3","Derrick Henry","RB"],
+      ["4","George Pickens","WR","keeper"], ["5","Rhamondre Stevenson","RB"], ["6","Tony Pollard","RB"],
+      ["7","Jayden Reed","WR"], ["8","Trevor Lawrence","QB"], ["9","Alec Pierce","WR"],
+      ["10","Denver Broncos","DEF"], ["11","Brenton Strange","TE"], ["12","Josh Downs","WR"],
+      ["13","Jordan Love","QB"], ["14","Jacksonville Jaguars","DEF"], ["15","Rico Dowdle","RB","keeper"]
+    ]
+  },
+  {
+    name: "Aaron's Fancy Team", slot: 7, grade: "C+",
+    bit: "Christian McCaffrey at seven overall, then a draft that mostly held serve — a couple of mid-round wideout reaches (Brian Thomas, Jordan Addison) balanced out by a very sharp Baker Mayfield pickup in round thirteen. A Drake Maye keeper anchors the quarterback room. Solid, unspectacular, occasionally sharp.",
+    picks: [
+      ["1","Christian McCaffrey","RB"], ["2","Nico Collins","WR"], ["3","Travis Etienne","RB"],
+      ["4","Jaylen Waddle","WR"], ["5","Carnell Tate","WR"], ["6","Harold Fannin","TE"],
+      ["7","Drake Maye","QB","keeper"], ["8","Brian Thomas","WR"], ["9","Jordan Addison","WR"],
+      ["10","Bhayshul Tuten","RB","keeper"], ["11","Chris Rodriguez","RB"], ["12","Mark Andrews","TE"],
+      ["13","Baker Mayfield","QB"], ["14","Keaton Mitchell","RB"], ["15","Baltimore Ravens","DEF"]
+    ]
+  },
+  {
+    name: "Deflate the Bay", slot: 8, grade: "A", isUs: true,
+    bit: "The draft everyone else's write-up is jealous of. JSN and McBride opened it clean, then a patient stretch of correct, on-value picks all the way through — no QB panic in round four, no TE overcorrection at round eleven, and a hard pivot away from a defense nobody needed to draft. The one real risk (a PUP-flagged Zach Charbonnet) got talked down in favor of actual roster needs, twice. Ended with a real rookie flier instead of the safe, capped-upside veteran everyone else grabbed in that slot.",
+    picks: [
+      ["1","Jaxon Smith-Njigba","WR"], ["2","Trey McBride","TE"], ["3","D'Andre Swift","RB"],
+      ["4","Jaylen Warren","RB"], ["5","TreVeyon Henderson","RB"], ["6","Kyle Pitts","TE"],
+      ["7","Stefon Diggs","WR","keeper"], ["8","Quinshon Judkins","RB","keeper"], ["9","Michael Pittman","WR"],
+      ["10","Daniel Jones","QB"], ["11","Juwan Johnson","TE"], ["12","Keenan Allen","WR"],
+      ["13","Sam Darnold","QB"], ["14","Tyrone Tracy Jr.","RB"], ["15","Denzel Boston","WR"]
+    ]
+  },
+  {
+    name: "Silveir Lining", slot: 9, grade: "C-",
+    bit: "CeeDee Lamb at nine overall was already a bit of a reach, and the reaches kept coming — Skattebo in round four, a properly stunning Sam LaPorta pull in round seven. The bright spot was letting a Blake Corum keeper close things out on a genuinely great value note. A draft that spent most of its budget on names instead of value.",
+    picks: [
+      ["1","CeeDee Lamb","WR"], ["2","Chase Brown","RB"], ["3","Kenneth Walker","RB","keeper"],
+      ["4","Cam Skattebo","RB"], ["5","Jayden Daniels","QB"], ["6","Parker Washington","WR"],
+      ["7","Sam LaPorta","TE"], ["8","De'Zhaun Stribling","WR"], ["9","Wan'Dale Robinson","WR"],
+      ["10","KC Concepcion","WR"], ["11","Mike Washington","RB"], ["12","Kyler Murray","QB"],
+      ["13","Los Angeles Chargers","DEF"], ["14","Caleb Douglas","WR"], ["15","Blake Corum","RB","keeper"]
+    ]
+  },
+  {
+    name: "tayspa", slot: 10, grade: "B-",
+    bit: "A genuine roller coaster. Jonathan Taylor keeper anchors a strong start, then round seven delivers Chris Godwin at a price that made the whole room wince. Somehow rescues itself completely with back-to-back late-round robbery: <b>Matthew Stafford</b> in round ten and <b>Dalton Schultz</b>, the single best value pick of the entire draft, in round fourteen. Chaos, but profitable chaos.",
+    picks: [
+      ["1","Jonathan Taylor","RB","keeper"], ["2","De'Von Achane","RB"], ["3","Tee Higgins","WR"],
+      ["4","Joe Burrow","QB"], ["5","Zay Flowers","WR","keeper"], ["6","Mike Evans","WR"],
+      ["7","Chris Godwin","WR"], ["8","Jacory Croskey-Merritt","RB"], ["9","Dalton Kincaid","TE"],
+      ["10","Matthew Stafford","QB"], ["11","Woody Marks","RB"], ["12","Dylan Sampson","RB"],
+      ["13","Ja'Kobi Lane","WR"], ["14","Dalton Schultz","TE"], ["15","New England Patriots","DEF"]
+    ]
+  },
+  {
+    name: "HanBlad", slot: 11, grade: "B-",
+    bit: "James Cook opened things steady, and the whole middle stretch quietly outkicked its coverage — Sutton, Mahomes, Shakir and Shaheed all landed well after the room expected them gone. Then, with the literal final pick of the draft, retired a decade and playing for a team that no longer exists on this roster: Tom Brady. A perfectly solid draft with a genuinely unhinged final chapter.",
+    picks: [
+      ["1","James Cook","RB"], ["2","Drake London","WR"], ["3","Breece Hall","RB"],
+      ["4","Colston Loveland","TE"], ["5","Jameson Williams","WR"], ["6","Jalen Hurts","QB"],
+      ["7","Courtland Sutton","WR"], ["8","Kyle Monangai","RB"], ["9","Houston Texans","DEF"],
+      ["10","Patrick Mahomes","QB"], ["11","Xavier Worthy","WR"], ["12","Tyjae Spears","RB"],
+      ["13","Khalil Shakir","WR"], ["14","Rashid Shaheed","WR"], ["15","Tom Brady","QB"]
+    ]
+  },
+  {
+    name: "Emily's Fancier Team", slot: 12, grade: "C-",
+    bit: "Saquon at twelve was a strong anchor, but the middle rounds got reach-heavy fast — Jefferson, Irving and a genuinely rough Jaxson Dart pull in round five all cost more than they were worth. Clawed a lot of it back late with Kelce, a Javonte Williams keeper, and Hunter Henry all landing as legitimate value, before closing the whole draft on a Najee Harris reach with the very last pick of the night.",
+    picks: [
+      ["1","Saquon Barkley","RB"], ["2","Justin Jefferson","WR"], ["3","Bucky Irving","RB"],
+      ["4","Garrett Wilson","WR"], ["5","Jaxson Dart","QB"], ["6","Rashee Rice","WR","keeper"],
+      ["7","Travis Kelce","TE"], ["8","Javonte Williams","RB","keeper"], ["9","Chig Okonkwo","TE"],
+      ["10","Bo Nix","QB"], ["11","MarShawn Lloyd","RB"], ["12","Hunter Henry","TE"],
+      ["13","Kaelon Black","RB"], ["14","Detroit Lions","DEF"], ["15","Najee Harris","RB"]
+    ]
+  }
+];
+
+function gradeClass(g){
+  if(g.startsWith('A')) return 'grade-a';
+  if(g.startsWith('D') || g.startsWith('F')) return 'grade-d';
+  return '';
+}
+
+const grid = document.getElementById('teamgrid');
+TEAMS.forEach(t => {
+  const card = document.createElement('div');
+  card.className = 'card' + (t.isUs ? ' us' : '');
+  const rows = t.picks.map(p => {
+    const [rd, nm, pos, keeper] = p;
+    return `<div class="pickrow"><span class="rd">R${rd}</span><span class="pk"></span><span class="nm">${nm}${keeper ? '<span class="keeper-tag">keeper</span>' : ''}</span><span class="pos">${pos}</span></div>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="card-top">
+      <div>
+        <div class="slot">Draft slot ${t.slot}${t.isUs ? ' &middot; this is us' : ''}</div>
+        <h3>${t.name}</h3>
+      </div>
+      <div class="grade-seal ${gradeClass(t.grade)}">${t.grade}</div>
+    </div>
+    <p class="bit">${t.bit}</p>
+    <details>
+      <summary>Full 15-round draft</summary>
+      <div class="picklist">${rows}</div>
+    </details>
+  `;
+  grid.appendChild(card);
+});
+</script>
