@@ -1,11 +1,5 @@
 # Project TODO
 
-## Before the draft (Saturday, Aug 29)
-
-- Verify our `is_keeper` flags (Diggs/Darnold) once they appear on the draft
-  object's `/picks` endpoint (not visible pre-lock as of Aug 23), and diff
-  `wiki/league/projected-keepers-2026.md` against the real inserted set.
-
 ## In-season
 
 - Sync `stats --season 2026` once nflverse starts publishing weekly files
