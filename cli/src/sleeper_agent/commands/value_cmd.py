@@ -10,11 +10,14 @@ import polars as pl
 from sleeper_agent.config import data_dir, find_repo_root, wiki_dir
 from sleeper_agent.draft_tools.bigboard import (
     BigboardMalformedError,
+    BigboardNotBuiltError,
+    BigboardUnresolvedRowError,
     is_unresolved,
     load_bigboard_for_build,
     merge_bigboard,
     save_bigboard,
 )
+from sleeper_agent.draft_tools.bigboard_print import generate_bigboard_print
 from sleeper_agent.draft_tools.rookies import load_triaged_rookies
 from sleeper_agent.sleeper_client import sync as sleeper_sync
 from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
@@ -99,6 +102,29 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
     bigboard_build_parser.set_defaults(func=cmd_value_bigboard_build)
+
+    bigboard_print_parser = bigboard_subparsers.add_parser(
+        "print", help="Regenerate the printable, paginated HTML big-board backup"
+    )
+    bigboard_print_parser.add_argument("--season", required=True)
+    bigboard_print_parser.add_argument(
+        "--draft-season",
+        default=None,
+        help="Season being drafted for, for keeper lookup. Defaults to --season + 1.",
+    )
+    bigboard_print_parser.add_argument(
+        "--cutoff",
+        type=int,
+        default=None,
+        help="Last rank to print. Defaults to open picks (teams x rounds minus "
+        "confirmed keepers) plus a fixed buffer for reaches/handcuffs.",
+    )
+    bigboard_print_parser.add_argument(
+        "--out",
+        default=None,
+        help="Output HTML path. Defaults to reports/bigboard-print-<draft-season>.html.",
+    )
+    bigboard_print_parser.set_defaults(func=cmd_value_bigboard_print)
 
 
 def _read_vorp(root: Path, season: str) -> pl.DataFrame:
@@ -271,6 +297,36 @@ def cmd_value_bigboard_build(
         print(f"  rank {row.rank}: {row.name} — {row.rationale}")
     if len(flagged) > 20:
         print(f"  ...and {len(flagged) - 20} more")
+    return 0
+
+
+def cmd_value_bigboard_print(
+    args: argparse.Namespace, *, repo_root: Path | None = None
+) -> int:
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    out_path = Path(args.out) if args.out else None
+    try:
+        result = generate_bigboard_print(
+            root,
+            args.season,
+            draft_season=args.draft_season,
+            cutoff=args.cutoff,
+            out_path=out_path,
+        )
+    except (BigboardNotBuiltError, BigboardUnresolvedRowError) as exc:
+        print(str(exc))
+        return 1
+
+    print(
+        f"{result.out_path}: {result.printed_rows} of {result.total_rows} rows "
+        f"printed across {result.pages} pages, {result.appendix_rows} appendix note(s)"
+    )
+    if result.unmatched_keepers:
+        names = ", ".join(result.unmatched_keepers)
+        print(
+            f"  warning: {len(result.unmatched_keepers)} confirmed keeper(s) not found "
+            f"on the board: {names}"
+        )
     return 0
 
 
