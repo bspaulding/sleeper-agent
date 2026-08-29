@@ -5,6 +5,7 @@ import polars as pl
 from sleeper_agent.stats.vorp import (
     DEFAULT_FLEX_WEIGHTS,
     add_fantasy_points_column,
+    compute_def_vorp,
     compute_replacement_ranks,
     compute_vorp,
 )
@@ -208,3 +209,161 @@ def test_compute_vorp_excludes_postseason_rows() -> None:
     by_id = {r.sleeper_id: r for r in results}
     assert by_id["101"].games_played == 2
     assert by_id["101"].season_points == 32.0
+
+
+DEF_SCORING_SETTINGS = {
+    "sack": 1.0,
+    "int": 2.0,
+    "fum_rec": 2.0,
+    "def_td": 6.0,
+    "safe": 2.0,
+    "blk_kick": 2.0,
+    "pts_allow_0": 10.0,
+    "pts_allow_1_6": 7.0,
+    "pts_allow_7_13": 4.0,
+    "pts_allow_14_20": 1.0,
+    "pts_allow_21_27": 0.0,
+    "pts_allow_28_34": -1.0,
+    "pts_allow_35p": -4.0,
+}
+
+
+def test_compute_def_vorp_scores_real_stat_line_and_aliases_la_to_lar() -> None:
+    team_stats = pl.DataFrame(
+        [
+            {
+                "team": "SEA",
+                "season_type": "REG",
+                "game_id": "2025_01_SEA_LA",
+                "def_sacks": 3,
+                "def_interceptions": 1,
+                "fumble_recovery_opp": 0,
+                "def_tds": 0,
+                "def_safeties": 0,
+                "def_fg_blocks": 0,
+                "def_pat_blocks": 0,
+                "def_punt_blocks": 0,
+            },
+            {
+                "team": "LA",
+                "season_type": "REG",
+                "game_id": "2025_01_SEA_LA",
+                "def_sacks": 1,
+                "def_interceptions": 0,
+                "fumble_recovery_opp": 1,
+                "def_tds": 1,
+                "def_safeties": 0,
+                "def_fg_blocks": 1,
+                "def_pat_blocks": 0,
+                "def_punt_blocks": 0,
+            },
+            # Postseason game — should be excluded even though it would
+            # otherwise change both teams' totals.
+            {
+                "team": "SEA",
+                "season_type": "POST",
+                "game_id": "2025_20_SEA_LA",
+                "def_sacks": 9,
+                "def_interceptions": 9,
+                "fumble_recovery_opp": 9,
+                "def_tds": 9,
+                "def_safeties": 9,
+                "def_fg_blocks": 9,
+                "def_pat_blocks": 9,
+                "def_punt_blocks": 9,
+            },
+        ]
+    )
+    schedules = pl.DataFrame(
+        [
+            {
+                "game_id": "2025_01_SEA_LA",
+                "game_type": "REG",
+                "home_team": "LA",
+                "away_team": "SEA",
+                "home_score": 10,
+                "away_score": 20,
+            },
+            {
+                "game_id": "2025_20_SEA_LA",
+                "game_type": "POST",
+                "home_team": "LA",
+                "away_team": "SEA",
+                "home_score": 0,
+                "away_score": 0,
+            },
+        ]
+    )
+    def_players = pl.DataFrame(
+        {
+            "player_id": ["SEA", "LAR"],
+            "name": ["Seattle Seahawks", "Los Angeles Rams"],
+        }
+    )
+    roster_positions = ["QB", "RB", "WR", "TE", "DEF"]
+
+    results = compute_def_vorp(
+        team_stats,
+        schedules,
+        def_players,
+        DEF_SCORING_SETTINGS,
+        roster_positions,
+        num_teams=1,
+    )
+
+    by_id = {r.sleeper_id: r for r in results}
+    assert set(by_id) == {"SEA", "LAR"}
+    assert all(r.position == "DEF" for r in results)
+    assert all(r.games_played == 1 for r in results)
+
+    # SEA: 3 sacks * 1 + 1 int * 2 = 5 stat points; allowed 10 (LA's home
+    # score) -> pts_allow_7_13 tier = 4. Total 9.
+    assert by_id["SEA"].season_points == 9.0
+    assert by_id["SEA"].name == "Seattle Seahawks"
+
+    # LA (aliased to Sleeper's "LAR"): 1 sack + 1 fum_rec*2 + 1 def_td*6 +
+    # 1 blocked FG*2 = 11 stat points; allowed 20 (SEA's away score) ->
+    # pts_allow_14_20 tier = 1. Total 12.
+    assert by_id["LAR"].season_points == 12.0
+    assert by_id["LAR"].name == "Los Angeles Rams"
+
+    # One DEF slot, one team in the league -> replacement rank 1, so the
+    # top-scoring defense (LAR) sets replacement level and has zero VORP.
+    assert by_id["LAR"].vorp_season == 0.0
+    assert by_id["SEA"].vorp_season == -3.0
+
+
+def test_compute_def_vorp_falls_back_to_team_code_when_name_unresolved() -> None:
+    team_stats = pl.DataFrame(
+        [
+            {
+                "team": "KC",
+                "season_type": "REG",
+                "game_id": "2025_01_KC_DEN",
+                "def_sacks": 0,
+                "def_interceptions": 0,
+                "fumble_recovery_opp": 0,
+                "def_tds": 0,
+                "def_safeties": 0,
+            }
+        ]
+    )
+    schedules = pl.DataFrame(
+        [
+            {
+                "game_id": "2025_01_KC_DEN",
+                "game_type": "REG",
+                "home_team": "KC",
+                "away_team": "DEN",
+                "home_score": 0,
+                "away_score": 0,
+            }
+        ]
+    )
+    def_players = pl.DataFrame({"player_id": [], "name": []})
+
+    results = compute_def_vorp(
+        team_stats, schedules, def_players, DEF_SCORING_SETTINGS, ["DEF"], num_teams=1
+    )
+
+    assert results[0].name == "KC"

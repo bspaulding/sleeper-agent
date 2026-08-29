@@ -228,10 +228,31 @@ _DEFAULT_ROOKIE_PERCENTILE = 0.7
 
 
 def _insert_index_by_vorp(rows: list[BigboardRow], vorp: float) -> int:
-    for i, row in enumerate(rows):
-        if row.source == "vorp" and row.vorp is not None and row.vorp < vorp:
-            return i
-    return len(rows)
+    """Index to insert a new `vorp`-source row at, keeping it near its
+    correct neighborhood by descending vorp. Counts how many existing
+    `vorp` rows outrank the new one rather than scanning for the first row
+    that doesn't, so one hand-promoted row that breaks strict monotonicity
+    (e.g. an injury-recovery bet placed well above its raw VORP — see the
+    `bigboard` skill's review pass) can't act as a false floor: a
+    first-violation scan stops at that single anomalous dip and inserts
+    *every* later, unrelated new row right above it regardless of the new
+    row's own value. Confirmed live 2026-08-28 — four new bench-tier rows
+    all landed at board rank ~25 (immediately above a hand-promoted Joe
+    Burrow row) instead of near their actual ~-140 vorp neighborhood.
+
+    Not a perfect fix for an already non-monotonic board: existing rows are
+    never reordered (see `merge_bigboard`'s docstring), so a hand-promoted
+    row's fixed position can still shift a new row's placement by roughly
+    the count of such anomalies whose vorp is below the new row's — a small,
+    bounded error instead of the unbounded one above. Still worth a glance
+    per the `bigboard` skill's existing "re-check hand-moved rows after
+    every build" step.
+    """
+    return sum(
+        1
+        for row in rows
+        if row.source == "vorp" and row.vorp is not None and row.vorp >= vorp
+    )
 
 
 def _rookie_insert_index(
@@ -255,6 +276,23 @@ def _renumber(rows: list[BigboardRow]) -> list[BigboardRow]:
     return [replace(row, rank=i) for i, row in enumerate(rows, start=1)]
 
 
+# `DEF` is deliberately never ordinally merged, even though `stats vorp`
+# computes real DEF VORP rows: its raw points/VORP scale is compressed
+# relative to skill positions (a whole season of team defense fits in the
+# range a single skill-position roster spot's replacement margin spans), so
+# inserting it via the same `_insert_index_by_vorp` cross-position scan
+# placed all 32 defenses at ranks 24-56 — ahead of legitimate rostered
+# RB2/WR2 talent — the first time this was tried. Separately, year-over-year
+# research found DEF's best available signal (pressure rate) barely beats
+# raw fantasy points at predicting next season (r~0.30 vs skill positions'
+# r~0.68), while in-season, the upcoming opponent's own offensive strength
+# predicts a defense's weekly score far better than the defense's own
+# recent form does (r~0.32 vs r~0.09) — DEF is a streaming position, not a
+# draft-capital one. See
+# decisions/2026/2026-08-28-bigboard-def-vorp-research-streaming-recommended.md.
+POSITIONS_EXCLUDED_FROM_ORDINAL_MERGE = frozenset({"DEF"})
+
+
 def merge_bigboard(
     existing_rows: list[BigboardRow],
     vorp_df: pl.DataFrame,
@@ -266,6 +304,9 @@ def merge_bigboard(
     positioning a `[NEEDS REVIEW...]` rookie) is the LLM's job, done via the
     `bigboard` skill, not this function.
     """
+    vorp_df = vorp_df.filter(
+        ~pl.col("position").is_in(list(POSITIONS_EXCLUDED_FROM_ORDINAL_MERGE))
+    )
     existing_ids = {row.player_id for row in existing_rows}
     rows = list(existing_rows)
 

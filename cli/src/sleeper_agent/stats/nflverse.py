@@ -46,6 +46,14 @@ def fetch_snap_counts(seasons: list[int]) -> pl.DataFrame:
     return nfl.load_snap_counts(seasons)  # pragma: no cover - live nflverse call
 
 
+def fetch_team_stats(seasons: list[int]) -> pl.DataFrame:
+    """Team-level game logs, including the `def_*` columns (sacks,
+    interceptions, TDs, safeties, blocked kicks) that back
+    `vorp.compute_def_vorp` — per-player `fetch_weekly_stats` has no
+    team-defense signal at all."""
+    return nfl.load_team_stats(seasons)  # pragma: no cover - live nflverse call
+
+
 def fetch_schedules(seasons: list[int]) -> pl.DataFrame:
     return nfl.load_schedules(seasons)  # pragma: no cover - live nflverse call
 

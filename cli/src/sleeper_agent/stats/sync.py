@@ -22,6 +22,7 @@ SNAPS_SCHEMA_VERSION = 1
 SCHEDULES_SCHEMA_VERSION = 1
 INJURIES_SCHEMA_VERSION = 1
 IDS_SCHEMA_VERSION = 1
+TEAM_SCHEMA_VERSION = 1
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,7 @@ class StatsSyncResult:
     schedule_rows: int
     injury_rows: int
     id_crosswalk_rows: int
+    team_rows: int
 
 
 def sync_stats(
@@ -45,12 +47,14 @@ def sync_stats(
     fetch_schedules: Callable[[list[int]], pl.DataFrame] = nflverse.fetch_schedules,
     fetch_injuries: Callable[[list[int]], pl.DataFrame] = nflverse.fetch_injuries,
     fetch_id_crosswalk: Callable[[], pl.DataFrame] = nflverse.fetch_id_crosswalk,
+    fetch_team_stats: Callable[[list[int]], pl.DataFrame] = nflverse.fetch_team_stats,
 ) -> StatsSyncResult:
     weekly_df = fetch_weekly_stats([season])
     snaps_df = fetch_snap_counts([season])
     schedules_df = fetch_schedules([season])
     injuries_df = fetch_injuries([season])
     ids_df = fetch_id_crosswalk()
+    team_df = fetch_team_stats([season])
 
     write_table(
         weekly_df,
@@ -73,6 +77,11 @@ def sync_stats(
         schema_version=INJURIES_SCHEMA_VERSION,
     )
     write_table(ids_df, stats_dir / "ids.parquet", schema_version=IDS_SCHEMA_VERSION)
+    write_table(
+        team_df,
+        stats_dir / "team" / f"{season}.parquet",
+        schema_version=TEAM_SCHEMA_VERSION,
+    )
 
     return StatsSyncResult(
         season=season,
@@ -81,4 +90,5 @@ def sync_stats(
         schedule_rows=schedules_df.height,
         injury_rows=injuries_df.height,
         id_crosswalk_rows=ids_df.height,
+        team_rows=team_df.height,
     )

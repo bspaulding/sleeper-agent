@@ -75,21 +75,36 @@ ahead of WR. No fix landed yet; when the top NEED row is a heavily speculative/i
 with a strongly negative raw vorp, sanity-check it against whether a different still-empty starter
 slot has a solid, non-speculative option before locking it in.
 
-## Defenses — no data, don't go hunting for it
+## Defenses — deliberately unranked, don't go hunting for a better signal
 
-`data/bigboard/<season>.csv` has zero DEF rows. `draft board` will never surface a defense even
-though DEF sits at 0/1 NEED. Don't spend draft time searching for defense data or projections —
-there isn't any in this pipeline. Use general judgment instead: recent real-season defensive
-performance (pressure rate, takeaways) is enough. Reasonable timing: once remaining board rows
-have gone SURPLUS with converging near-replacement value, or a visible run on defenses starts.
-Don't wait for the last pick — autopick or another team can take the one you want.
+`data/bigboard/<season>.csv` has zero DEF rows, and this is now a researched decision, not a gap:
+`stats vorp` does compute real team-DEF VORP (`compute_def_vorp`, real nflverse team stats + the
+league's own scoring_settings) but `value bigboard build` explicitly excludes DEF from the ordinal
+merge (`bigboard.POSITIONS_EXCLUDED_FROM_ORDINAL_MERGE`) because the underlying signal doesn't
+clear the bar for draft-day ranking — see
+[[2026-08-28-bigboard-def-vorp-research-streaming-recommended]]. `draft board` will never surface
+a defense even though DEF sits at 0/1 NEED. Don't spend draft time searching for a better defense
+signal — one was already researched (pressure rate, sack rate, points allowed, raw fantasy
+points) and none of it works: DEF's year-over-year correlation tops out around r≈0.30 (pressure
+rate, the best of the bunch) vs. a skill position like RB at r≈0.68, and one real consecutive-year
+pair (2023→2024) was statistically zero. Use general judgment at the table instead, same as
+before. Reasonable timing: once remaining board rows have gone SURPLUS with converging
+near-replacement value, or a visible run on defenses starts. Don't wait for the last pick —
+autopick or another team can take the one you want.
 
 Before overriding to DEF, check the current top of the board first: DEF is never a ranked
-comparison (zero data means it can't be), so a defense-run/convergence signal alone can still
-be wrong if a clearly above-replacement skill player (roughly top-10 rank, rookies included —
-see [[2026-08-28-draft-mock-draft-5-slot8]]) is still sitting there. DEF is far more streamable
-in-season than a rostered skill player; take the skill player and defer DEF one round rather than
-reach for it reflexively once a run starts.
+comparison (deliberately, not for lack of data), so a defense-run/convergence signal alone can
+still be wrong if a clearly above-replacement skill player (roughly top-10 rank, rookies included
+— see [[2026-08-28-draft-mock-draft-5-slot8]]) is still sitting there. DEF is far more streamable
+in-season than a rostered skill player — confirmed with real numbers, not just intuition: a
+defense's own trailing-4-week form predicts its next game barely at all (r≈0.09), while the
+upcoming opponent's own offensive strength predicts it more than 3x better (r≈0.32). Take the
+skill player and defer DEF one round rather than reach for it reflexively once a run starts.
+
+**Future idea, not built:** since the real lever is matchup, not season-long quality, a weekly
+DEF-streaming recommender (rank available defenses by upcoming opponent offensive weakness) would
+be a more honest tool than trying to rank DEF pre-draft — a distinct feature from anything the
+`bigboard`/`draft board` pipeline does today.
 
 ## After the draft
 

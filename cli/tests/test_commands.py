@@ -370,6 +370,7 @@ def test_cmd_stats_sync_prints_summary(
             schedule_rows=1,
             injury_rows=1,
             id_crosswalk_rows=1,
+            team_rows=1,
         )
 
     args = argparse.Namespace(season=2025)
@@ -537,6 +538,117 @@ def test_cmd_stats_vorp_writes_table_and_prints_top_players(
         repo_root / "data" / "vorp" / "2025.parquet", expected_schema_version=1
     )
     assert set(vorp_df["sleeper_id"].to_list()) == {"101", "102"}
+
+
+def test_cmd_stats_vorp_adds_def_rows_when_team_stats_available(
+    tmp_path: Path,
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    sleeper_dir = repo_root / "data" / "sleeper"
+    stats_dir = repo_root / "data" / "stats"
+
+    from sleeper_agent.models.sleeper import League, LeagueSettings
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.stats.sync import (
+        IDS_SCHEMA_VERSION,
+        SCHEDULES_SCHEMA_VERSION,
+        TEAM_SCHEMA_VERSION,
+        WEEKLY_SCHEMA_VERSION,
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    league = League(
+        league_id="lid",
+        name="Only Gold",
+        season="2025",
+        status="complete",
+        previous_league_id=None,
+        draft_id="did",
+        scoring_settings={"sack": 1.0, "pts_allow_0": 10.0},
+        roster_positions=("QB", "DEF"),
+        settings=LeagueSettings(
+            waiver_budget=100,
+            trade_deadline=11,
+            max_keepers=2,
+            playoff_week_start=14,
+            num_teams=1,
+            waiver_type=2,
+            best_ball=True,
+        ),
+    )
+    write_table(
+        sleeper_sync.league_to_dataframe(league),
+        sleeper_dir / "league" / "2025.parquet",
+        schema_version=sleeper_sync.LEAGUE_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            [
+                {
+                    "player_id": "00-A",
+                    "player_display_name": "Some QB",
+                    "position": "QB",
+                    "week": 1,
+                }
+            ]
+        ),
+        stats_dir / "weekly" / "2025.parquet",
+        schema_version=WEEKLY_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame({"gsis_id": ["00-A"], "sleeper_id": ["101"]}),
+        stats_dir / "ids.parquet",
+        schema_version=IDS_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            [
+                {
+                    "team": "SEA",
+                    "season_type": "REG",
+                    "game_id": "2025_01_SEA_DEN",
+                    "def_sacks": 3,
+                }
+            ]
+        ),
+        stats_dir / "team" / "2025.parquet",
+        schema_version=TEAM_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            [
+                {
+                    "game_id": "2025_01_SEA_DEN",
+                    "game_type": "REG",
+                    "home_team": "DEN",
+                    "away_team": "SEA",
+                    "home_score": 0,
+                    "away_score": 0,
+                }
+            ]
+        ),
+        stats_dir / "schedules" / "2025.parquet",
+        schema_version=SCHEDULES_SCHEMA_VERSION,
+    )
+    write_table(
+        pl.DataFrame(
+            {"player_id": ["SEA"], "name": ["Seattle Seahawks"], "position": ["DEF"]}
+        ),
+        sleeper_dir / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season=2025)
+    exit_code = stats_cmd.cmd_stats_vorp(args, repo_root=repo_root)
+
+    assert exit_code == 0
+    vorp_df = read_table(
+        repo_root / "data" / "vorp" / "2025.parquet", expected_schema_version=1
+    )
+    def_row = vorp_df.filter(pl.col("position") == "DEF").to_dicts()[0]
+    assert def_row["sleeper_id"] == "SEA"
+    # 3 sacks * 1.0 + a shutout (0 points allowed) * pts_allow_0 (10.0) = 13.
+    assert def_row["season_points"] == 13.0
 
 
 def test_main_dispatches_registered_handler(tmp_path: Path) -> None:

@@ -11,12 +11,14 @@ from (see IMPLEMENTATION_PLAN.md §3):
    (default RB 0.45 / WR 0.45 / TE 0.10 — tunable, not derived from anything
    fancier for v1) rather than assuming one hardcoded FLEX split.
 
-Known v1 scope gap (see IMPLEMENTATION_PLAN.md deviation note): this covers
-QB/RB/WR/TE only. Team defense (`DEF`) fantasy scoring depends on team-level
-stats (points allowed, team sacks/INTs/fumble recoveries) that
-`nflreadpy`'s per-player weekly stats don't carry — that needs a separate
-team-defense stats source and is deferred, not silently wrong: `compute_vorp`
-only ever returns rows for `CORE_POSITIONS`.
+`compute_vorp` covers QB/RB/WR/TE only (`CORE_POSITIONS`) — team defense
+(`DEF`) fantasy scoring depends on team-level stats (points allowed, team
+sacks/INTs/fumble recoveries) that `nflreadpy`'s per-player weekly stats
+don't carry. `compute_def_vorp` below fills that gap from a separate
+team-level source (`nflreadpy.load_team_stats` + `load_schedules`), scored
+against the same live `scoring_settings` rather than a hardcoded table —
+same principle as (1) above, different input shape, so it's a sibling
+function rather than a `CORE_POSITIONS` addition.
 """
 
 from __future__ import annotations
@@ -192,4 +194,191 @@ def compute_vorp(
                 )
             )
 
+    return results
+
+
+# nflverse `team_stats` column -> Sleeper scoring_settings key, for the
+# team-defense counting stats that carry directly (one column, one rate).
+# Blocked kicks are handled separately below since Sleeper scores all three
+# nflverse block columns (FG/PAT/punt) under the single `blk_kick` key.
+DEF_STAT_COLUMN_TO_SCORING_KEY: dict[str, str] = {
+    "def_sacks": "sack",
+    "def_interceptions": "int",
+    "fumble_recovery_opp": "fum_rec",
+    "def_tds": "def_td",
+    "def_safeties": "safe",
+}
+DEF_BLOCKED_KICK_COLUMNS: tuple[str, ...] = (
+    "def_fg_blocks",
+    "def_pat_blocks",
+    "def_punt_blocks",
+)
+
+# Sleeper's points-allowed scoring is tiered per game, not on the season
+# total — each tuple is (inclusive upper bound, scoring_settings key);
+# anything above the last bound falls to `DEF_POINTS_ALLOWED_35P_KEY`.
+DEF_POINTS_ALLOWED_TIERS: tuple[tuple[int, str], ...] = (
+    (0, "pts_allow_0"),
+    (6, "pts_allow_1_6"),
+    (13, "pts_allow_7_13"),
+    (20, "pts_allow_14_20"),
+    (27, "pts_allow_21_27"),
+    (34, "pts_allow_28_34"),
+)
+DEF_POINTS_ALLOWED_35P_KEY = "pts_allow_35p"
+
+# Sleeper's DEF `player_id` is the team's own roster code, which matches
+# nflverse's `team` column for every franchise except the Rams (nflverse
+# "LA" vs Sleeper "LAR").
+DEF_TEAM_CODE_ALIASES: dict[str, str] = {"LA": "LAR"}
+
+
+def _points_allowed_expr(scoring_settings: dict[str, float]) -> pl.Expr:
+    points_allowed = pl.col("points_allowed")
+    ceiling, key = DEF_POINTS_ALLOWED_TIERS[0]
+    expr = pl.when(points_allowed <= ceiling).then(
+        pl.lit(scoring_settings.get(key, 0.0))
+    )
+    for ceiling, key in DEF_POINTS_ALLOWED_TIERS[1:]:
+        expr = expr.when(points_allowed <= ceiling).then(
+            pl.lit(scoring_settings.get(key, 0.0))
+        )
+    return expr.otherwise(pl.lit(scoring_settings.get(DEF_POINTS_ALLOWED_35P_KEY, 0.0)))
+
+
+def _def_season_totals(
+    team_stats: pl.DataFrame,
+    schedules: pl.DataFrame,
+    scoring_settings: dict[str, float],
+) -> pl.DataFrame:
+    """One row per team (`sleeper_id`, `season_points`, `games_played`),
+    regular season only — same REG-only convention as `_season_totals`, for
+    the same reason (nflverse's team-stats and schedules files both mix
+    `REG`/postseason rows with no filtering of their own)."""
+    reg_team_stats = (
+        team_stats.filter(pl.col("season_type") == "REG")
+        if "season_type" in team_stats.columns
+        else team_stats
+    )
+    reg_schedules = (
+        schedules.filter(pl.col("game_type") == "REG")
+        if "game_type" in schedules.columns
+        else schedules
+    )
+
+    stat_points = pl.lit(0.0)
+    for column, scoring_key in DEF_STAT_COLUMN_TO_SCORING_KEY.items():
+        if column not in reg_team_stats.columns:
+            continue
+        rate = scoring_settings.get(scoring_key, 0.0)
+        stat_points = stat_points + pl.col(column).fill_null(0.0) * rate
+
+    blocked_kick_columns = [
+        c for c in DEF_BLOCKED_KICK_COLUMNS if c in reg_team_stats.columns
+    ]
+    if blocked_kick_columns:
+        blk_rate = scoring_settings.get("blk_kick", 0.0)
+        stat_points = (
+            stat_points
+            + pl.sum_horizontal(
+                [pl.col(c).fill_null(0.0) for c in blocked_kick_columns]
+            )
+            * blk_rate
+        )
+
+    scored = reg_team_stats.with_columns(stat_points.alias("stat_points"))
+
+    points_allowed = pl.concat(
+        [
+            reg_schedules.select(
+                pl.col("game_id"),
+                pl.col("home_team").alias("team"),
+                pl.col("away_score").alias("points_allowed"),
+            ),
+            reg_schedules.select(
+                pl.col("game_id"),
+                pl.col("away_team").alias("team"),
+                pl.col("home_score").alias("points_allowed"),
+            ),
+        ]
+    )
+
+    joined = scored.join(
+        points_allowed, on=["game_id", "team"], how="left"
+    ).with_columns(_points_allowed_expr(scoring_settings).alias("points_allowed_score"))
+    scored_games = joined.with_columns(
+        (pl.col("stat_points") + pl.col("points_allowed_score").fill_null(0.0)).alias(
+            "fantasy_points"
+        )
+    )
+
+    return (
+        scored_games.with_columns(
+            pl.col("team").replace(DEF_TEAM_CODE_ALIASES).alias("sleeper_id")
+        )
+        .group_by("sleeper_id")
+        .agg(
+            [
+                pl.col("fantasy_points").sum().alias("season_points"),
+                pl.len().alias("games_played"),
+            ]
+        )
+    )
+
+
+def compute_def_vorp(
+    team_stats: pl.DataFrame,
+    schedules: pl.DataFrame,
+    def_players: pl.DataFrame,
+    scoring_settings: dict[str, float],
+    roster_positions: Sequence[str],
+    num_teams: int,
+) -> list[PlayerVorp]:
+    """Team-defense VORP from real per-game defensive stats and points
+    allowed, scored against the league's live `scoring_settings` — the
+    `DEF` counterpart to `compute_vorp`. `def_players` is
+    `data/sleeper/players.parquet` filtered to `position == "DEF"`, used
+    only to resolve a display name for each team code.
+
+    Replacement level is the last literal `DEF` roster slot across the
+    league (`num_teams` times however many `DEF` slots `roster_positions`
+    carries) — DEF has no FLEX-family slot to distribute, unlike
+    `compute_replacement_ranks`'s core positions.
+    """
+    season_totals = _def_season_totals(team_stats, schedules, scoring_settings)
+    names_by_id = dict(
+        zip(def_players["player_id"].to_list(), def_players["name"].to_list())
+    )
+
+    def_slots = sum(1 for slot in roster_positions if slot == "DEF")
+    rank = max(1, def_slots * num_teams)
+    rows = season_totals.sort("season_points", descending=True).to_dicts()
+    if rows:
+        replacement_row = rows[min(rank, len(rows)) - 1]
+        replacement_points = replacement_row["season_points"]
+        replacement_games = replacement_row["games_played"] or 1
+        replacement_ppg = replacement_points / replacement_games
+    else:
+        replacement_points = 0.0
+        replacement_ppg = 0.0
+
+    results: list[PlayerVorp] = []
+    for row in rows:
+        games_played = row["games_played"] or 0
+        season_points = row["season_points"] or 0.0
+        ppg = season_points / games_played if games_played else 0.0
+        sleeper_id = row["sleeper_id"]
+        results.append(
+            PlayerVorp(
+                sleeper_id=sleeper_id,
+                name=names_by_id.get(sleeper_id, sleeper_id),
+                position="DEF",
+                games_played=games_played,
+                season_points=season_points,
+                points_per_game=ppg,
+                replacement_points=replacement_points,
+                vorp_season=season_points - replacement_points,
+                vorp_per_game=ppg - replacement_ppg,
+            )
+        )
     return results

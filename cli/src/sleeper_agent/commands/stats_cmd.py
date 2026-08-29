@@ -10,6 +10,7 @@ import polars as pl
 
 from sleeper_agent.config import data_dir, find_repo_root
 from sleeper_agent.sleeper_client import sync as sleeper_sync
+from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
 from sleeper_agent.stats import draft_picks_sync
 from sleeper_agent.stats import sync as stats_sync
 from sleeper_agent.stats import vorp as vorp_module
@@ -70,7 +71,8 @@ def cmd_stats_sync(
     print(
         f"synced stats for {result.season}: {result.weekly_rows} weekly rows, "
         f"{result.snap_rows} snap rows, {result.schedule_rows} schedule rows, "
-        f"{result.injury_rows} injury rows, {result.id_crosswalk_rows} id-crosswalk rows"
+        f"{result.injury_rows} injury rows, {result.id_crosswalk_rows} id-crosswalk rows, "
+        f"{result.team_rows} team rows"
     )
     return 0
 
@@ -120,6 +122,29 @@ def cmd_stats_vorp(args: argparse.Namespace, *, repo_root: Path | None = None) -
         league.roster_positions,
         league.settings.num_teams,
     )
+
+    team_stats_path = stats_dir / "team" / f"{args.season}.parquet"
+    schedules_path = stats_dir / "schedules" / f"{args.season}.parquet"
+    players_path = sleeper_dir / "players.parquet"
+    if team_stats_path.exists() and schedules_path.exists() and players_path.exists():
+        team_stats = read_table(
+            team_stats_path, expected_schema_version=stats_sync.TEAM_SCHEMA_VERSION
+        )
+        schedules = read_table(
+            schedules_path, expected_schema_version=stats_sync.SCHEDULES_SCHEMA_VERSION
+        )
+        players_df = read_table(
+            players_path, expected_schema_version=PLAYERS_SCHEMA_VERSION
+        )
+        def_players = players_df.filter(pl.col("position") == "DEF")
+        results = results + vorp_module.compute_def_vorp(
+            team_stats,
+            schedules,
+            def_players,
+            league.scoring_settings,
+            league.roster_positions,
+            league.settings.num_teams,
+        )
 
     df = pl.DataFrame(
         {

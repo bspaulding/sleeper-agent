@@ -257,6 +257,65 @@ def test_merge_bigboard_inserts_new_vorp_players_by_value_order() -> None:
     assert all(r.source == "vorp" for r in merged)
 
 
+def test_merge_bigboard_inserts_near_correct_neighborhood_despite_a_hand_promoted_anomaly() -> (
+    None
+):
+    """A hand-promoted row (e.g. an injury-recovery bet placed well above
+    its raw VORP by the bigboard skill's review pass) breaks strict
+    descending-vorp order. The old first-violation scan stopped at the
+    first row with lower vorp than the new one — which, when that row is
+    an anomalous hand-promotion sitting near the top of the board, meant
+    *every* later-added row got trapped immediately above it regardless of
+    its own vorp. Confirmed live 2026-08-28: four new bench-tier rows (raw
+    vorp roughly -134 to -146) all landed at board rank ~25, immediately
+    above a hand-promoted Joe Burrow row, instead of their true
+    neighborhood around rank 380. This reproduces that shape at a smaller
+    scale and checks the new row lands deep in the normal run, not at the
+    top next to the anomaly.
+    """
+    existing = [
+        _row(rank=1, player_id="hi", name="Elite RB", position="RB", vorp=200.0),
+        _row(
+            rank=2,
+            player_id="promoted",
+            name="Hand-Promoted Injury Bet",
+            position="QB",
+            vorp=-500.0,
+            rationale="[INJURY REVIEW] promoted well above raw VORP",
+        ),
+    ] + [
+        _row(
+            rank=i + 3,
+            player_id=f"n{i}",
+            name=f"Normal {i}",
+            position="WR",
+            vorp=100.0 - i * 10,
+        )
+        for i in range(20)
+    ]
+    # -40 belongs deep in the normal run (between Normal 13 at -30 and
+    # Normal 15 at -50) — nowhere near the top of the board.
+    vorp_df = _vorp_df(("new", "New Bench Player", "WR", -40.0))
+
+    merged = merge_bigboard(existing, vorp_df, [])
+
+    new_rank = next(r.rank for r in merged if r.player_id == "new")
+    assert new_rank > 10
+
+
+def test_merge_bigboard_never_inserts_def_rows() -> None:
+    """DEF is deliberately excluded from the ordinal merge — its raw VORP
+    scale isn't comparable to skill positions (see
+    `POSITIONS_EXCLUDED_FROM_ORDINAL_MERGE`'s docstring) — even though
+    `stats vorp` computes real DEF rows in the same `vorp_df`."""
+    vorp_df = _vorp_df(
+        ("1", "Player One", "RB", 100.0),
+        ("SEA", "Seattle Seahawks", "DEF", 38.0),
+    )
+    merged = merge_bigboard([], vorp_df, [])
+    assert [r.player_id for r in merged] == ["1"]
+
+
 def test_merge_bigboard_never_touches_existing_row_rank_or_rationale() -> None:
     existing = [
         BigboardRow(

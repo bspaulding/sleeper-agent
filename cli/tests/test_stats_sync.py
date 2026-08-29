@@ -18,6 +18,7 @@ def test_sync_stats_writes_every_table(tmp_path: Path) -> None:
     schedules = make_df([{"game_id": "2025_01_A_B"}])
     injuries = make_df([{"player_id": "00-1", "report_status": "Questionable"}])
     ids = make_df([{"gsis_id": "00-1", "sleeper_id": "7564", "name": "Test Player"}])
+    team_stats = make_df([{"team": "SEA", "week": 1, "def_sacks": 3}])
 
     result = sync_stats(
         2025,
@@ -27,6 +28,7 @@ def test_sync_stats_writes_every_table(tmp_path: Path) -> None:
         fetch_schedules=lambda seasons: schedules,
         fetch_injuries=lambda seasons: injuries,
         fetch_id_crosswalk=lambda: ids,
+        fetch_team_stats=lambda seasons: team_stats,
     )
 
     assert result.season == 2025
@@ -35,6 +37,7 @@ def test_sync_stats_writes_every_table(tmp_path: Path) -> None:
     assert result.schedule_rows == 1
     assert result.injury_rows == 1
     assert result.id_crosswalk_rows == 1
+    assert result.team_rows == 1
 
     weekly_out = read_table(
         tmp_path / "weekly" / "2025.parquet", expected_schema_version=1
@@ -43,3 +46,6 @@ def test_sync_stats_writes_every_table(tmp_path: Path) -> None:
 
     ids_out = read_table(tmp_path / "ids.parquet", expected_schema_version=1)
     assert ids_out["sleeper_id"].to_list() == ["7564"]
+
+    team_out = read_table(tmp_path / "team" / "2025.parquet", expected_schema_version=1)
+    assert team_out["team"].to_list() == ["SEA"]
