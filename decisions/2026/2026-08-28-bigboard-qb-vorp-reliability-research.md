@@ -5,10 +5,12 @@ season: '2026'
 week: null
 status: recommended
 players_involved:
-  - Joe Burrow
   - Lamar Jackson
-  - Drake Maye
-  - J.J. McCarthy
+  - Joe Burrow
+  - Daniel Jones
+  - Jayden Daniels
+  - Brock Purdy
+  - Justin Fields
 related_wiki:
   - wiki/team/draft-strategy.md
 ---
@@ -57,11 +59,16 @@ tier-distance during hand review.
   directly than QB scoring variance does.
 - **This retroactively explains a pattern already visible on the board, rather than predicting a
   new one.** QB is by far the most hand-overridden position on `data/bigboard/2025.csv` already —
-  Burrow, Lamar Jackson, Drake Maye, and J.J. McCarthy all carry manual injury/role-change
-  rationale overriding raw VORP rank. That wasn't previously understood as a *position-level*
-  pattern (each override was reasoned individually, case by case); this research gives a
-  quantitative reason those keep happening specifically at QB and should keep being expected
-  there, not treated as one-off surprises each time.
+  Lamar Jackson, Joe Burrow, Daniel Jones, Jayden Daniels, and Brock Purdy all carry manual
+  injury-recovery rationale, plus Justin Fields via a role-change review — five of six overrides
+  driven by a single injury distorting a season's raw total. (Correction: an earlier draft of
+  this entry and the linked docs incorrectly listed Drake Maye and J.J. McCarthy as already
+  hand-overridden — checking `data/bigboard/2025.csv` directly, both are plain mechanical
+  `vorp`-source rows with empty `rationale`. Fixed here and in `draft.md`/`draft-strategy.md`.)
+  That wasn't previously understood as a *position-level* pattern (each override was reasoned
+  individually, case by case); this research gives a quantitative reason those keep happening
+  specifically at QB and should keep being expected there, not treated as one-off surprises each
+  time.
 - **Decision: calibrate review-pass judgment, don't change the ranking mechanism.** Unlike DEF
   (where the in-season streaming finding gave a clean alternative strategy and justified full
   exclusion from the ordinal merge), QB's r=0.40 is still real, useful signal, and a single-QB

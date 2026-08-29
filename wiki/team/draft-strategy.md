@@ -146,8 +146,10 @@ context (offensive-line/scheme continuity, injury-recovery ceiling, a rushing fl
 bad passing luck) should move a QB row further from its raw-VORP slot than the same context would
 move a skill-position row. This isn't a new rule so much as a name for what the review pass has
 already been doing in practice: QB is by far the most hand-overridden position on the current
-board (Burrow, Lamar Jackson, Drake Maye, J.J. McCarthy all carry manual injury/role-change
-adjustments), which this number now explains rather than just observes.
+board — Lamar Jackson, Joe Burrow, Daniel Jones, Jayden Daniels, and Brock Purdy all carry manual
+injury-recovery rationale (plus Justin Fields via a role-change review), five of six overrides
+driven by a single injury distorting a season's raw total — which this number now explains
+rather than just observes.
 
 ## Sources
 
