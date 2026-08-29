@@ -81,10 +81,12 @@ below.
   as if those players *are* available in some counterfactual sense — the mock's actual pick-by-pick
   flow doesn't otherwise resemble the real draft closely enough for full exclusion to pay for
   itself, and it makes the practice run's board less representative of "what a generic 12-team
-  draft looks like." **Action: don't default to excluding all confirmed keepers in the next mock —
-  treat `--exclude-players` as opt-in for testing a specific scenario, not a standing default.**
-  This directly reverses [[2026-08-29-draft-mock-draft-6-slot8]]'s point (b) action item; noted
-  here so the next mock doesn't silently re-apply it without re-asking.
+  draft looks like." **Settled: mocks never filter `--exclude-players` for league keepers — not
+  all of them, not even our own.** Only the real draft should account for keepers; a mock's board
+  should reflect a generic pool. This directly reverses
+  [[2026-08-29-draft-mock-draft-6-slot8]]'s point (b) action item, and goes further than "opt-in".
+  Recorded here (not in `draft.md` itself — user preference, keep this as a decision-log-level
+  rule rather than baked into the skill) so it's discoverable if the question comes up again.
 - **(d) 5 TEs (before the R12-14 override) — real gap, fixed live, guard added.** Board order kept
   surfacing TE rows in the top-overall fallback well past any usable depth (5 rostered by R11).
   Applied the same logic as the existing QB-stacking guard live at R12/R13/R14 (skipped Dalton
@@ -115,5 +117,6 @@ below.
 
 Drafted live by the user in Sleeper's mock draft room. `draft.md` updated in place with the
 generalized position-stacking guard (d) and the unresolved speculative-NEED-vs-open-starter gap
-(a/b) documented as a known limitation. Two follow-ups filed in `todo.md`: don't default to
-full-keeper-exclusion in the next mock (c), and build a real DEF ranking pass (e).
+(a/b) documented as a known limitation. Point (c) — mocks never filter `--exclude-players` for
+league keepers — is settled but recorded only here, not in `draft.md` (user preference). One
+follow-up left open in `todo.md`: build a real DEF ranking pass (e).
