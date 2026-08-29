@@ -14,7 +14,7 @@ from sleeper_agent.trade.propose import propose_trades
 from sleeper_agent.waiver.recommend import PlayerValueRow
 
 ME_ROSTER_ID = 5
-VORP_SCHEMA_VERSION = 1
+VORP_SCHEMA_VERSION = 2
 
 
 class VorpNotComputedError(Exception):

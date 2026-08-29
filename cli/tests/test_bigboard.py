@@ -220,12 +220,18 @@ def test_filter_off_roster_never_drops_rookie_rows() -> None:
 
 
 def _vorp_df(*rows: tuple[str, str, str, float]) -> pl.DataFrame:
+    """`merge_bigboard` sorts/inserts by `vorp_season_shrunk` (the
+    reliability-shrunk value), not raw `vorp_season` — see
+    `stats/vorp.py`'s `POSITION_YOY_RELIABILITY` docstring. The 4th tuple
+    element here is that shrunk value directly; tests don't need to also
+    carry a separate raw `vorp_season` column since `merge_bigboard` never
+    reads one."""
     return pl.DataFrame(
         {
             "sleeper_id": [r[0] for r in rows],
             "name": [r[1] for r in rows],
             "position": [r[2] for r in rows],
-            "vorp_season": [r[3] for r in rows],
+            "vorp_season_shrunk": [r[3] for r in rows],
         }
     )
 

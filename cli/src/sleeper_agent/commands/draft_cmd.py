@@ -74,7 +74,7 @@ from sleeper_agent.value.team_changes import (
 )
 
 ME_ROSTER_ID = 5
-VORP_SCHEMA_VERSION = 1
+VORP_SCHEMA_VERSION = 2
 
 
 def add_subcommands(subparsers: argparse._SubParsersAction) -> None:

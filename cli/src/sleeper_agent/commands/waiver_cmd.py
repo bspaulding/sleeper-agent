@@ -13,7 +13,7 @@ from sleeper_agent.storage.parquet_store import read_table
 from sleeper_agent.waiver.recommend import PlayerValueRow, recommend_waivers
 
 ME_ROSTER_ID = 5
-VORP_SCHEMA_VERSION = 1
+VORP_SCHEMA_VERSION = 2
 
 
 def add_subcommands(subparsers: argparse._SubParsersAction) -> None:

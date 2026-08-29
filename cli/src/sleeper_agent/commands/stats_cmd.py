@@ -16,7 +16,7 @@ from sleeper_agent.stats import sync as stats_sync
 from sleeper_agent.stats import vorp as vorp_module
 from sleeper_agent.storage.parquet_store import read_table, write_table
 
-VORP_SCHEMA_VERSION = 1
+VORP_SCHEMA_VERSION = 2
 
 
 class LeagueNotSyncedError(Exception):
@@ -157,6 +157,7 @@ def cmd_stats_vorp(args: argparse.Namespace, *, repo_root: Path | None = None) -
             "replacement_points": [r.replacement_points for r in results],
             "vorp_season": [r.vorp_season for r in results],
             "vorp_per_game": [r.vorp_per_game for r in results],
+            "vorp_season_shrunk": [r.vorp_season_shrunk for r in results],
         }
     )
     write_table(

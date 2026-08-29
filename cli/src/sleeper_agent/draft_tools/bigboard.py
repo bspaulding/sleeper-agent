@@ -303,6 +303,12 @@ def merge_bigboard(
     `[VORP CHANGED...]` flag — placement judgment (resolving that flag,
     positioning a `[NEEDS REVIEW...]` rookie) is the LLM's job, done via the
     `bigboard` skill, not this function.
+
+    Sorts/inserts/flags by `vorp_season_shrunk`, not raw `vorp_season` — see
+    `stats/vorp.py`'s `POSITION_YOY_RELIABILITY` docstring: a position whose
+    raw season total carries over to next year less reliably (QB, per
+    2026-08-28's research) shouldn't get full credit for an extreme raw
+    value on this shared cross-position scale.
     """
     vorp_df = vorp_df.filter(
         ~pl.col("position").is_in(list(POSITIONS_EXCLUDED_FROM_ORDINAL_MERGE))
@@ -310,7 +316,7 @@ def merge_bigboard(
     existing_ids = {row.player_id for row in existing_rows}
     rows = list(existing_rows)
 
-    vorp_by_id = {r["sleeper_id"]: r["vorp_season"] for r in vorp_df.to_dicts()}
+    vorp_by_id = {r["sleeper_id"]: r["vorp_season_shrunk"] for r in vorp_df.to_dicts()}
     for i, row in enumerate(rows):
         if row.source != "vorp":
             continue
@@ -322,11 +328,11 @@ def merge_bigboard(
 
     new_vorp_rows = [
         r
-        for r in vorp_df.sort("vorp_season", descending=True).to_dicts()
+        for r in vorp_df.sort("vorp_season_shrunk", descending=True).to_dicts()
         if r["sleeper_id"] not in existing_ids
     ]
     for r in new_vorp_rows:
-        insert_at = _insert_index_by_vorp(rows, r["vorp_season"])
+        insert_at = _insert_index_by_vorp(rows, r["vorp_season_shrunk"])
         rows.insert(
             insert_at,
             BigboardRow(
@@ -335,7 +341,7 @@ def merge_bigboard(
                 name=r["name"],
                 position=r["position"],
                 source="vorp",
-                vorp=r["vorp_season"],
+                vorp=r["vorp_season_shrunk"],
                 draft_round=None,
                 rationale="",
                 log_ref=None,

@@ -535,7 +535,7 @@ def test_cmd_stats_vorp_writes_table_and_prints_top_players(
     out = capsys.readouterr().out
     assert "Runner A" in out
     vorp_df = read_table(
-        repo_root / "data" / "vorp" / "2025.parquet", expected_schema_version=1
+        repo_root / "data" / "vorp" / "2025.parquet", expected_schema_version=2
     )
     assert set(vorp_df["sleeper_id"].to_list()) == {"101", "102"}
 
@@ -643,7 +643,7 @@ def test_cmd_stats_vorp_adds_def_rows_when_team_stats_available(
 
     assert exit_code == 0
     vorp_df = read_table(
-        repo_root / "data" / "vorp" / "2025.parquet", expected_schema_version=1
+        repo_root / "data" / "vorp" / "2025.parquet", expected_schema_version=2
     )
     def_row = vorp_df.filter(pl.col("position") == "DEF").to_dicts()[0]
     assert def_row["sleeper_id"] == "SEA"
@@ -1155,7 +1155,7 @@ def _write_value_fixtures(repo_root: Path, season: str) -> None:
         }
     )
     write_table(
-        vorp_df, repo_root / "data" / "vorp" / f"{season}.parquet", schema_version=1
+        vorp_df, repo_root / "data" / "vorp" / f"{season}.parquet", schema_version=2
     )
 
     stats_dir = repo_root / "data" / "stats"
@@ -1578,9 +1578,10 @@ def test_cmd_value_bigboard_build_creates_file_from_scratch(
             "replacement_points": [10.0, 10.0],
             "vorp_season": [100.0, 80.0],
             "vorp_per_game": [10.0, 8.0],
+            "vorp_season_shrunk": [100.0, 80.0],
         }
     )
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=2)
 
     args = argparse.Namespace(season="2026", rookie_season=None)
     exit_code = value_cmd.cmd_value_bigboard_build(args, repo_root=repo_root)
@@ -1616,9 +1617,10 @@ def test_cmd_value_bigboard_build_prints_flagged_rookie_rows(
             "replacement_points": [10.0, 10.0],
             "vorp_season": [100.0, 80.0],
             "vorp_per_game": [10.0, 8.0],
+            "vorp_season_shrunk": [100.0, 80.0],
         }
     )
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=2)
     write_table(
         pl.DataFrame(
             [
@@ -1683,9 +1685,10 @@ def test_cmd_value_bigboard_build_truncates_a_long_flagged_list(
             # all 22 get a [VORP CHANGED] flag -- past the 20-row printout cap.
             "vorp_season": [float(100 - i) for i, _ in enumerate(ids)],
             "vorp_per_game": [10.0] * len(ids),
+            "vorp_season_shrunk": [float(100 - i) for i, _ in enumerate(ids)],
         }
     )
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=2)
     save_bigboard(
         repo_root,
         "2026",
@@ -1747,7 +1750,7 @@ def test_cmd_value_bigboard_build_reports_malformed_existing_board(
             }
         ),
         repo_root / "data" / "vorp" / "2026.parquet",
-        schema_version=1,
+        schema_version=2,
     )
     # A hand-corrupted `source` value: not something `save_bigboard` could
     # ever write, but something a hand-edit of the CSV during review could
@@ -1878,7 +1881,7 @@ def _write_draft_keeper_fixtures(repo_root: Path) -> None:
             "vorp_per_game": [9.0, 4.0],
         }
     )
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
 
 
 def test_cmd_draft_keepers_prints_eligible_and_ineligible(
@@ -2006,7 +2009,7 @@ def test_cmd_draft_board_prints_available_players(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2057,7 +2060,7 @@ def test_cmd_draft_board_exclude_players_drops_projected_keepers(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2116,7 +2119,7 @@ def test_cmd_draft_board_tags_live_sleeper_injury_designations(
     from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
     players_df = pl.DataFrame(
         {
@@ -2186,7 +2189,7 @@ def test_cmd_draft_board_excludes_players_with_no_nfl_team(
             "vorp_season": [50.0, 30.0],
         }
     )
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
     write_table(
         pl.DataFrame({"player_id": ["1", "2"], "team": ["KC", ""]}),
@@ -2285,7 +2288,7 @@ def test_cmd_draft_board_tags_triaged_role_changer(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
     _write_team_change_fixtures(repo_root)
 
@@ -2338,7 +2341,7 @@ def test_cmd_draft_board_omits_moved_tag_when_no_stats_data(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
     # No data/stats/weekly, data/stats/ids.parquet, or players.parquet written.
 
@@ -2388,7 +2391,7 @@ def test_cmd_draft_board_non_tty_defaults_to_line_watch_loop(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2440,7 +2443,7 @@ def test_cmd_draft_board_notify_my_turn_prints_your_turn_line(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2493,7 +2496,7 @@ def test_cmd_draft_board_tty_dispatches_to_tui(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2648,7 +2651,7 @@ def test_cmd_draft_board_reports_missing_draft_id(
             }
         ),
         repo_root / "data" / "vorp" / "2025.parquet",
-        schema_version=1,
+        schema_version=2,
     )
 
     def handler(request: Request) -> Response:
@@ -2686,7 +2689,7 @@ def test_cmd_draft_board_with_draft_id_skips_league_lookup(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=2)
     _write_bigboard(repo_root, "2026", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2732,7 +2735,7 @@ def test_cmd_draft_board_annotates_with_me_flag(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2799,7 +2802,7 @@ def test_cmd_draft_board_annotates_with_roster_id_flag(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
     _write_bigboard(repo_root, "2025", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2866,7 +2869,7 @@ def test_cmd_draft_board_annotates_with_draft_slot_in_mock_mode(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=2)
     _write_bigboard(repo_root, "2026", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -2915,7 +2918,7 @@ def test_cmd_draft_board_reports_unresolvable_draft_slot(
     )
     from sleeper_agent.storage.parquet_store import write_table
 
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2026.parquet", schema_version=2)
     _write_bigboard(repo_root, "2026", vorp_df)
 
     def handler(request: Request) -> Response:
@@ -3089,7 +3092,7 @@ def _write_waiver_freeagent_fixtures(repo_root: Path) -> None:
             "vorp_per_game": [-1.0, 5.0, 2.0],
         }
     )
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2024.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2024.parquet", schema_version=2)
 
     players_df = pl.DataFrame(
         {
@@ -3338,7 +3341,7 @@ def _write_trade_fixtures(repo_root: Path) -> None:
             "vorp_per_game": [5.0, 5.1, -2.0],
         }
     )
-    write_table(vorp_df, repo_root / "data" / "vorp" / "2024.parquet", schema_version=1)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2024.parquet", schema_version=2)
 
 
 def test_cmd_trade_evaluate_prints_value_delta(

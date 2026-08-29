@@ -4,6 +4,7 @@ import polars as pl
 
 from sleeper_agent.stats.vorp import (
     DEFAULT_FLEX_WEIGHTS,
+    POSITION_YOY_RELIABILITY,
     add_fantasy_points_column,
     compute_def_vorp,
     compute_replacement_ranks,
@@ -211,6 +212,67 @@ def test_compute_vorp_excludes_postseason_rows() -> None:
     assert by_id["101"].season_points == 32.0
 
 
+def test_compute_vorp_shrinks_by_position_reliability() -> None:
+    """`vorp_season_shrunk` = position's own year-over-year reliability (r)
+    times raw `vorp_season` -- QB's lower reliability should shrink a QB's
+    vorp harder than an RB's identical raw vorp gets shrunk, since that's
+    the whole point of feeding the bigboard a cross-position-comparable
+    value instead of the raw one."""
+    weekly = pl.DataFrame(
+        [
+            _weekly_row("00-A", "Runner A", "RB", 1, 100, 1),
+            _weekly_row("00-A", "Runner A", "RB", 2, 100, 1),
+            _weekly_row("00-B", "Runner B", "RB", 1, 0, 0),
+            {
+                "player_id": "00-Q",
+                "player_display_name": "Passer Q",
+                "position": "QB",
+                "week": 1,
+                "passing_yards": 3000,
+                "passing_tds": 10,
+                "rushing_yards": 0,
+                "rushing_tds": 0,
+            },
+            {
+                "player_id": "00-R",
+                "player_display_name": "Passer R",
+                "position": "QB",
+                "week": 1,
+                "passing_yards": 0,
+                "passing_tds": 0,
+                "rushing_yards": 0,
+                "rushing_tds": 0,
+            },
+        ]
+    )
+    ids = pl.DataFrame(
+        {
+            "gsis_id": ["00-A", "00-B", "00-Q", "00-R"],
+            "sleeper_id": ["101", "102", "201", "202"],
+        }
+    )
+    scoring_settings = {"rush_yd": 0.1, "rush_td": 6.0, "pass_yd": 0.1, "pass_td": 6.0}
+    roster_positions = ["QB", "RB", "RB", "WR", "WR", "TE"]
+
+    # num_teams=2 so each position's replacement rank (slots * num_teams) is
+    # 2, not 1 -- otherwise the single best player at each position would be
+    # its own replacement level, making vorp_season (and this test) trivially
+    # zero.
+    results = compute_vorp(weekly, ids, scoring_settings, roster_positions, num_teams=2)
+
+    by_id = {r.sleeper_id: r for r in results}
+    rb = by_id["101"]
+    qb = by_id["201"]
+    assert rb.vorp_season_shrunk == POSITION_YOY_RELIABILITY["RB"] * rb.vorp_season
+    assert qb.vorp_season_shrunk == POSITION_YOY_RELIABILITY["QB"] * qb.vorp_season
+    # Same underlying replacement-relative shape (one clear starter, one at
+    # replacement level) but QB's lower reliability (0.40 vs RB's 0.67)
+    # shrinks its vorp harder in relative terms.
+    assert (
+        qb.vorp_season_shrunk / qb.vorp_season < rb.vorp_season_shrunk / rb.vorp_season
+    )
+
+
 DEF_SCORING_SETTINGS = {
     "sack": 1.0,
     "int": 2.0,
@@ -331,6 +393,7 @@ def test_compute_def_vorp_scores_real_stat_line_and_aliases_la_to_lar() -> None:
     # top-scoring defense (LAR) sets replacement level and has zero VORP.
     assert by_id["LAR"].vorp_season == 0.0
     assert by_id["SEA"].vorp_season == -3.0
+    assert by_id["SEA"].vorp_season_shrunk == POSITION_YOY_RELIABILITY["DEF"] * -3.0
 
 
 def test_compute_def_vorp_falls_back_to_team_code_when_name_unresolved() -> None:

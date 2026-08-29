@@ -41,7 +41,7 @@ from sleeper_agent.value.team_changes import (
 # convention as a missing `players.parquet`, not an error.
 _TEAM_CHANGE_WEEKLY_COLUMNS = {"team", "position", "carries", "targets"}
 
-VORP_SCHEMA_VERSION = 1
+VORP_SCHEMA_VERSION = 2
 ME_ROSTER_ID = 5
 
 

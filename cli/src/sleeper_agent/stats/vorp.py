@@ -55,6 +55,33 @@ STAT_COLUMN_TO_SCORING_KEY: dict[str, str] = {
 }
 
 
+# Year-over-year vorp_season reliability per position (Pearson r, players with
+# >=8 games played in both years of a season pair, pooled 2018-2025 -- see
+# decisions/2026/2026-08-28-bigboard-qb-vorp-reliability-research.md). DEF
+# uses its pooled full-population r instead (2026-08-28-bigboard-def-vorp-
+# research-streaming-recommended.md): a team defense doesn't have the
+# "backup who never plays" issue a >=8-games filter exists to correct for,
+# since all 32 teams play essentially every scheduled game every year.
+#
+# Used to shrink vorp_season toward replacement level
+# (`vorp_season_shrunk = r * vorp_season`) before cross-position ordinal
+# comparison on the big board: a position whose raw season total carries
+# over to next year less reliably shouldn't get full credit for an extreme
+# value on the shared scale (see `bigboard.merge_bigboard`, which sorts and
+# inserts new rows by `vorp_season_shrunk`, not raw `vorp_season`). A
+# position missing from this map (there are none among CORE_POSITIONS/DEF
+# today) would fall back to no shrinkage (factor 1.0) rather than error.
+# Not derived from anything fancier for v1 -- same hardcoded-but-documented,
+# tunable convention as DEFAULT_FLEX_WEIGHTS above.
+POSITION_YOY_RELIABILITY: dict[str, float] = {
+    "QB": 0.40,
+    "RB": 0.67,
+    "WR": 0.71,
+    "TE": 0.68,
+    "DEF": 0.31,
+}
+
+
 @dataclass(frozen=True)
 class PlayerVorp:
     sleeper_id: str
@@ -66,6 +93,7 @@ class PlayerVorp:
     replacement_points: float
     vorp_season: float
     vorp_per_game: float
+    vorp_season_shrunk: float
 
 
 def add_fantasy_points_column(
@@ -176,10 +204,12 @@ def compute_vorp(
             replacement_points = 0.0
             replacement_ppg = 0.0
 
+        reliability = POSITION_YOY_RELIABILITY.get(position, 1.0)
         for row in rows:
             games_played = row["games_played"] or 0
             season_points = row["season_points"] or 0.0
             ppg = season_points / games_played if games_played else 0.0
+            vorp_season = season_points - replacement_points
             results.append(
                 PlayerVorp(
                     sleeper_id=str(int(row["sleeper_id"])),
@@ -189,8 +219,9 @@ def compute_vorp(
                     season_points=season_points,
                     points_per_game=ppg,
                     replacement_points=replacement_points,
-                    vorp_season=season_points - replacement_points,
+                    vorp_season=vorp_season,
                     vorp_per_game=ppg - replacement_ppg,
+                    vorp_season_shrunk=reliability * vorp_season,
                 )
             )
 
@@ -362,12 +393,14 @@ def compute_def_vorp(
         replacement_points = 0.0
         replacement_ppg = 0.0
 
+    reliability = POSITION_YOY_RELIABILITY.get("DEF", 1.0)
     results: list[PlayerVorp] = []
     for row in rows:
         games_played = row["games_played"] or 0
         season_points = row["season_points"] or 0.0
         ppg = season_points / games_played if games_played else 0.0
         sleeper_id = row["sleeper_id"]
+        vorp_season = season_points - replacement_points
         results.append(
             PlayerVorp(
                 sleeper_id=sleeper_id,
@@ -377,8 +410,9 @@ def compute_def_vorp(
                 season_points=season_points,
                 points_per_game=ppg,
                 replacement_points=replacement_points,
-                vorp_season=season_points - replacement_points,
+                vorp_season=vorp_season,
                 vorp_per_game=ppg - replacement_ppg,
+                vorp_season_shrunk=reliability * vorp_season,
             )
         )
     return results
