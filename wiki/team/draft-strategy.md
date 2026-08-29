@@ -1,5 +1,5 @@
 ---
-last_updated: '2026-08-16'
+last_updated: '2026-08-28'
 source: docs/superpowers/specs/2026-08-16-draft-strategy-research-and-positional-need.md
 ---
 
@@ -107,6 +107,47 @@ RB slots are full but this pick would still occupy a real, currently-open FLEX s
 position (or enough of the same one) claims those FLEX slots, everything still over its own
 hard_min shows plain `SURPLUS` with no FLEX suffix — so three rows tagged `FLEX` really do share
 one pool, not three independent ones.
+
+## QB raw VORP is the least reliable of the four core positions
+
+Researched 2026-08-28 alongside the DEF ranking work
+([[2026-08-28-bigboard-def-vorp-research-streaming-recommended]]): pooled year-over-year
+`vorp_season` correlation (2018-2025, this league's own `compute_vorp`/`scoring_settings`) looks
+similar-and-high across all four core positions at first glance — QB r=+0.696, RB r=+0.681, WR
+r=+0.739, TE r=+0.731 — but that QB number is inflated by roster mechanics, not real
+predictability: a league only carries 1-2 real QBs per team, so a backup who plays 0 games two
+years running contributes an easy, meaningless "both near the floor" data point. Restricting to
+players with **≥8 games played in both years** (i.e., comparing actual established starters to
+themselves) tells a different story:
+
+| Position | r, full population | r, ≥8 games both years |
+|---|---|---|
+| QB | +0.696 | **+0.399** |
+| RB | +0.681 | +0.667 |
+| WR | +0.739 | +0.713 |
+| TE | +0.731 | +0.679 |
+
+RB/WR/TE barely move when filtered to real starters — their high full-population correlation
+reflects genuine year-to-year stickiness in performance, not just usage. QB's collapses by nearly
+half. Among established starters, **QB is the most volatile of the four core positions year over
+year**, not the most stable, despite what the raw number suggests.
+
+**Why this is plausible, not just noise:** a QB's fantasy output leans heavily on TD rate and
+game script (both of which regress hard year to year) and is uniquely exposed to a single
+injury/backup-QB game erasing a whole season's raw total (see Joe Burrow's -146.5 vorp_season
+distortion in
+[[2026-08-28-bigboard-injury-recovery-games-missed-review]]) — whereas a workhorse RB's role/
+opportunity or a true WR1/TE1's target share tends to persist more directly into next year's
+usage, independent of scoring variance.
+
+**How to apply this:** during the `bigboard` skill's review pass, weight a QB row's raw
+`vorp_season` less than an RB/WR/TE row's at the same distance from a tier line — situational
+context (offensive-line/scheme continuity, injury-recovery ceiling, a rushing floor that survives
+bad passing luck) should move a QB row further from its raw-VORP slot than the same context would
+move a skill-position row. This isn't a new rule so much as a name for what the review pass has
+already been doing in practice: QB is by far the most hand-overridden position on the current
+board (Burrow, Lamar Jackson, Drake Maye, J.J. McCarthy all carry manual injury/role-change
+adjustments), which this number now explains rather than just observes.
 
 ## Sources
 

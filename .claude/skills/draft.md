@@ -75,6 +75,15 @@ ahead of WR. No fix landed yet; when the top NEED row is a heavily speculative/i
 with a strongly negative raw vorp, sanity-check it against whether a different still-empty starter
 slot has a solid, non-speculative option before locking it in.
 
+**This keeps happening at QB specifically because raw QB VORP is genuinely the least reliable of
+the four core positions, not bad luck.** Researched 2026-08-28
+([[2026-08-28-bigboard-def-vorp-research-streaming-recommended]],
+`wiki/team/draft-strategy.md`): among established starters, QB's year-over-year VORP correlation
+is r≈0.40 vs. RB/WR/TE's r≈0.67-0.71 — a QB's raw season total is far more exposed to a single
+injury/TD-rate/game-script swing erasing it than a skill position's is. That's why Burrow, Lamar
+Jackson, Drake Maye, and J.J. McCarthy all needed hand-promotion on this board already: expect the
+next speculative QB judgment call, don't treat each one as a one-off surprise.
+
 ## Defenses — deliberately unranked, don't go hunting for a better signal
 
 `data/bigboard/<season>.csv` has zero DEF rows, and this is now a researched decision, not a gap:

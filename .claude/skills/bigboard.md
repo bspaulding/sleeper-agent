@@ -56,6 +56,12 @@ the judgment half.
    - Any near-tied cluster you notice while reviewing (even if nothing flagged it): resolve it
      into a strict order now. This is the whole point — a tie resolved here never costs a live
      pick's clock again.
+   - **QB rows specifically: weight raw `vorp_season` less than you would at the same distance
+     for RB/WR/TE.** Among established starters, QB's year-over-year VORP correlation is
+     r≈0.40 vs. RB/WR/TE's r≈0.67-0.71 (see `wiki/team/draft-strategy.md`'s "QB raw VORP is the
+     least reliable of the four core positions") — situational context (scheme/O-line
+     continuity, injury-recovery ceiling, rushing floor) should move a QB row further from its
+     raw-VORP slot than the same context would move a skill-position row.
 4. Run `sleeper-agent decisions new --kind bigboard --slug <slug> --season <year>` and fill in
    Summary/Reasoning/Data: what changed, why, and what was explicitly reconsidered-and-kept.
 5. Update every row you touched this pass to set `log_ref` to this entry's date/slug.
