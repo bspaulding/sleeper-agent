@@ -1,15 +1,58 @@
 ---
 season: '2026'
-last_updated: '2026-08-23'
-source: keeper-surplus projection run 2026-08-23 (see wiki/team/keeper-strategy.md for method)
+last_updated: '2026-08-28'
+source: keeper-surplus projection run 2026-08-23; confirmed against real keepers
+  2026-08-28 (see decisions/2026/2026-08-28-real-keepers-confirmed-via-graphql.md)
 ---
 
 # Projected keepers — 2026
 
-Best-guess projection of each team's ≤2 keeps, computed from `draft keepers`
+**Superseded by confirmed real keepers below (2026-08-28).** Original
+best-guess projection kept for reference, computed from `draft keepers`
 eligibility/costs + the surplus test (`wiki/team/keeper-strategy.md`) +
-owner-judgment priors. **Projections, not facts** — owners choose their own;
-refresh after the Aug 28 lock and verify against the draft object's
+owner-judgment priors.
+
+## Confirmed real keepers (2026-08-28)
+
+Pulled from Sleeper's GraphQL API (`league_rosters` query, `keepers` field) —
+the draft object's REST `/picks` endpoint is still empty pre-draft (status
+`pre_draft`), so this GraphQL field is the only source that has the real
+submitted keepers before the draft starts. Costs below are from `draft
+keepers --season 2026 --roster-id <N>`, i.e. our own eligibility engine
+applied to the actual kept player.
+
+| Roster | Kept | Cost | vs. projection |
+|---|---|---|---|
+| 1 | Drake Maye, Bhayshul Tuten | R7, R5 (ADP-reset) | Maye ✓; Tuten swapped in for Charbonnet |
+| 2 | Kenneth Walker III, Blake Corum | R3, R8 (ADP-reset) | Walker ✓; Corum swapped in for Wan'Dale |
+| 3 | Luther Burden III, Tucker Kraft | R4, R5 (both ADP-reset) | Neither projected player kept — full swap from Warren/Harvey |
+| 4 | Javonte Williams, Rashee Rice | R8, R6 | Javonte ✓; Rice swapped in for JSN (JSN was still eligible at R1 — owner chose otherwise) |
+| 5 (us) | Stefon Diggs, Quinshon Judkins | R7, R8 | ✓ exact match, our own locks |
+| 6 | Jonathan Taylor, Zay Flowers | R1, R5 | ✓ exact match |
+| 7 | Chris Olave, Christian Watson | R5, R5 (ADP-reset) | Olave ✓; Watson swapped in for Lawrence |
+| 8 | George Pickens, Rico Dowdle | R4, R7 (ADP-reset) | Pickens ✓; Dowdle swapped in for Stafford (Dowdle was the "also considered" alt) |
+| 9 | Romeo Doubs (only) | — | **⚠️ ineligible — see caveat below.** Neither Cook nor Jennings kept; only 1 keeper submitted |
+| 10 | *(none)* | — | Confirmed real pass, not pending |
+| 11 | *(none)* | — | Confirmed real pass, not pending |
+| 12 | *(none)* | — | Confirmed real pass, not pending |
+
+**⚠️ Roster 9 rules conflict:** Doubs was `is_keeper=True` in both the synced
+2024 and 2025 draft picks for roster 9 — this repo's `draft keepers` engine
+correctly flags him `ineligible: kept 2 consecutive seasons already (max
+reached)` per the league's own rule
+(`wiki/league/season-2026.md` — "Max 2 consecutive years on a kept player").
+Sleeper accepted the submission anyway; the app does not enforce this house
+rule, contrary to `wiki/league/season-2026.md`'s claim that the deadline is
+"enforced directly by Sleeper." **This needs a commissioner ruling before the
+draft** — either Doubs returns to the open pool (roster 9 enters the draft
+with 0 or 1 keeper) or the league treats this as an approved exception. See
+`decisions/2026/2026-08-28-real-keepers-confirmed-via-graphql.md`.
+
+---
+
+## Original projection (2026-08-23), for reference
+
+Refresh after the Aug 28 lock and verify against the draft object's
 `is_keeper` picks before trusting it on draft day.
 
 Our own locks (executed 2026-08-28): Diggs R7, Judkins R8 — revised
