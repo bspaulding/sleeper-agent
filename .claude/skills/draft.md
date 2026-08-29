@@ -45,6 +45,16 @@ watcher re-renders the whole board on every change, so the last render in the fi
 Don't re-invoke the CLI. Take the top-ranked `NEED`-tagged row; if none are `NEED`, take the top
 row overall. State the pick and one line of reasoning, then stop.
 
+**QB cap on the top-overall fallback:** before taking a top-overall QB once the starter QB slot
+is filled, check the roster line for how many QBs are already rostered. Two is enough (starter +
+one buy-low/handcuff bench bet) — a bigboard-curated rank can legitimately put an injury-recovery
+QB (e.g. a healthy-again Burrow or Daniel Jones) above a same-tier skill player on raw rank, but
+that comparison stops mattering once a 3rd QB is on the table, since a single-QB league has near-
+zero marginal use for a 3rd string arm regardless of its rank. At that point skip every QB row
+and take the next-highest non-QB row as the real top-overall pick instead. Confirmed live in
+[[2026-08-29-draft-mock-draft-6-slot8]] — the fallback recommended a 3rd QB (Daniel Jones) purely
+on bigboard rank; user override: "3 QBs should never happen in a draft," took a rookie WR instead.
+
 ## Defenses — no data, don't go hunting for it
 
 `data/bigboard/<season>.csv` has zero DEF rows. `draft board` will never surface a defense even
