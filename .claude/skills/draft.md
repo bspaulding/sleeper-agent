@@ -65,6 +65,19 @@ of RB/WR bench depth instead. No hard numeric cap defined yet (2 for QB, informa
 TE/RB/WR depending on FLEX capacity) — use judgment on "would a 6th of these ever start or
 matter," same test as the QB rule.
 
+**TE cap, quantified: apply the QB-style guard at TE #3, not TE #5.** Mock #7 above waited until
+5 TEs to intervene; a full retro of mock #8
+([[2026-08-29-draft-mock-draft-8-slot8]], every pick checked against `data/adp/*.parquet`
+external consensus) showed the cost of waiting that long: TE2–TE4 (Goedert, Juwan Johnson,
+Schultz) reached an average of **+44 picks ahead of market ADP**, with Johnson alone at **+73**
+— the top-overall fallback has no depth discount for a stacked position, so it kept re-surfacing
+TE at full raw VORP with zero penalty for the 3rd/4th copy of the same position. Don't wait for
+"would a 6th ever start" to feel obviously absurd — check the roster count *before* taking a TE
+row in the top-overall fallback, and once TE is already 2-deep (1 starter + 1 bench), skip
+further TE rows unless the VORP gap to the next-best non-TE row exceeds ~15. This is a specific
+number precisely because "use judgment" let the pattern repeat across three separate mocks (#7,
+#8, and whatever prompted #7's own fix) before anyone quantified the actual cost.
+
 **A speculative injury-recovery bet still needs its NEED weighed against unfilled starter slots.**
 The primary "take the top NEED row" rule (not just the fallback) can also misfire: a bigboard row
 hand-curated high on a healthy-again ceiling story (e.g. Joe Burrow, re-ranked well above his
