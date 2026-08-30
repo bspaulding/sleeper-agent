@@ -88,6 +88,18 @@ ahead of WR. No fix landed yet; when the top NEED row is a heavily speculative/i
 with a strongly negative raw vorp, sanity-check it against whether a different still-empty starter
 slot has a solid, non-speculative option before locking it in.
 
+**A bigboard row's own "defer to ADP"/"no wiki news on file" annotation is a hard stop against
+overriding it live at the table, not a soft suggestion.** When `bigboard`'s pre-draft review pass
+explicitly writes that a row should defer to market ADP given the size of the gap (or that no
+wiki news exists to justify a bump), that call was already made calmly, off the clock, with the
+same information available live — reaching past it at the table needs genuinely new information
+that wasn't there during the review pass, not just the pick "feeling right" in the moment. Keenan
+Allen (R12, 2026 real draft, -58 vs. ADP) is the case that established this: the board's own
+rationale said to defer fully to ADP given the gap, and the reach happened anyway with no new
+information to justify it — see
+`decisions/2026/2026-08-30-draft-adp-market-comparison-post-draft-review.md`. Before overriding
+any row live, read its `rationale` column for this kind of self-flagged deferral first.
+
 **This keeps happening at QB specifically because raw QB VORP is genuinely the least reliable of
 the four core positions, not bad luck.** Researched 2026-08-28
 ([[2026-08-28-bigboard-def-vorp-research-streaming-recommended]],

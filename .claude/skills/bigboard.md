@@ -75,6 +75,11 @@ the judgment half.
      that motivated this: our own rationale called the bump "modest, not elite" while the specific
      team-sourced caution signal (zero preseason snaps) sat unweighted in the same player's wiki
      page the whole time.
+   - **A row where the honest call is "defer to market ADP" (little/no wiki-sourced signal to
+     justify a placement above it) should say so explicitly in `rationale`, in those words.**
+     `.claude/skills/draft.md`'s live-draft process now treats that exact annotation as a hard
+     stop against overriding the row at the table — it only works as a check if the rationale
+     text actually says it plainly, not just implies it.
 4. Run `sleeper-agent decisions new --kind bigboard --slug <slug> --season <year>` and fill in
    Summary/Reasoning/Data: what changed, why, and what was explicitly reconsidered-and-kept.
 5. Update every row you touched this pass to set `log_ref` to this entry's date/slug.
