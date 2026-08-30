@@ -1,0 +1,475 @@
+<title>The Consensus Correction</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,500&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#e9edf1;
+    --panel:#ffffff;
+    --panel-alt:#f3f5f8;
+    --rule:#d6dce3;
+    --rule-strong:#b9c2cd;
+    --ink:#12181f;
+    --ink-soft:#4c5866;
+    --ink-faint:#7c8794;
+    --navy:#1c3f66;
+    --navy-bright:#2c5c92;
+    --up:#1f7a4d;
+    --up-bg:#e3f3ea;
+    --down:#b93b2c;
+    --down-bg:#fbe9e6;
+    --flat:#8a93a0;
+    --shadow:0 16px 40px -24px rgba(18,24,31,.35);
+  }
+
+  *{ box-sizing:border-box; }
+  html{ color-scheme:light; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Source Serif 4', Georgia, serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ text-wrap:balance; margin:0; }
+  .display{ font-family:'Archivo Black', 'Source Serif 4', sans-serif; font-weight:400; }
+  .mono{ font-family:'JetBrains Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.7rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--navy);
+  }
+  a{ color:var(--navy-bright); }
+  .wrap{ max-width:1160px; margin:0 auto; padding:0 24px; }
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    background:var(--panel);
+    border-bottom:3px solid var(--ink);
+  }
+  .ticker-rule{
+    height:34px;
+    background:var(--ink);
+    color:var(--panel);
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    white-space:nowrap;
+  }
+  .ticker-rule .track{
+    display:inline-flex;
+    gap:36px;
+    padding-left:100%;
+    animation:scroll 42s linear infinite;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.78rem;
+  }
+  .ticker-rule .up{ color:#7fe0ac; }
+  .ticker-rule .down{ color:#ff9a8a; }
+  @keyframes scroll{ from{ transform:translateX(0);} to{ transform:translateX(-100%);} }
+  @media (prefers-reduced-motion: reduce){ .ticker-rule .track{ animation:none; } }
+
+  .masthead-inner{ padding:52px 0 40px; }
+  .masthead .kicker{ margin-bottom:16px; }
+  .masthead h1{
+    font-size:clamp(2.2rem, 5vw, 4rem);
+    line-height:1.02;
+    letter-spacing:-.01em;
+  }
+  .masthead h1 .hl{ color:var(--navy); }
+  .masthead p.dek{
+    max-width:64ch;
+    margin-top:18px;
+    font-size:1.18rem;
+    color:var(--ink-soft);
+  }
+  .masthead .source-note{
+    margin-top:22px;
+    padding:14px 16px;
+    background:var(--panel-alt);
+    border:1px solid var(--rule);
+    border-left:3px solid var(--navy);
+    font-family:'JetBrains Mono', monospace;
+    font-size:.78rem;
+    color:var(--ink-soft);
+    max-width:70ch;
+  }
+  .masthead .meta{
+    margin-top:24px;
+    display:flex; flex-wrap:wrap; gap:8px 26px;
+    font-size:.8rem; color:var(--ink-faint);
+    font-family:'JetBrains Mono', monospace;
+  }
+  .masthead .meta b{ color:var(--ink-soft); }
+
+  /* ---------- Sections ---------- */
+  .section{ padding:52px 0; }
+  .section + .section{ border-top:1px solid var(--rule); }
+  .section-head{ margin-bottom:28px; }
+  .section-head h2{ font-size:clamp(1.6rem, 3vw, 2.2rem); }
+  .section-head p{ color:var(--ink-soft); max-width:64ch; margin-top:8px; font-size:1.02rem; }
+
+  /* ---------- Standings strip ---------- */
+  .standings{
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    overflow-x:auto;
+  }
+  table.standings-table{
+    width:100%;
+    border-collapse:collapse;
+    font-family:'JetBrains Mono', monospace;
+    font-size:.82rem;
+  }
+  table.standings-table th{
+    text-align:left;
+    padding:10px 14px;
+    background:var(--ink);
+    color:var(--panel);
+    font-weight:500;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    font-size:.68rem;
+  }
+  table.standings-table td{
+    padding:9px 14px;
+    border-top:1px solid var(--rule);
+  }
+  table.standings-table tr.us td{ background:#fff4e0; font-weight:700; }
+  .grade-chip{
+    display:inline-block;
+    font-family:'Archivo Black', sans-serif;
+    font-size:.82rem;
+    padding:2px 8px;
+    border-radius:3px;
+  }
+  .grade-chip.g-a{ background:var(--up-bg); color:var(--up); }
+  .grade-chip.g-b{ background:#eaf1fb; color:var(--navy); }
+  .grade-chip.g-c{ background:#f2f0e8; color:#8a7a2e; }
+  .grade-chip.g-d{ background:var(--down-bg); color:var(--down); }
+
+  /* ---------- Trophies ---------- */
+  .trophy-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+    gap:16px;
+  }
+  .trophy{
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-left:4px solid var(--navy);
+    border-radius:2px;
+    padding:20px 22px 22px;
+  }
+  .trophy .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:.68rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-faint);
+    margin-bottom:8px;
+  }
+  .trophy h3{ font-family:'Archivo Black', sans-serif; font-size:1.1rem; color:var(--ink); margin-bottom:6px; text-wrap:balance; }
+  .trophy .who{ font-size:.85rem; color:var(--navy); font-weight:600; margin-bottom:8px; font-family:'Source Serif 4', serif; }
+  .trophy p{ color:var(--ink-soft); font-size:.95rem; }
+  .trophy .stat{
+    display:inline-block; margin-top:10px;
+    font-family:'JetBrains Mono', monospace; font-size:.78rem;
+    padding:3px 8px; border-radius:3px;
+  }
+  .trophy .stat.down{ background:var(--down-bg); color:var(--down); }
+  .trophy .stat.up{ background:var(--up-bg); color:var(--up); }
+
+  /* ---------- Team cards ---------- */
+  .team-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(360px, 1fr));
+    gap:18px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:22px;
+    box-shadow:var(--shadow);
+  }
+  .card.us{ border-color:var(--navy); box-shadow:0 0 0 1px var(--navy), var(--shadow); }
+  .card-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:8px; }
+  .card-top .slot{ font-family:'JetBrains Mono', monospace; font-size:.7rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px; }
+  .card-top h3{ font-family:'Archivo Black', sans-serif; font-size:1.3rem; }
+  .grade-seal{
+    flex:none; width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Archivo Black', sans-serif; font-size:1.35rem;
+    border:2px solid var(--navy); color:var(--navy);
+  }
+  .grade-seal.grade-a{ border-color:var(--up); color:var(--up); }
+  .grade-seal.grade-d{ border-color:var(--down); color:var(--down); }
+
+  .card .bit{ color:var(--ink-soft); font-size:.96rem; margin:12px 0 4px; }
+  .card .bit b{ color:var(--ink); }
+
+  .card details{ margin-top:14px; border-top:1px solid var(--rule); padding-top:10px; }
+  .card summary{
+    cursor:pointer; list-style:none;
+    font-family:'JetBrains Mono', monospace; font-size:.72rem;
+    letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  .card summary::-webkit-details-marker{ display:none; }
+  .card summary::before{ content:'▸ '; color:var(--navy); }
+  .card details[open] summary::before{ content:'▾ '; }
+
+  .picklist{ margin-top:10px; display:flex; flex-direction:column; }
+  .pickrow{
+    display:grid;
+    grid-template-columns:2.2em 1fr 2.6em 5.6em;
+    gap:8px; align-items:center;
+    font-size:.83rem;
+    padding:4px 0;
+    border-bottom:1px solid var(--rule);
+  }
+  .pickrow:last-child{ border-bottom:none; }
+  .pickrow .rd{ font-family:'JetBrains Mono', monospace; font-size:.72rem; color:var(--ink-faint); }
+  .pickrow .nm{ color:var(--ink); }
+  .pickrow .pos{
+    font-family:'JetBrains Mono', monospace; font-size:.66rem; color:var(--navy);
+    background:#eaf1fb; border:1px solid #d3e0f2; border-radius:3px;
+    padding:1px 5px; justify-self:start;
+  }
+  .pickrow .gap{
+    font-family:'JetBrains Mono', monospace; font-size:.74rem;
+    text-align:right; padding:1px 6px; border-radius:3px; justify-self:end;
+  }
+  .pickrow .gap.up{ background:var(--up-bg); color:var(--up); }
+  .pickrow .gap.down{ background:var(--down-bg); color:var(--down); }
+  .pickrow .gap.flat{ color:var(--ink-faint); background:none; }
+  .keeper-tag{ font-size:.66rem; color:var(--ink-faint); font-style:italic; margin-left:5px; }
+
+  footer{ padding:36px 0 60px; color:var(--ink-faint); font-size:.82rem; font-family:'JetBrains Mono', monospace; }
+
+  .legend{ display:flex; gap:18px; flex-wrap:wrap; font-family:'JetBrains Mono', monospace; font-size:.76rem; color:var(--ink-faint); margin-top:14px; }
+  .legend span.up{ color:var(--up); } .legend span.down{ color:var(--down); }
+
+  @media (max-width:640px){ .masthead-inner{ padding:38px 0 28px; } .section{ padding:36px 0; } }
+</style>
+
+<div class="masthead">
+  <div class="ticker-rule">
+    <div class="track">
+      <span>DEFLATE THE BAY <span class="down">DANIEL JONES -89</span></span>
+      <span>AARON'S FANCY TEAM <span class="up">TOP OF THE BOARD</span></span>
+      <span>TAYSPA <span class="up">NE DEF +42</span></span>
+      <span>GRANDPA TOD <span class="down">JAYDEN REED -34</span></span>
+      <span>HANBLAD <span class="flat">TOM BRADY — UNLISTED</span></span>
+      <span>DEFLATE THE BAY <span class="down">DANIEL JONES -89</span></span>
+      <span>AARON'S FANCY TEAM <span class="up">TOP OF THE BOARD</span></span>
+      <span>TAYSPA <span class="up">NE DEF +42</span></span>
+      <span>GRANDPA TOD <span class="down">JAYDEN REED -34</span></span>
+      <span>HANBLAD <span class="flat">TOM BRADY — UNLISTED</span></span>
+    </div>
+  </div>
+  <div class="wrap masthead-inner">
+    <div class="kicker eyebrow">Only Gold Dynasty League &middot; Season 2026 &middot; Independent Review</div>
+    <h1>THE CONSENSUS <span class="hl">CORRECTION</span></h1>
+    <p class="dek">Last week's report card graded this draft against our own board. This one throws that board out and grades it against the open market instead — same 180 picks, a completely different judge.</p>
+    <div class="source-note">
+      <b>Methodology:</b> every pick re-scored against consensus average draft position (external
+      ADP, <span class="mono">data/adp/2026-08-28.parquet</span>) instead of our internal VORP
+      board. Gap = draft slot minus consensus rank &mdash; positive means the market would have
+      let this player fall later than we did.
+    </div>
+    <div class="meta">
+      <span><b>12</b> teams</span>
+      <span><b>15</b> rounds</span>
+      <span><b>337</b>-player consensus pool</span>
+      <span>Draft <b>#1389376972722835457</b></span>
+      <span>Filed <b>2026-08-29</b></span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">The Reversal</div>
+      <h2>Standings, Restated</h2>
+      <p>Some teams look the same either way. One team does not.</p>
+    </div>
+    <div class="standings">
+      <table class="standings-table">
+        <thead><tr><th>Slot</th><th>Team</th><th>Consensus grade</th><th>Note</th></tr></thead>
+        <tbody id="standings-body"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span><span class="up">▲ green</span> = fell later than consensus (value)</span>
+      <span><span class="down">▼ red</span> = taken earlier than consensus (reach)</span>
+      <span>— = untracked by consensus (mostly defenses, one legend)</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Notable Filings</div>
+      <h2>What the Market Actually Thinks</h2>
+      <p>Grounded in real consensus gaps, not vibes — though the vibes checked out too.</p>
+    </div>
+    <div class="trophy-grid">
+
+      <div class="trophy">
+        <div class="tag">Biggest reach, league-wide</div>
+        <h3>Reach of the Century</h3>
+        <div class="who">Daniel Jones &middot; Deflate the Bay &middot; Round 10</div>
+        <p>Our own board loved this pick as a deliberate injury-recovery bet. The open market did not get the memo — by consensus ADP, this is the single largest reach of anyone's entire draft, full stop. Sometimes the house model and the market just disagree, loudly.</p>
+        <span class="stat down">89 spots ahead of consensus</span>
+      </div>
+
+      <div class="trophy">
+        <div class="tag">Biggest true value, non-keeper</div>
+        <h3>Vindicated By The Numbers</h3>
+        <div class="who">Quinshon Judkins &middot; Deflate the Bay &middot; Round 8</div>
+        <p>The late keeper swap that replaced Sam Darnold with Judkins looks better every week — consensus agrees this was a legitimate steal at the actual pick, not just a house-board favorite.</p>
+        <span class="stat up">35 spots of free value</span>
+      </div>
+
+      <div class="trophy">
+        <div class="tag">Two teams, one insight</div>
+        <h3>Analysts Hate This One Trick</h3>
+        <div class="who">Patriots DEF &rarr; tayspa &middot; Ravens DEF &rarr; Aaron's Fancy Team</div>
+        <p>Both landed a defense in round fifteen that consensus had rated as a much earlier pick elsewhere. Whatever the market thinks a streaming defense is worth, these two got it for a round-fifteen discount, twice.</p>
+        <span class="stat up">+42 / +40 vs. consensus</span>
+      </div>
+
+      <div class="trophy">
+        <div class="tag">Special case</div>
+        <h3>Ghost Stock</h3>
+        <div class="who">Tom Brady &middot; HanBlad &middot; Pick 180 (dead last)</div>
+        <p>No consensus rank exists for a quarterback who last played in 2023 — not a reach, not a steal, just completely delisted. The market has no opinion on this pick, which might be the purest review it could get.</p>
+        <span class="stat" style="color:var(--flat); background:var(--panel-alt);">unrated</span>
+      </div>
+
+      <div class="trophy">
+        <div class="tag">Pattern, not accident</div>
+        <h3>Running Out of Runway</h3>
+        <div class="who">Emily's Fancier Team &middot; Rounds 11, 13, 15</div>
+        <p>MarShawn Lloyd, Kaelon Black, then Najee Harris to close it out — three separate running backs, three separate rounds, all taken well ahead of where consensus had them. Not one bad pick; a whole strategy.</p>
+        <span class="stat down">−65 / −68 / −39</span>
+      </div>
+
+      <div class="trophy">
+        <div class="tag">New league leader</div>
+        <h3>Bull Market</h3>
+        <div class="who">Aaron's Fancy Team</div>
+        <p>Quietly the best-graded team once the house board is out of the picture — no gaudy headline steal, just fifteen rounds of picks that consensus mostly agreed with, plus a genuinely excellent Bhayshul Tuten keeper number.</p>
+        <span class="stat up">Best in league</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow">Full Filings</div>
+      <h2>Every Team, Re-Graded</h2>
+      <p>Click a team to see the full round-by-round consensus gap. Green rows fell later than the market expected; red rows didn't.</p>
+    </div>
+    <div class="team-grid" id="teamgrid"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    Consensus ADP: draftsharks.com, retrieved 2026-08-28 (data/adp/2026-08-28.parquet, 337 players). Grades weigh round-by-round consensus gap against roster construction — not a strict average, no receipts owed.
+  </div>
+</footer>
+
+<script>
+const TEAM_DATA = [{"name": "Redzone & BBQ", "slot": 1, "picks": [[1, "Jahmyr Gibbs", "RB", false, 1, 0], [2, "Kyren Williams", "RB", false, 29, -5], [3, "Jeremiyah Love", "RB", false, 26, -1], [4, "Terry McLaurin", "WR", false, 56, -8], [5, "Chris Olave", "WR", true, 30, 19], [6, "J.K. Dobbins", "RB", false, 94, -22], [7, "Caleb Williams", "QB", false, 72, 1], [8, "Brock Purdy", "QB", false, 121, -25], [9, "Deebo Samuel", "WR", false, 138, -41], [10, "Matthew Golden", "WR", false, 127, -7], [11, "Dallas Goedert", "TE", false, 123, -2], [12, "Isiah Pacheco", "RB", false, 184, -40], [13, "James Conner", "RB", false, 212, -67], [14, "San Francisco 49ers", "DEF", false, 220, -52], [15, "Christian Watson", "WR", true, 70, 99]]}, {"name": "Team Questionable", "slot": 2, "picks": [[1, "Bijan Robinson", "RB", false, 2, 0], [2, "Malik Nabers", "WR", false, 28, -5], [3, "Tetairoa McMillan", "WR", false, 37, -11], [4, "Emeka Egbuka", "WR", false, 39, 8], [5, "Jadarian Price", "RB", false, 67, -17], [6, "RJ Harvey", "RB", false, 79, -8], [7, "Jonathon Brooks", "RB", false, 106, -32], [8, "Tucker Kraft", "TE", true, 63, 32], [9, "Justin Herbert", "QB", false, 82, 16], [10, "Rachaad White", "RB", false, 131, -12], [11, "Luther Burden", "WR", true, 52, 70], [12, "T.J. Hockenson", "TE", false, 164, -21], [13, "Tyler Shough", "QB", false, 183, -37], [14, "Jalen Coker", "WR", false, 145, 22], [15, "Kansas City Chiefs", "DEF", false, 229, -59]]}, {"name": "Barbara\u2019s Big Boys", "slot": 3, "picks": [[1, "Puka Nacua", "WR", false, 4, -1], [2, "Omarion Hampton", "RB", false, 15, 7], [3, "Lamar Jackson", "QB", false, 32, -5], [4, "David Montgomery", "RB", false, 49, -3], [5, "Ladd McConkey", "WR", false, 38, 13], [6, "Marvin Harrison", "WR", false, 75, -5], [7, "Kenny Gainwell", "RB", false, null, null], [8, "Makai Lemon", "WR", false, 86, 8], [9, "Aaron Jones", "RB", false, 124, -25], [10, "Isaiah Likely", "TE", false, 109, 9], [11, "Quentin Johnston", "WR", false, 114, 9], [12, "Philadelphia Eagles", "DEF", false, 126, 16], [13, "Oronde Gadsden", "TE", false, 128, 19], [14, "Tank Bigsby", "RB", false, 176, -10], [15, "Braelon Allen", "RB", false, 204, -33]]}, {"name": "momsrock", "slot": 4, "picks": [[1, "Ja'Marr Chase", "WR", false, 3, 1], [2, "A.J. Brown", "WR", false, 18, 3], [3, "Josh Jacobs", "RB", false, 31, -3], [4, "Tyler Warren", "TE", false, 47, -2], [5, "DJ Moore", "WR", false, 57, -5], [6, "Rome Odunze", "WR", false, 65, 4], [7, "Dak Prescott", "QB", false, 78, -2], [8, "Jordan Mason", "RB", false, 117, -24], [9, "Los Angeles Rams", "DEF", false, 88, 12], [10, "Jake Ferguson", "TE", false, 99, 18], [11, "Romeo Doubs", "WR", true, 132, -8], [12, "Jakobi Meyers", "WR", false, 113, 28], [13, "Jared Goff", "QB", false, 133, 15], [14, "Tyler Allgeier", "RB", false, 146, 19], [15, "Jonah Coleman", "RB", false, 168, 4]]}, {"name": "blindsqwirrels", "slot": 5, "picks": [[1, "Josh Allen", "QB", false, 22, -17], [2, "Ashton Jeanty", "RB", false, 14, 6], [3, "DeVonta Smith", "WR", false, 35, -6], [4, "George Kittle", "TE", false, 90, -46], [5, "Davante Adams", "WR", false, 50, 3], [6, "Chuba Hubbard", "RB", false, 77, -9], [7, "DK Metcalf", "WR", false, 74, 3], [8, "Michael Wilson", "WR", false, 83, 9], [9, "Jordyn Tyson", "WR", false, 89, 12], [10, "Seattle Seahawks", "DEF", false, 105, 11], [11, "Brian Robinson", "RB", false, 155, -30], [12, "Alvin Kamara", "RB", false, 161, -21], [13, "Zach Charbonnet", "RB", false, 147, 2], [14, "Brashard Smith", "RB", false, 235, -71], [15, "Kenyon Sadiq", "TE", false, 152, 21]]}, {"name": "Grandpa Tod", "slot": 6, "picks": [[1, "Amon-Ra St. Brown", "WR", false, 9, -3], [2, "Brock Bowers", "TE", false, 23, -4], [3, "Derrick Henry", "RB", false, 20, 10], [4, "George Pickens", "WR", true, 24, 19], [5, "Rhamondre Stevenson", "RB", false, 81, -27], [6, "Tony Pollard", "RB", false, 84, -17], [7, "Jayden Reed", "WR", false, 112, -34], [8, "Trevor Lawrence", "QB", false, 100, -9], [9, "Alec Pierce", "WR", false, 101, 1], [10, "Denver Broncos", "DEF", false, 119, -4], [11, "Brenton Strange", "TE", false, 153, -27], [12, "Josh Downs", "WR", false, 108, 31], [13, "Jordan Love", "QB", false, 149, 1], [14, "Jacksonville Jaguars", "DEF", false, 169, -6], [15, "Rico Dowdle", "RB", true, 85, 89]]}, {"name": "Aaron\u2019s Fancy Team", "slot": 7, "picks": [[1, "Christian McCaffrey", "RB", false, 5, 2], [2, "Nico Collins", "WR", false, 25, -7], [3, "Travis Etienne", "RB", false, 45, -14], [4, "Jaylen Waddle", "WR", false, 46, -4], [5, "Carnell Tate", "WR", false, 66, -11], [6, "Harold Fannin", "TE", false, 68, -2], [7, "Drake Maye", "QB", true, 48, 31], [8, "Brian Thomas", "WR", false, 73, 17], [9, "Jordan Addison", "WR", false, 104, -1], [10, "Bhayshul Tuten", "RB", true, 62, 52], [11, "Chris Rodriguez", "RB", false, 142, -15], [12, "Mark Andrews", "TE", false, 129, 9], [13, "Baker Mayfield", "QB", false, 144, 7], [14, "Keaton Mitchell", "RB", false, 179, -17], [15, "Baltimore Ravens", "DEF", false, 135, 40]]}, {"name": "Deflate the Bay", "slot": 8, "picks": [[1, "Jaxon Smith-Njigba", "WR", false, 6, 2], [2, "Trey McBride", "TE", false, 21, -4], [3, "D'Andre Swift", "RB", false, 55, -23], [4, "Jaylen Warren", "RB", false, 71, -30], [5, "TreVeyon Henderson", "RB", false, 53, 3], [6, "Kyle Pitts", "TE", false, 69, -4], [7, "Stefon Diggs", "WR", true, 110, -30], [8, "Quinshon Judkins", "RB", true, 54, 35], [9, "Michael Pittman", "WR", false, 102, 2], [10, "Daniel Jones", "QB", false, 202, -89], [11, "Juwan Johnson", "TE", false, 186, -58], [12, "Keenan Allen", "WR", false, 195, -58], [13, "Sam Darnold", "QB", false, 175, -23], [14, "Tyrone Tracy", "RB", false, 163, -2], [15, "Denzel Boston", "WR", false, 165, 11]]}, {"name": "Silveir Lining", "slot": 9, "picks": [[1, "CeeDee Lamb", "WR", false, 8, 1], [2, "Chase Brown", "RB", false, 16, 0], [3, "Kenneth Walker", "RB", true, 19, 14], [4, "Cam Skattebo", "RB", false, null, null], [5, "Jayden Daniels", "QB", false, 64, -7], [6, "Parker Washington", "WR", false, 76, -12], [7, "Sam LaPorta", "TE", false, 59, 22], [8, "De'Zhaun Stribling", "WR", false, 137, -49], [9, "Wan'Dale Robinson", "WR", false, 116, -11], [10, "KC Concepcion", "WR", false, 122, -10], [11, "Mike Washington", "RB", false, 170, -41], [12, "Kyler Murray", "QB", false, 159, -23], [13, "Los Angeles Chargers", "DEF", false, 177, -24], [14, "Caleb Douglas", "WR", false, 215, -55], [15, "Blake Corum", "RB", true, 103, 74]]}, {"name": "tayspa", "slot": 10, "picks": [[1, "Jonathan Taylor", "RB", true, 7, 3], [2, "De'Von Achane", "RB", false, 12, 3], [3, "Tee Higgins", "WR", false, 34, 0], [4, "Joe Burrow", "QB", false, 51, -12], [5, "Zay Flowers", "WR", true, 42, 16], [6, "Mike Evans", "WR", false, 61, 2], [7, "Chris Godwin", "WR", false, 95, -13], [8, "Jacory Croskey-Merritt", "RB", false, 115, -28], [9, "Dalton Kincaid", "TE", false, 87, 19], [10, "Matthew Stafford", "QB", false, 96, 15], [11, "Woody Marks", "RB", false, 160, -30], [12, "Dylan Sampson", "RB", false, 187, -52], [13, "Ja'Kobi Lane", "WR", false, 157, -3], [14, "Dalton Schultz", "TE", false, 192, -33], [15, "New England Patriots", "DEF", false, 136, 42]]}, {"name": "HanBlad", "slot": 11, "picks": [[1, "James Cook", "RB", false, 10, 1], [2, "Drake London", "WR", false, 17, -3], [3, "Breece Hall", "RB", false, 33, 2], [4, "Colston Loveland", "TE", false, 40, -2], [5, "Jameson Williams", "WR", false, 58, 1], [6, "Jalen Hurts", "QB", false, 60, 2], [7, "Courtland Sutton", "WR", false, 80, 3], [8, "Kyle Monangai", "RB", false, 98, -12], [9, "Houston Texans", "DEF", false, 97, 10], [10, "Patrick Mahomes", "QB", false, 107, 3], [11, "Xavier Worthy", "WR", false, 140, -9], [12, "Tyjae Spears", "RB", false, 166, -32], [13, "Khalil Shakir", "WR", false, 141, 14], [14, "Rashid Shaheed", "WR", false, 148, 10], [15, "Tom Brady", "QB", false, null, null]]}, {"name": "Emily\u2019s Fancier Team", "slot": 12, "picks": [[1, "Saquon Barkley", "RB", false, 13, -1], [2, "Justin Jefferson", "WR", false, 11, 2], [3, "Bucky Irving", "RB", false, 41, -5], [4, "Garrett Wilson", "WR", false, 44, -7], [5, "Jaxson Dart", "QB", false, 91, -31], [6, "Rashee Rice", "WR", true, 27, 34], [7, "Travis Kelce", "TE", false, 92, -8], [8, "Javonte Williams", "RB", true, 36, 49], [9, "Chig Okonkwo", "TE", false, null, null], [10, "Bo Nix", "QB", false, 120, -11], [11, "MarShawn Lloyd", "RB", false, 197, -65], [12, "Hunter Henry", "TE", false, 139, -6], [13, "Kaelon Black", "RB", false, 224, -68], [14, "Detroit Lions", "DEF", false, 154, 3], [15, "Najee Harris", "RB", false, 219, -39]]}];
+
+const META = {
+  "Redzone & BBQ": { grade: "D+", bit: "Jahmyr Gibbs at one overall is as clean as it gets by any measure. The market's real complaint is the back half — <b>James Conner</b> and a 49ers defense both landed a full round-plus ahead of consensus, and Deebo Samuel in round nine wasn't far behind. A Christian Watson keeper number bails out the final line, but that's a keeper decision from seasons past, not this draft's doing." },
+  "Team Questionable": { grade: "C+", bit: "Bijan Robinson at two overall, then a string of small, defensible gaps the rest of the way — nothing egregious, nothing thrilling. The one real outlier is Tyler Shough in round thirteen, taken well ahead of where the market had any quarterback depth priced. A Luther Burden keeper number is doing a lot of the heavy lifting on the final grade." },
+  "Barbara's Big Boys": { grade: "B-", bit: "A genuinely boring draft by consensus standards, and that's a compliment here — most gaps sit within a round of market expectation in either direction. No standout reach, no standout robbery. The house board flagged this as a rough draft; the open market shrugs and calls it fine." },
+  "momsrock": { grade: "B+", bit: "Steady positive value basically top to bottom, with Jake Ferguson and Jared Goff both landing well past where consensus had them queued up. The only real outlier is a round-eight Jordan Mason pick that the market wasn't buying at all. A quietly strong filing." },
+  "blindsqwirrels": { grade: "C-", bit: "Josh Allen at five overall is the first outlier — a real reach by consensus terms even before the QB carousel got going. George Kittle in round four and a round-fourteen running back pick both missed hard. The Kenyon Sadiq flier in round fifteen reads fine to the market too, for what it's worth." },
+  "Grandpa Tod": { grade: "B", bit: "A mostly clean draft with exactly one crater: Jayden Reed in round seven, which the market has priced multiple rounds cheaper than where this went. Everything else is minor noise around consensus, and the Rico Dowdle keeper number is doing serious work on the bottom line — again, a decision from a different season, not this draft." },
+  "Aaron's Fancy Team": { grade: "A-", bit: "The market's actual favorite. Christian McCaffrey at seven overall, a well-priced middle of the draft, and a genuinely excellent Bhayshul Tuten keeper number closing strong. Nothing here reads as a reach worth flagging, which by itself puts this near the top of the consensus-graded field." },
+  "Deflate the Bay": { grade: "D-", bit: "Depends entirely on whose board you trust. By our own analysis this was the best draft in the league. By the open market, it's the worst — anchored by the single biggest reach of anyone's draft (Daniel Jones, round ten) and real gaps at Juwan Johnson and Keenan Allen in the following two rounds. The Quinshon Judkins pick is the one place both judges agree completely." },
+  "Silveir Lining": { grade: "C-", bit: "CeeDee Lamb at nine overall priced fine, but the middle rounds get rough — De'Zhaun Stribling and a round-eleven running back both landed well ahead of consensus. A Blake Corum keeper number single-handedly rescues the final grade from looking much worse." },
+  "tayspa": { grade: "C+", bit: "Jonathan Taylor's keeper number checks out, and the Matthew Stafford pickup in round ten reads as real value to the market too — but Dylan Sampson in round twelve and Dalton Schultz in round fourteen (a genuine steal by our own board) both actually graded as reaches here, since the market had them going even later than we did. The Patriots defense in round fifteen is the one clean win everyone agrees on." },
+  "HanBlad": { grade: "B-", bit: "One of the most boringly consistent drafts in the league by consensus standards — almost every pick lands within a round of expectation. Then, dead last, completely off the board: Tom Brady. No note from the market on that one. None was possible." },
+  "Emily's Fancier Team": { grade: "D+", bit: "Saquon Barkley and Justin Jefferson opened clean, and the Javonte Williams keeper number is a real bright spot. But the closing stretch is a genuine pattern, not bad luck — three separate running backs (Lloyd, Black, Harris) across rounds eleven, thirteen and fifteen, every one of them taken well ahead of consensus." }
+};
+
+function gradeClass(g){
+  if(g.startsWith('A')) return 'grade-a';
+  if(g.startsWith('D') || g.startsWith('F')) return 'grade-d';
+  return '';
+}
+function chipClass(g){
+  if(g.startsWith('A')) return 'g-a';
+  if(g.startsWith('B')) return 'g-b';
+  if(g.startsWith('D') || g.startsWith('F')) return 'g-d';
+  return 'g-c';
+}
+function gapChip(gap){
+  if(gap === null || gap === undefined) return '<span class="gap flat">—</span>';
+  const sign = gap > 0 ? '+' : '';
+  const cls = gap > 0 ? 'up' : (gap < 0 ? 'down' : 'flat');
+  return `<span class="gap ${cls}">${sign}${gap}</span>`;
+}
+
+const grid = document.getElementById('teamgrid');
+const standingsBody = document.getElementById('standings-body');
+
+const withMeta = TEAM_DATA.map(t => ({...t, ...META[t.name]}));
+withMeta.sort((a,b) => {
+  const order = ['A','B','C','D','F'];
+  const la = order.indexOf(a.grade[0]), lb = order.indexOf(b.grade[0]);
+  if(la !== lb) return la - lb;
+  const isMinus = g => g.includes('-') ? 1 : (g.includes('+') ? -1 : 0);
+  return isMinus(a.grade) - isMinus(b.grade);
+});
+
+withMeta.forEach(t => {
+  const isUs = t.name === 'Deflate the Bay';
+  const row = document.createElement('tr');
+  if(isUs) row.className = 'us';
+  const note = isUs ? "Best on our board, worst on the market's" : '';
+  row.innerHTML = `<td>${t.slot}</td><td>${t.name}${isUs ? ' <span style="color:var(--navy);">(us)</span>' : ''}</td><td><span class="grade-chip ${chipClass(t.grade)}">${t.grade}</span></td><td style="color:var(--ink-faint);">${note}</td>`;
+  standingsBody.appendChild(row);
+});
+
+TEAM_DATA.forEach(raw => {
+  const t = {...raw, ...META[raw.name]};
+  const isUs = t.name === 'Deflate the Bay';
+  const card = document.createElement('div');
+  card.className = 'card' + (isUs ? ' us' : '');
+  const rows = t.picks.map(p => {
+    const [rd, nm, pos, keeper, rank, gap] = p;
+    return `<div class="pickrow"><span class="rd">R${rd}</span><span class="nm">${nm}${keeper ? '<span class="keeper-tag">keeper</span>' : ''}</span><span class="pos">${pos}</span>${gapChip(gap)}</div>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="card-top">
+      <div>
+        <div class="slot">Draft slot ${t.slot}${isUs ? ' &middot; this is us' : ''}</div>
+        <h3>${t.name}</h3>
+      </div>
+      <div class="grade-seal ${gradeClass(t.grade)}">${t.grade}</div>
+    </div>
+    <p class="bit">${t.bit}</p>
+    <details>
+      <summary>Full 15-round consensus gap</summary>
+      <div class="picklist">${rows}</div>
+    </details>
+  `;
+  grid.appendChild(card);
+});
+</script>
