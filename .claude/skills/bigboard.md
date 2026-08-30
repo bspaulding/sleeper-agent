@@ -62,6 +62,19 @@ the judgment half.
      least reliable of the four core positions") — situational context (scheme/O-line
      continuity, injury-recovery ceiling, rushing floor) should move a QB row further from its
      raw-VORP slot than the same context would move a skill-position row.
+   - **A team holding a player out of all preseason game action as a precaution is a hard
+     downgrade flag, not a footnote.** Check `wiki/players/<player>.md` and
+     `wiki/nfl-teams/<team>.md` news for exactly this shape of signal — the team itself declining
+     to play a player in any preseason snap despite otherwise-positive practice reports (distinct
+     from a routine "starters sit the preseason" veteran-rest policy, and distinct from a
+     confirmed clean injury designation, which already has its own handling). When present, it
+     must move the row down or cap how far an injury-recovery/ceiling bump can raise it — not just
+     get mentioned in the rationale under an unchanged or bumped rank. Daniel Jones (R10, 2026
+     real draft, -89 vs. ADP — see
+     `decisions/2026/2026-08-30-draft-adp-market-comparison-post-draft-review.md`) is the case
+     that motivated this: our own rationale called the bump "modest, not elite" while the specific
+     team-sourced caution signal (zero preseason snaps) sat unweighted in the same player's wiki
+     page the whole time.
 4. Run `sleeper-agent decisions new --kind bigboard --slug <slug> --season <year>` and fill in
    Summary/Reasoning/Data: what changed, why, and what was explicitly reconsidered-and-kept.
 5. Update every row you touched this pass to set `log_ref` to this entry's date/slug.
