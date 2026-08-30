@@ -396,16 +396,16 @@ const TEAM_DATA = [{"name": "Redzone & BBQ", "slot": 1, "picks": [[1, "Jahmyr Gi
 const META = {
   "Redzone & BBQ": { grade: "D+", bit: "Jahmyr Gibbs at one overall is as clean as it gets by any measure. The market's real complaint is the back half — <b>James Conner</b> and a 49ers defense both landed a full round-plus ahead of consensus, and Deebo Samuel in round nine wasn't far behind. A Christian Watson keeper number bails out the final line, but that's a keeper decision from seasons past, not this draft's doing." },
   "Team Questionable": { grade: "C+", bit: "Bijan Robinson at two overall, then a string of small, defensible gaps the rest of the way — nothing egregious, nothing thrilling. The one real outlier is Tyler Shough in round thirteen, taken well ahead of where the market had any quarterback depth priced. A Luther Burden keeper number is doing a lot of the heavy lifting on the final grade." },
-  "Barbara's Big Boys": { grade: "B-", bit: "A genuinely boring draft by consensus standards, and that's a compliment here — most gaps sit within a round of market expectation in either direction. No standout reach, no standout robbery — just fifteen unremarkable, defensible rounds." },
+  "Barbara’s Big Boys": { grade: "B-", bit: "A genuinely boring draft by consensus standards, and that's a compliment here — most gaps sit within a round of market expectation in either direction. No standout reach, no standout robbery — just fifteen unremarkable, defensible rounds." },
   "momsrock": { grade: "B+", bit: "Steady positive value basically top to bottom, with Jake Ferguson and Jared Goff both landing well past where consensus had them queued up. The only real outlier is a round-eight Jordan Mason pick that the market wasn't buying at all. A quietly strong filing." },
   "blindsqwirrels": { grade: "C-", bit: "Josh Allen at five overall is the first outlier — a real reach by consensus terms even before the QB carousel got going. George Kittle in round four and a round-fourteen running back pick both missed hard. The Kenyon Sadiq flier in round fifteen reads fine to the market too, for what it's worth." },
   "Grandpa Tod": { grade: "B", bit: "A mostly clean draft with exactly one crater: Jayden Reed in round seven, which the market has priced multiple rounds cheaper than where this went. Everything else is minor noise around consensus, and the Rico Dowdle keeper number is doing serious work on the bottom line — again, a decision from a different season, not this draft." },
-  "Aaron's Fancy Team": { grade: "A-", bit: "The market's actual favorite. Christian McCaffrey at seven overall, a well-priced middle of the draft, and a genuinely excellent Bhayshul Tuten keeper number closing strong. Nothing here reads as a reach worth flagging, which by itself puts this near the top of the consensus-graded field." },
+  "Aaron’s Fancy Team": { grade: "A-", bit: "The market's actual favorite. Christian McCaffrey at seven overall, a well-priced middle of the draft, and a genuinely excellent Bhayshul Tuten keeper number closing strong. Nothing here reads as a reach worth flagging, which by itself puts this near the top of the consensus-graded field." },
   "Deflate the Bay": { grade: "D-", bit: "The league's worst-graded draft by consensus, anchored by the single biggest reach of anyone's entire draft (Daniel Jones, round ten) and real gaps at Juwan Johnson and Keenan Allen in the following two rounds. Quinshon Judkins in round eight is the one clean bright spot the market fully signs off on." },
   "Silveir Lining": { grade: "C-", bit: "CeeDee Lamb at nine overall priced fine, but the middle rounds get rough — De'Zhaun Stribling and a round-eleven running back both landed well ahead of consensus. A Blake Corum keeper number single-handedly rescues the final grade from looking much worse." },
   "tayspa": { grade: "C+", bit: "Jonathan Taylor's keeper number checks out, and the Matthew Stafford pickup in round ten reads as real value to the market too — but Dylan Sampson in round twelve and Dalton Schultz in round fourteen both graded as real reaches here, since the market had them going even later than this room did. The Patriots defense in round fifteen is the one clean win everyone agrees on." },
   "HanBlad": { grade: "B-", bit: "One of the most boringly consistent drafts in the league by consensus standards — almost every pick lands within a round of expectation. Then, dead last, completely off the board: Tom Brady. No note from the market on that one. None was possible." },
-  "Emily's Fancier Team": { grade: "D+", bit: "Saquon Barkley and Justin Jefferson opened clean, and the Javonte Williams keeper number is a real bright spot. But the closing stretch is a genuine pattern, not bad luck — three separate running backs (Lloyd, Black, Harris) across rounds eleven, thirteen and fifteen, every one of them taken well ahead of consensus." }
+  "Emily’s Fancier Team": { grade: "D+", bit: "Saquon Barkley and Justin Jefferson opened clean, and the Javonte Williams keeper number is a real bright spot. But the closing stretch is a genuine pattern, not bad luck — three separate running backs (Lloyd, Black, Harris) across rounds eleven, thirteen and fifteen, every one of them taken well ahead of consensus." }
 };
 
 function gradeClass(g){
@@ -429,9 +429,9 @@ function gapChip(gap){
 const grid = document.getElementById('teamgrid');
 const standingsBody = document.getElementById('standings-body');
 
-const withMeta = TEAM_DATA.map(t => ({...t, ...META[t.name]}));
+const withMeta = TEAM_DATA.map(t => ({...t, grade: '?', bit: '', ...META[t.name]}));
 withMeta.sort((a,b) => {
-  const order = ['A','B','C','D','F'];
+  const order = ['A','B','C','D','F','?'];
   const la = order.indexOf(a.grade[0]), lb = order.indexOf(b.grade[0]);
   if(la !== lb) return la - lb;
   const isMinus = g => g.includes('-') ? 1 : (g.includes('+') ? -1 : 0);
