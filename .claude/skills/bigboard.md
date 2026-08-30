@@ -75,6 +75,15 @@ the judgment half.
      that motivated this: our own rationale called the bump "modest, not elite" while the specific
      team-sourced caution signal (zero preseason snaps) sat unweighted in the same player's wiki
      page the whole time.
+   - **A caveat inside a cited news source that undercuts the pick's own thesis has to move the
+     row, not just get quoted underneath an unchanged rank.** If the source you're citing as
+     support for a placement also contains a specific reason to doubt it (a beat reporter's own
+     warning, a coach's quote pointing the other way), that caveat is real signal about the same
+     player, not a disclaimer to note in passing — weigh it into the rank the way you would if it
+     were the only thing you'd read. Juwan Johnson (R11, 2026 real draft, -58 vs. ADP) is the case
+     that missed this: the cited beat report itself warned that more multi-TE sets would dilute
+     his target share, that caveat was quoted in the rationale text, and the rank didn't move — see
+     `decisions/2026/2026-08-30-draft-adp-market-comparison-post-draft-review.md`.
    - **A row where the honest call is "defer to market ADP" (little/no wiki-sourced signal to
      justify a placement above it) should say so explicitly in `rationale`, in those words.**
      `.claude/skills/draft.md`'s live-draft process now treats that exact annotation as a hard
