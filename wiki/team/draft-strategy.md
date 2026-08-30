@@ -1,5 +1,5 @@
 ---
-last_updated: '2026-08-28'
+last_updated: '2026-08-30'
 source: docs/superpowers/specs/2026-08-16-draft-strategy-research-and-positional-need.md
 ---
 
@@ -73,6 +73,32 @@ because streaming is impossible, but because what's left to stream at RB specifi
 worse. A Hero-RB-leaning approach (one strong early RB, then broaden) is still a reasonable
 starting hypothesis on that basis, but it should be tested against the next mock draft for the
 right reason, not the wrong one.
+
+## Named failure mode: committee backfield taken at bell-cow pricing
+
+A recurring, specific way RB picks go wrong here: drafting/pricing a running back as if he holds
+a clean bell-cow role when beat reporters are already live-reporting a real committee at the time
+of the pick. This isn't the general "RB is volatile" point above — it's a concrete, checkable
+signal (current depth-chart/committee reporting for that specific player, already sitting in
+`wiki/players/`) that keeps not getting checked against the pending pick in the moment.
+
+Confirmed twice, a full season apart:
+
+- **Mock-draft-1 (2026-08-09), the original "8 RB" retro** (`roster-philosophy.md`) — a pure-VORP
+  policy loaded up on RBs without checking any of them for role clarity.
+- **2026 real draft** (R3 D'Andre Swift, CHI; R4 Jaylen Warren, PIT — see
+  `decisions/2026/2026-08-30-draft-adp-market-comparison-post-draft-review.md`) — both picks
+  walked into backfields where beat reporters were already reporting a real committee (Monangai in
+  CHI; Dowdle in PIT under a new HC running an explicit competition) at the time of the pick, and
+  the market (ADP) had already priced that in while our own board hadn't. Not disastrous
+  individually, but a repeat of the same shape, still not priced in live even with the signal
+  sitting in `wiki/players/` before the pick.
+
+**How to apply this:** before locking in an RB pick (live or during a `bigboard` review pass),
+check that player's current `wiki/players/<player>.md` entry specifically for committee/timeshare
+language, not just injury/depth-chart status generally — a "committee" signal should discount the
+pick toward the committee-mate's share of value, not the bell-cow price the raw VORP number
+implies.
 
 ## Tiered drafting and positional runs
 
