@@ -1,12 +1,11 @@
 ---
-last_swept: '2026-08-22T19:35:00-07:00'
+last_swept: '2026-08-31T13:38:00+00:00'
 ---
 
 # News sweep checkpoint
 
 Tracks the last time a **full** news-research sweep ran (time/source-scoped, not player-scoped —
-see `.claude/skills/news-research.md` §1). `last_swept: '2026-08-22T19:35:00-07:00'` means no full sweep has run yet
-under this model; treat that as "look back ~7 days" for the first one. After each full sweep,
+see `.claude/skills/news-research.md` §1). After each full sweep,
 update `last_swept` to the date/time the sweep completed.
 
 This is separate from the per-page `last_researched` frontmatter on individual

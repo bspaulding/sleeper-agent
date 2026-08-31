@@ -3,7 +3,7 @@ sleeper_id: '1339'
 name: Zach Ertz
 position: TE
 nfl_team: null
-last_researched: '2026-08-23'
+last_researched: '2026-08-31'
 ---
 
 ## News

@@ -3,10 +3,11 @@ sleeper_id: '11435'
 name: Emanuel Wilson
 position: RB
 nfl_team: SEA
-last_researched: '2026-08-22'
+last_researched: '2026-08-31'
 ---
 
 ## News
+- 2026-08-31 [depth-chart] News-sweep follow-up: made Seattle's initial 53-man roster (Aug 30 cutdown) as one of three RBs alongside Jadarian Price and George Holani; Jacardia Wright was the RB cut ([Field Gulls](https://www.fieldgulls.com/seattle-seahawks-roster/173590/seattle-seahawks-2026-initial-53-man-roster))
 - 2026-08-22 [injury] Resolves the earlier "sidelined, undisclosed" note: short-term hamstring injury; sat out the preseason opener vs DAL ([CBS Sports](https://www.cbssports.com/fantasy/football/news/seahawks-emanuel-wilson-sidelined-by-short-term-hamstring-injury/))
 - 2026-08-22 [injury] A recent roster-projection note lists him as sidelined for undisclosed reasons — not confirmed by a dedicated injury article yet, worth a follow-up check closer to the draft ([Yahoo Sports](https://sports.yahoo.com/articles/seahawks-2026-training-camp-latest-140000471.html))
 - 2026-08-22 [depth-chart] Adjusting to new OC Brian Fleury's scheme (Fleury came over from San Francisco); Wilson and George Holani are described as the steady veterans in the room while rookie Jadarian Price and injured Zach Charbonnet (torn ACL, working back) round out the competition ([Seahawks.com](https://www.seahawks.com/video/emanuel-wilson-we-can-make-plays-anywhere-press-conference-august-8))
