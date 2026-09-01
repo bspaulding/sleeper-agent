@@ -3,7 +3,7 @@ sleeper_id: '2449'
 name: Stefon Diggs
 position: WR
 nfl_team: WAS
-last_researched: '2026-08-22'
+last_researched: '2026-09-01'
 ---
 
 ## News

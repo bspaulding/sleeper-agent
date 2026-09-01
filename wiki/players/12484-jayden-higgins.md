@@ -3,7 +3,7 @@ sleeper_id: '12484'
 name: Jayden Higgins
 position: WR
 nfl_team: HOU
-last_researched: '2026-08-22'
+last_researched: '2026-09-01'
 ---
 
 ## News
