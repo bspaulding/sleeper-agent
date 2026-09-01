@@ -3,7 +3,7 @@ sleeper_id: '13346'
 name: Denzel Boston
 position: WR
 nfl_team: CLE
-last_researched: '2026-08-22'
+last_researched: '2026-09-01'
 ---
 
 ## News
