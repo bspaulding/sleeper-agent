@@ -57,3 +57,20 @@ for the rules themselves.
 - Keep news-research passes (`.claude/skills/news-research.md`) going on rostered/likely-keeper
   players in the run-up, since keeper value calls should reflect current camp/depth-chart news,
   not just last season's VORP.
+
+## Post-draft roster (confirmed 2026-09-01)
+
+The Saturday draft (Aug 29) completed; `roster_id 5` (our team) has had **zero transactions since**
+— this is exactly the draft result, unmodified:
+
+- **QB:** Sam Darnold, Daniel Jones
+- **RB:** Quinshon Judkins (keeper, R8), TreVeyon Henderson, D'Andre Swift, Jaylen Warren, Tyrone Tracy
+- **WR:** Stefon Diggs (keeper, R7), Jaxon Smith-Njigba, Michael Pittman, Keenan Allen, Denzel Boston
+- **TE:** Trey McBride, Kyle Pitts, Juwan Johnson
+
+Verified directly against the live Sleeper API (`/v1/league/<id>/rosters` and
+`/v1/draft/<id>/picks`) on 2026-09-01, see
+`decisions/2026/2026-09-01-waiver-stale-roster-cache-correction.md` for how this diverged from
+what the local cache and several decision-log entries had been assuming (a team of Emanuel Wilson,
+Bo Nix, Rome Odunze, Jayden Higgins, etc. that was never actually drafted). Re-run
+`sleeper league sync` before trusting `sleeper roster show --me` if it's been more than a few days.

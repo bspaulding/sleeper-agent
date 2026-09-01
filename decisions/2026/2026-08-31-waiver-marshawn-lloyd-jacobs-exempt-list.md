@@ -73,3 +73,15 @@ not acted on).
 Recommended: claim MarShawn Lloyd (GB RB, sleeper_id 11581) for **$30 FAAB**. This run does not
 place waiver claims (no Sleeper write access) — the commissioner needs to submit the bid manually
 before Tuesday's processing.
+
+## Correction 2026-09-01 — recommendation invalidated, roster was stale
+
+The local `data/sleeper/rosters/2026.parquet` cache used for the "thin RB corps" reasoning above
+was stale (last synced Aug 30, before this decision) and did not reflect our actual post-draft
+roster. Our real RB corps (confirmed via live Sleeper API, see
+`decisions/2026/2026-09-01-waiver-stale-roster-cache-correction.md`) is **Quinshon Judkins,
+TreVeyon Henderson, D'Andre Swift, Jaylen Warren, Tyrone Tracy** — five drafted RBs, not the
+Emanuel Wilson/Henderson/unsigned-Hunt trio this entry describes. RB is not our thin position;
+this claim does not clear the waivers skill's bar for a need-filling target on the real roster.
+**Do not submit the $30 Lloyd bid** on this reasoning — if Lloyd is still wanted, re-evaluate from
+scratch against the real roster and this week's fresh `waiver recommend` output.
