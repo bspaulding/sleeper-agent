@@ -3,7 +3,7 @@ sleeper_id: '13279'
 name: Carnell Tate
 position: WR
 nfl_team: TEN
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

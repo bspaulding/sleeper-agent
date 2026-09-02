@@ -3,7 +3,7 @@ sleeper_id: '9480'
 name: Brenton Strange
 position: TE
 nfl_team: JAX
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '4983'
 name: DJ Moore
 position: WR
 nfl_team: BUF
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

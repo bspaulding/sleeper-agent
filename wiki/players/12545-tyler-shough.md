@@ -3,7 +3,7 @@ sleeper_id: '12545'
 name: Tyler Shough
 position: QB
 nfl_team: NO
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

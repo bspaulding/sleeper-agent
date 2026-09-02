@@ -3,7 +3,7 @@ sleeper_id: '5859'
 name: A.J. Brown
 position: WR
 nfl_team: NE
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '9753'
 name: Zach Charbonnet
 position: RB
 nfl_team: SEA
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

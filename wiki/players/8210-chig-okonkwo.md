@@ -3,7 +3,7 @@ sleeper_id: '8210'
 name: Chig Okonkwo
 position: TE
 nfl_team: WAS
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

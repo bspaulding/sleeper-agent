@@ -3,7 +3,7 @@ sleeper_id: '6790'
 name: D'Andre Swift
 position: RB
 nfl_team: CHI
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

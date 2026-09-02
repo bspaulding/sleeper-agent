@@ -3,7 +3,7 @@ sleeper_id: '8112'
 name: Drake London
 position: WR
 nfl_team: ATL
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

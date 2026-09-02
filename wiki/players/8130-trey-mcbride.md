@@ -3,7 +3,7 @@ sleeper_id: '8130'
 name: Trey McBride
 position: TE
 nfl_team: ARI
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

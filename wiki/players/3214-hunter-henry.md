@@ -3,7 +3,7 @@ sleeper_id: '3214'
 name: Hunter Henry
 position: TE
 nfl_team: NE
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

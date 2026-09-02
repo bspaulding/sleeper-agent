@@ -3,7 +3,7 @@ sleeper_id: '6806'
 name: J.K. Dobbins
 position: RB
 nfl_team: DEN
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

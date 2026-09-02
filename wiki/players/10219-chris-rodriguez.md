@@ -3,7 +3,7 @@ sleeper_id: '10219'
 name: Chris Rodriguez
 position: RB
 nfl_team: JAX
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '7567'
 name: Kenny Gainwell
 position: RB
 nfl_team: TB
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

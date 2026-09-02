@@ -3,7 +3,7 @@ sleeper_id: '12469'
 name: Dylan Sampson
 position: RB
 nfl_team: CLE
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

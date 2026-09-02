@@ -3,7 +3,7 @@ sleeper_id: '8131'
 name: Isaiah Likely
 position: TE
 nfl_team: NYG
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

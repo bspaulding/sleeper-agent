@@ -3,7 +3,7 @@ sleeper_id: '4037'
 name: Chris Godwin
 position: WR
 nfl_team: TB
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

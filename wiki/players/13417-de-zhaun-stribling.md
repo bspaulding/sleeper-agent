@@ -3,7 +3,7 @@ sleeper_id: '13417'
 name: De'Zhaun Stribling
 position: WR
 nfl_team: SF
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

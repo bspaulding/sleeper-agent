@@ -3,7 +3,7 @@ sleeper_id: '11603'
 name: AJ Barner
 position: TE
 nfl_team: SEA
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

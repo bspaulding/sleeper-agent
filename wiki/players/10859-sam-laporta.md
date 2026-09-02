@@ -3,7 +3,7 @@ sleeper_id: '10859'
 name: Sam LaPorta
 position: TE
 nfl_team: DET
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

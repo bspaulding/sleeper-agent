@@ -3,7 +3,7 @@ sleeper_id: '7525'
 name: DeVonta Smith
 position: WR
 nfl_team: PHI
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

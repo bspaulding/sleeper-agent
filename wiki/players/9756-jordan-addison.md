@@ -3,7 +3,7 @@ sleeper_id: '9756'
 name: Jordan Addison
 position: WR
 nfl_team: MIN
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '5892'
 name: David Montgomery
 position: RB
 nfl_team: HOU
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

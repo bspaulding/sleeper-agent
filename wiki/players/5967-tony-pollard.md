@@ -3,7 +3,7 @@ sleeper_id: '5967'
 name: Tony Pollard
 position: RB
 nfl_team: TEN
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

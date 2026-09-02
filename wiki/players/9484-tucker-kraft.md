@@ -3,7 +3,7 @@ sleeper_id: '9484'
 name: Tucker Kraft
 position: TE
 nfl_team: GB
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

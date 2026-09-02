@@ -3,7 +3,7 @@ sleeper_id: '11635'
 name: Ladd McConkey
 position: WR
 nfl_team: LAC
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

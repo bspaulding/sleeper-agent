@@ -3,7 +3,7 @@ sleeper_id: '9500'
 name: Josh Downs
 position: WR
 nfl_team: IND
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

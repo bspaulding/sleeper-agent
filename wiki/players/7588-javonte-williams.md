@@ -3,7 +3,7 @@ sleeper_id: '7588'
 name: Javonte Williams
 position: RB
 nfl_team: DAL
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

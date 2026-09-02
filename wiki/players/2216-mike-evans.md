@@ -3,7 +3,7 @@ sleeper_id: '2216'
 name: Mike Evans
 position: WR
 nfl_team: SF
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

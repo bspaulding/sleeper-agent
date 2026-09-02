@@ -3,7 +3,7 @@ sleeper_id: '9487'
 name: Parker Washington
 position: WR
 nfl_team: JAX
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

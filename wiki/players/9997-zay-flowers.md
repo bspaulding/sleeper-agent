@@ -3,7 +3,7 @@ sleeper_id: '9997'
 name: Zay Flowers
 position: WR
 nfl_team: BAL
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

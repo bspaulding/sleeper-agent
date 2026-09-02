@@ -3,7 +3,7 @@ sleeper_id: '6804'
 name: Jordan Love
 position: QB
 nfl_team: GB
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

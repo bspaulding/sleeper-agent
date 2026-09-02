@@ -3,7 +3,7 @@ sleeper_id: '9226'
 name: De'Von Achane
 position: RB
 nfl_team: MIA
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '2133'
 name: Davante Adams
 position: WR
 nfl_team: LAR
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

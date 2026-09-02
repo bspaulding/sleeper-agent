@@ -3,7 +3,7 @@ sleeper_id: '5846'
 name: DK Metcalf
 position: WR
 nfl_team: PIT
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

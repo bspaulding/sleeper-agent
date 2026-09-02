@@ -3,7 +3,7 @@ sleeper_id: '7547'
 name: Amon-Ra St. Brown
 position: WR
 nfl_team: DET
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

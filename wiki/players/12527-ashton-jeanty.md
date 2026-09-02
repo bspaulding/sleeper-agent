@@ -3,7 +3,7 @@ sleeper_id: '12527'
 name: Ashton Jeanty
 position: RB
 nfl_team: LV
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

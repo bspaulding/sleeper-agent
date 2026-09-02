@@ -3,7 +3,7 @@ sleeper_id: '5012'
 name: Mark Andrews
 position: TE
 nfl_team: BAL
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

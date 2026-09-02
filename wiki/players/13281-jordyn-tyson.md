@@ -3,7 +3,7 @@ sleeper_id: '13281'
 name: Jordyn Tyson
 position: WR
 nfl_team: 'NO'
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '12455'
 name: Brashard Smith
 position: RB
 nfl_team: KC
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

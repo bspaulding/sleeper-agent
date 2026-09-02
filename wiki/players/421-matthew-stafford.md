@@ -3,7 +3,7 @@ sleeper_id: '421'
 name: Matthew Stafford
 position: QB
 nfl_team: LAR
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

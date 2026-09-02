@@ -3,7 +3,7 @@ sleeper_id: '7553'
 name: Kyle Pitts
 position: TE
 nfl_team: ATL
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

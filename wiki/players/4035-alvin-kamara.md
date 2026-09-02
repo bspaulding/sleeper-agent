@@ -3,7 +3,7 @@ sleeper_id: '4035'
 name: Alvin Kamara
 position: RB
 nfl_team: 'NO'
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

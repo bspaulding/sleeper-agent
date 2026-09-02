@@ -3,7 +3,7 @@ sleeper_id: '11564'
 name: Drake Maye
 position: QB
 nfl_team: NE
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

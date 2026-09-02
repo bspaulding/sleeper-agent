@@ -3,7 +3,7 @@ sleeper_id: '11586'
 name: Blake Corum
 position: RB
 nfl_team: LAR
-last_researched: '2026-08-29'
+last_researched: '2026-09-02'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '8155'
 name: Breece Hall
 position: RB
 nfl_team: NYJ
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

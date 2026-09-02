@@ -3,7 +3,7 @@ sleeper_id: '13286'
 name: Jadarian Price
 position: RB
 nfl_team: SEA
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

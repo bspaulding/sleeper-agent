@@ -3,7 +3,7 @@ sleeper_id: '6819'
 name: Michael Pittman
 position: WR
 nfl_team: PIT
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News

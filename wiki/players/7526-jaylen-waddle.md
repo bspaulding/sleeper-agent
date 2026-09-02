@@ -3,7 +3,7 @@ sleeper_id: '7526'
 name: Jaylen Waddle
 position: WR
 nfl_team: DEN
-last_researched: '2026-08-22'
+last_researched: '2026-09-02'
 ---
 
 ## News

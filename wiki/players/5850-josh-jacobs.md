@@ -3,7 +3,7 @@ sleeper_id: '5850'
 name: Josh Jacobs
 position: RB
 nfl_team: GB
-last_researched: '2026-09-01'
+last_researched: '2026-09-02'
 ---
 
 ## News
