@@ -3,7 +3,7 @@ sleeper_id: '9511'
 name: Keaton Mitchell
 position: RB
 nfl_team: LAC
-last_researched: '2026-09-02'
+last_researched: '2026-09-08'
 ---
 
 ## News
