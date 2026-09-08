@@ -3,7 +3,7 @@ sleeper_id: '13287'
 name: Jeremiyah Love
 position: RB
 nfl_team: ARI
-last_researched: '2026-09-02'
+last_researched: '2026-09-08'
 ---
 
 ## News

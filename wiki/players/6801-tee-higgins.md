@@ -3,7 +3,7 @@ sleeper_id: '6801'
 name: Tee Higgins
 position: WR
 nfl_team: CIN
-last_researched: '2026-09-02'
+last_researched: '2026-09-08'
 ---
 
 ## News
