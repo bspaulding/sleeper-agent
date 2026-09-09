@@ -3,10 +3,11 @@ sleeper_id: '11620'
 name: Rome Odunze
 position: WR
 nfl_team: CHI
-last_researched: '2026-09-08'
+last_researched: '2026-09-09'
 ---
 
 ## News
+- 2026-09-09 [injury] News-sweep update: the Sept 3 leg injury is now being described as a foot injury (different from last season's foot issue) and has turned less clear-cut — Odunze was a non-participant again Tuesday Sept 8 and is officially "day-to-day," with HC Ben Johnson saying only "we're hopeful he'll be out there on Sunday" for the Sept 13 opener vs. Carolina, not a firm confirmation ([Yahoo Sports](https://sports.yahoo.com/articles/rome-odunze-injury-latest-bears-011357462.html)).
 - 2026-09-08 [injury] Left the same Sept 3 practice as D'Andre Swift's cramping scare with an apparent leg injury, pulled by trainers after trying to stay in; beat reporter Dan Wiederer said he "should be all good," no indication of missed time ([Chicago Sun-Times](https://chicago.suntimes.com/bears/2026/09/03/bears-practice-report-rb-dandre-swift-wr-rome-odunze-injuries)).
 - 2026-08-14 [team-news] HC Ben Johnson has shifted his offensive approach to lean into Odunze's contested-catch ability at the top of routes rather than forcing a separation-first scheme, correcting an earlier misuse of his skill set ([AtoZ Sports](https://atozsports.com/nfl/chicago-bears-news/bears-ben-johnson-leaning-into-rome-odunze-contested-catch-ability-2026/))
 - 2026-03-11 [team-news] Bears' trade of WR DJ Moore to Buffalo became official (for a 2026 2nd-round pick, sending back a 5th), clearing the way for Odunze to lead the receiver room as Chicago's No. 1 target entering 2026 ([Chicago Sun-Times](https://chicago.suntimes.com/bears/2026/03/05/bears-bills-trade-dj-moore-receiver-draft-pick-ryan-poles-ben-johnson-caleb-williams-nfl-buffalo-joe-brady))
