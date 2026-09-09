@@ -3,7 +3,7 @@ sleeper_id: '11583'
 name: Jonathon Brooks
 position: RB
 nfl_team: CAR
-last_researched: '2026-09-08'
+last_researched: '2026-09-09'
 ---
 
 ## News

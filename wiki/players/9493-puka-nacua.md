@@ -3,7 +3,7 @@ sleeper_id: '9493'
 name: Puka Nacua
 position: WR
 nfl_team: LAR
-last_researched: '2026-09-08'
+last_researched: '2026-09-09'
 ---
 
 ## News

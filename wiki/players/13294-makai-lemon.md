@@ -3,7 +3,7 @@ sleeper_id: '13294'
 name: Makai Lemon
 position: WR
 nfl_team: PHI
-last_researched: '2026-09-02'
+last_researched: '2026-09-09'
 ---
 
 ## News

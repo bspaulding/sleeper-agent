@@ -3,7 +3,7 @@ sleeper_id: '8134'
 name: Khalil Shakir
 position: WR
 nfl_team: BUF
-last_researched: '2026-09-08'
+last_researched: '2026-09-09'
 ---
 
 ## News

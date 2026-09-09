@@ -3,7 +3,7 @@ sleeper_id: '11631'
 name: Brian Thomas
 position: WR
 nfl_team: JAX
-last_researched: '2026-09-08'
+last_researched: '2026-09-09'
 ---
 
 ## News
