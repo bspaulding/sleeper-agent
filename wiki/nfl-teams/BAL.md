@@ -1,6 +1,6 @@
 ---
 team_code: BAL
-last_researched: '2026-09-02'
+last_researched: '2026-09-09'
 ---
 
 ## News
