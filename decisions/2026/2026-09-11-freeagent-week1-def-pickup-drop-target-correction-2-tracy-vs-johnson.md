@@ -3,7 +3,7 @@ date: '2026-09-11'
 kind: freeagent
 season: '2026'
 week: 1
-status: recommended
+status: confirmed
 players_involved:
   - Tyrone Tracy
   - Juwan Johnson
@@ -56,6 +56,7 @@ the weaker asset right now. **Revised drop target: Tyrone Tracy, not Juwan Johns
 
 ## Outcome
 
-Recommended: **add Tennessee Titans (TEN) D/ST, drop Tyrone Tracy** (not Juwan Johnson, not Daniel
-Jones). Not yet executed in Sleeper — this CLI has no roster-transaction command; the user needs to
-make the actual add/drop in the Sleeper app.
+Confirmed by Brad on 2026-09-11: **add Tennessee Titans (TEN) D/ST, drop Tyrone Tracy** (not Juwan
+Johnson, not Daniel Jones). This CLI has no roster-transaction command, so the actual add/drop
+still needs to be made in the Sleeper app by the user; the analysis and choice of players are
+final.
