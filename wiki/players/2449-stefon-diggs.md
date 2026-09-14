@@ -7,6 +7,7 @@ last_researched: '2026-09-14'
 ---
 
 ## News
+- 2026-09-14 [depth-chart] News-sweep update: made his Commanders debut in Washington's Week 1 game vs. Philadelphia. No injury designation entering the game; paired with Terry McLaurin as expected. No detailed box score found in this pass — worth a follow-up if a real target-share signal is needed ([CBS Sports](https://www.cbssports.com/fantasy/football/news/patriots-stefon-diggs-not-on-week-1-injury-report/) — note: headline is a stale wire-service title from before his Patriots release, content covers the Commanders debut).
 - 2026-08-22 [depth-chart] Debuted at camp Aug. 7, working slowly back in on short routes; HC Dan Quinn confirmed Diggs will line up in the slot, which is Washington's biggest depth-chart hole and where Jayden Daniels needs the most help — teammates have praised his route-running/separation early ([Commanders.com](https://www.commanders.com/news/commanders-training-camp-notebook-stefon-diggs))
 - 2026-08-05 [transaction] Signed a one-year deal worth up to $12M with the Washington Commanders, per Adam Schefter, ending his free agency to pair with Jayden Daniels and Terry McLaurin ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/stefon-diggs-to-sign-with-the-commanders))
 

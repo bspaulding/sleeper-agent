@@ -1,5 +1,5 @@
 ---
-last_swept: '2026-09-14T00:00:00+00:00'
+last_swept: '2026-09-14T13:30:00+00:00'
 ---
 
 # News sweep checkpoint
