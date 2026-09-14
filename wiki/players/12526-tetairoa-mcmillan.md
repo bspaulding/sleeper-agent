@@ -3,7 +3,7 @@ sleeper_id: '12526'
 name: Tetairoa McMillan
 position: WR
 nfl_team: CAR
-last_researched: '2026-09-02'
+last_researched: '2026-09-14'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '4881'
 name: Lamar Jackson
 position: QB
 nfl_team: BAL
-last_researched: '2026-09-02'
+last_researched: '2026-09-14'
 ---
 
 ## News

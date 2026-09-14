@@ -3,7 +3,7 @@ sleeper_id: '3294'
 name: Dak Prescott
 position: QB
 nfl_team: DAL
-last_researched: '2026-09-02'
+last_researched: '2026-09-14'
 ---
 
 ## News

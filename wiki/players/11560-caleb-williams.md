@@ -3,7 +3,7 @@ sleeper_id: '11560'
 name: Caleb Williams
 position: QB
 nfl_team: CHI
-last_researched: '2026-09-02'
+last_researched: '2026-09-14'
 ---
 
 ## News

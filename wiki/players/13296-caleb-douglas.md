@@ -3,7 +3,7 @@ sleeper_id: '13296'
 name: Caleb Douglas
 position: WR
 nfl_team: MIA
-last_researched: '2026-09-02'
+last_researched: '2026-09-14'
 ---
 
 ## News

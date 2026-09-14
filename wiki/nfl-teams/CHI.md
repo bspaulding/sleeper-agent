@@ -1,6 +1,6 @@
 ---
 team_code: CHI
-last_researched: '2026-09-09'
+last_researched: '2026-09-14'
 ---
 
 ## News
