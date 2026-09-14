@@ -3,10 +3,11 @@ sleeper_id: '12529'
 name: TreVeyon Henderson
 position: RB
 nfl_team: NE
-last_researched: '2026-09-09'
+last_researched: '2026-09-14'
 ---
 
 ## News
+- 2026-09-14 [injury] News-sweep update: officially ruled out for and missed the Sept 9 Week 1 opener at Seattle (ankle, since Aug 24) — Rhamondre Stevenson started in his place. No confirmed practice return or Week 2 (at NYJ) designation found as of this check; still an open question worth a targeted re-check before Week 2 news breaks ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/patriots-rb-treveyon-henderson-still-not-practicing-with-ankle-injury)).
 - 2026-09-08 [injury] Trending worse, not better: still hasn't practiced as of Sept 7 (two full weeks since the Aug 24 ankle injury), described by Boston.com as "leaning towards missing" the Wednesday Sept 9 opener at Seattle — though the Patriots have not yet issued an official Week 1 designation and HC Vrabel says he's "working hard to return" ([Boston.com](https://www.boston.com/sports/new-england-patriots/2026/09/07/new-england-patriots-treveyon-henderson-nfl-football-injury-update-seahawks/)).
 - 2026-09-05 [injury] Still had not returned to practice as of Sept 5 (11 days since the Aug 24/25 ankle slip); remains the No. 2 back behind Rhamondre Stevenson to open the season if he can't go, with Corey Kiner next up on the depth chart. Team sources still frame him as trending toward available for the opener despite the extended absence ([985 The Sports Hub](https://985thesportshub.com/2026/09/02/treveyon-henderson-injury-update-patriots/)).
 - 2026-08-31 [injury] News-sweep follow-up: suffered a right-ankle injury slipping on the turf at an Aug 25 practice, underwent precautionary tests; source confirms he "avoided a serious right ankle injury" and is walking/moving fine, expected to be good to go for the Sept 9 Week 1 opener vs. Seattle ([Yahoo Sports](https://sports.yahoo.com/articles/patriots-rb-treveyon-henderson-gets-001718577.html))
