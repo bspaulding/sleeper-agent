@@ -3,7 +3,7 @@ sleeper_id: '6813'
 name: Jonathan Taylor
 position: RB
 nfl_team: IND
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

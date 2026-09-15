@@ -3,10 +3,11 @@ sleeper_id: '9997'
 name: Zay Flowers
 position: WR
 nfl_team: BAL
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News
+- 2026-09-15 [injury] Follow-up: per NFL Network's Ian Rapoport, the hamstring is "not considered serious"; HC Jesse Minter called him day-to-day and is optimistic for Week 2 vs. New Orleans, pending further evaluation ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/jesse-minter-calls-zay-flowers-day-to-day-with-hamstring-injury)).
 - 2026-09-13 [injury] Had a career day in the Week 1 win over Indianapolis (5 catches for 150 yards and a TD in the first half alone) before being ruled out for the rest of the game after aggravating the hamstring injury that had bothered him in camp; not viewed as serious, but worth confirming ahead of Week 2 ([Athlon](https://athlonsports.com/nfl/trending/lamar-jackson-ravens-double-loss-zay-flowers-injury-colts)).
 - 2026-09-08 [injury] Was out of the lineup recently with an undisclosed lower-body injury; returned to practice Thursday and is fully expected to be available for the Sept 13 opener vs. Indianapolis ([ClutchPoints](https://clutchpoints.com/nfl/baltimore-ravens/ravens-news-zay-flowers-back-action-injury-absence)).
 - 2026-08-04 [transaction] Flowers signed a four-year, $140M extension with Baltimore ($108M guaranteed, $35M AAV, tied for 4th-highest at WR), cementing him as Lamar Jackson's top target for 2025's 86-1,211-5 line ([Washington Post](https://www.washingtonpost.com/sports/nfl/2026/08/04/baltimore-ravens-zay-flowers/088b8602-902e-11f1-9fdc-0a725c989a7b_story.html)).

@@ -3,7 +3,7 @@ sleeper_id: '11581'
 name: MarShawn Lloyd
 position: RB
 nfl_team: GB
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

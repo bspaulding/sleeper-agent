@@ -3,7 +3,7 @@ sleeper_id: '4217'
 name: George Kittle
 position: TE
 nfl_team: SF
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '12493'
 name: Oronde Gadsden
 position: TE
 nfl_team: LAC
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '7528'
 name: Najee Harris
 position: RB
 nfl_team: NYG
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

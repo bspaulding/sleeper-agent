@@ -1,6 +1,6 @@
 ---
 team_code: TEN
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

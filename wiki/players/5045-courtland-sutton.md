@@ -3,7 +3,7 @@ sleeper_id: '5045'
 name: Courtland Sutton
 position: WR
 nfl_team: DEN
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

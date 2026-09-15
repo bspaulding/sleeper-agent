@@ -3,7 +3,7 @@ sleeper_id: '8148'
 name: Jameson Williams
 position: WR
 nfl_team: DET
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

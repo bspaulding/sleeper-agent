@@ -3,7 +3,7 @@ sleeper_id: '9225'
 name: Tank Bigsby
 position: RB
 nfl_team: PHI
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

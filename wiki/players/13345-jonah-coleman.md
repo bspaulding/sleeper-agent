@@ -3,7 +3,7 @@ sleeper_id: '13345'
 name: Jonah Coleman
 position: RB
 nfl_team: DEN
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

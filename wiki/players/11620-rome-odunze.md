@@ -3,10 +3,11 @@ sleeper_id: '11620'
 name: Rome Odunze
 position: WR
 nfl_team: CHI
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News
+- 2026-09-15 [injury] Closed the health loop: played the full Week 1 blowout win with no re-injury, but volume was light — 2 catches on 3 targets for 52 yards, as Caleb Williams spread targets to Kalif Raymond/Luther Burden and Chicago leaned on the run (6 of 8 TDs on the ground); role, not health, is the open question now ([CBS Sports](https://www.cbssports.com/fantasy/football/news/bears-rome-odunze-little-volume-in-week-1-rout/)).
 - 2026-09-13 [injury] Was active and played in the Week 1 loss to Carolina despite the questionable calf designation (the same leg that had bothered him in practice); no in-game re-injury reported ([Bears.com](https://www.chicagobears.com/news/injury-update-rome-odunze-among-four-players-questionable-for-sunday-s-season-opener-vs-panthers)).
 - 2026-09-09 [injury] News-sweep update: the Sept 3 leg injury is now being described as a foot injury (different from last season's foot issue) and has turned less clear-cut — Odunze was a non-participant again Tuesday Sept 8 and is officially "day-to-day," with HC Ben Johnson saying only "we're hopeful he'll be out there on Sunday" for the Sept 13 opener vs. Carolina, not a firm confirmation ([Yahoo Sports](https://sports.yahoo.com/articles/rome-odunze-injury-latest-bears-011357462.html)).
 - 2026-09-08 [injury] Left the same Sept 3 practice as D'Andre Swift's cramping scare with an apparent leg injury, pulled by trainers after trying to stay in; beat reporter Dan Wiederer said he "should be all good," no indication of missed time ([Chicago Sun-Times](https://chicago.suntimes.com/bears/2026/09/03/bears-practice-report-rb-dandre-swift-wr-rome-odunze-injuries)).

@@ -3,7 +3,7 @@ sleeper_id: '5927'
 name: Terry McLaurin
 position: WR
 nfl_team: WAS
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

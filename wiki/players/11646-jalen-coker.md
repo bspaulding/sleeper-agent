@@ -3,7 +3,7 @@ sleeper_id: '11646'
 name: Jalen Coker
 position: WR
 nfl_team: CAR
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

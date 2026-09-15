@@ -3,7 +3,7 @@ sleeper_id: '9221'
 name: Jahmyr Gibbs
 position: RB
 nfl_team: DET
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '9224'
 name: Chase Brown
 position: RB
 nfl_team: CIN
-last_researched: '2026-09-14'
+last_researched: '2026-09-15'
 ---
 
 ## News
