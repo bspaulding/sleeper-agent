@@ -10,9 +10,10 @@ the player-id crosswalk (mirroring `players.meta.json`'s pattern for the
 Sleeper player dictionary in `sleeper_client/players.py`). Unlike that
 file, this one is unconditional (no TTL/skip logic) — `stats sync` always
 re-fetches — it exists purely so anyone reading `ids.parquet` can tell how
-current it is, since the underlying DynastyProcess CSV is fetched from a
-CDN mirror (see `stats/nflverse.py`) that can itself lag its source by up
-to ~12h.
+current it is, since the underlying DynastyProcess CSV is fetched from
+`raw.githubusercontent.com` (see `stats/nflverse.py`) rather than the
+same-second-fresh `github.com/.../raw/...` URL `nflreadpy` would otherwise
+use, and is cached there for up to 5 minutes.
 """
 
 from __future__ import annotations

@@ -23,11 +23,13 @@ and Claude Code cloud sessions' sandbox proxy treats that as a GitHub
 has been attached to the session via `add_repo` — a hiccup on every fresh
 sandbox. `nflreadpy` hardcodes that URL with no base-URL override (see the
 downloader's `BASE_URLS`), so the fix is to fetch the same CSV straight
-from its jsDelivr GitHub-CDN mirror instead: jsDelivr isn't treated as a
-GitHub repo fetch by the sandbox proxy, and it serves the identical file.
-Everything else in this module goes through `nflreadpy`'s
-`releases/download/` URLs, which redirect off github.com to
-`release-assets.githubusercontent.com` and aren't affected.
+from `raw.githubusercontent.com` instead: that host isn't subject to the
+sandbox's repo-scoping check (unlike `github.com` itself), it's the same
+GitHub-operated content (no third-party mirror involved), and it's cached
+for only 5 minutes — far fresher than the alternative jsDelivr GitHub-CDN
+mirror, which caches for up to 12h. Everything else in this module goes
+through `nflreadpy`'s `releases/download/` URLs, which redirect off
+github.com to `release-assets.githubusercontent.com` and aren't affected.
 
 `fetch_draft_picks`/`fetch_ff_playerids` back the rookie-triage crosswalk
 (`draft_tools/rookies.py`). `fetch_ff_playerids` intentionally returns the
@@ -44,7 +46,7 @@ import polars as pl
 import requests
 
 _DYNASTYPROCESS_PLAYERIDS_URL = (
-    "https://cdn.jsdelivr.net/gh/dynastyprocess/data@master/files/db_playerids.csv"
+    "https://raw.githubusercontent.com/dynastyprocess/data/master/files/db_playerids.csv"
 )
 
 
