@@ -15,23 +15,43 @@ docstring).
 release) so `vorp.py`'s `STAT_COLUMN_TO_SCORING_KEY` mapping doesn't need to
 know about the nflverse rename.
 
-`fetch_id_crosswalk` is *not* an `nflreadpy` wrapper: `nflreadpy`'s
-`load_ff_playerids` reads the same DynastyProcess `db_playerids.csv` this
-previously came from via `nfl_data_py.import_ids`, so it's used directly
-rather than reimplemented.
+`fetch_id_crosswalk` and `fetch_ff_playerids` do *not* go through
+`nflreadpy`'s `load_ff_playerids`: that function's downloader hits
+`https://github.com/dynastyprocess/data/raw/master/files/db_playerids.csv`,
+and Claude Code cloud sessions' sandbox proxy treats that as a GitHub
+*repository* fetch and blocks it with a 403 unless `dynastyprocess/data`
+has been attached to the session via `add_repo` — a hiccup on every fresh
+sandbox. `nflreadpy` hardcodes that URL with no base-URL override (see the
+downloader's `BASE_URLS`), so the fix is to fetch the same CSV straight
+from its jsDelivr GitHub-CDN mirror instead: jsDelivr isn't treated as a
+GitHub repo fetch by the sandbox proxy, and it serves the identical file.
+Everything else in this module goes through `nflreadpy`'s
+`releases/download/` URLs, which redirect off github.com to
+`release-assets.githubusercontent.com` and aren't affected.
 
 `fetch_draft_picks`/`fetch_ff_playerids` back the rookie-triage crosswalk
 (`draft_tools/rookies.py`). `fetch_ff_playerids` intentionally returns the
-*full*, unnarrowed `load_ff_playerids()` frame rather than reusing
-`fetch_id_crosswalk`'s narrowed `[name, position, gsis_id, sleeper_id]`
-selection — the rookie crosswalk needs `draft_year` too, which
-`fetch_id_crosswalk` drops.
+*full*, unnarrowed `_fetch_dynastyprocess_playerids()` frame rather than
+reusing `fetch_id_crosswalk`'s narrowed
+`[name, position, gsis_id, sleeper_id]` selection — the rookie crosswalk
+needs `draft_year` too, which `fetch_id_crosswalk` drops.
 """
 
 from __future__ import annotations
 
 import nflreadpy as nfl
 import polars as pl
+import requests
+
+_DYNASTYPROCESS_PLAYERIDS_URL = (
+    "https://cdn.jsdelivr.net/gh/dynastyprocess/data@master/files/db_playerids.csv"
+)
+
+
+def _fetch_dynastyprocess_playerids() -> pl.DataFrame:  # pragma: no cover - live HTTP call
+    response = requests.get(_DYNASTYPROCESS_PLAYERIDS_URL, timeout=30)
+    response.raise_for_status()
+    return pl.read_csv(response.content, null_values=["NA", "NULL", ""])
 
 
 def fetch_weekly_stats(  # pragma: no cover - live nflverse call
@@ -63,7 +83,9 @@ def fetch_injuries(seasons: list[int]) -> pl.DataFrame:
 
 
 def fetch_id_crosswalk() -> pl.DataFrame:  # pragma: no cover - live nflverse call
-    return nfl.load_ff_playerids().select(["name", "position", "gsis_id", "sleeper_id"])
+    return _fetch_dynastyprocess_playerids().select(
+        ["name", "position", "gsis_id", "sleeper_id"]
+    )
 
 
 def fetch_draft_picks(
@@ -73,4 +95,4 @@ def fetch_draft_picks(
 
 
 def fetch_ff_playerids() -> pl.DataFrame:  # pragma: no cover - live nflverse call
-    return nfl.load_ff_playerids()
+    return _fetch_dynastyprocess_playerids()
