@@ -361,6 +361,7 @@ def test_cmd_stats_sync_prints_summary(
     from sleeper_agent.stats.sync import StatsSyncResult
 
     repo_root = make_repo_root(tmp_path)
+    fetched_at = datetime(2025, 9, 1, 12, 0, 0, tzinfo=UTC)
 
     def fake_sync_stats(season: int, stats_dir: Path) -> StatsSyncResult:
         return StatsSyncResult(
@@ -370,6 +371,7 @@ def test_cmd_stats_sync_prints_summary(
             schedule_rows=1,
             injury_rows=1,
             id_crosswalk_rows=1,
+            id_crosswalk_fetched_at=fetched_at,
             team_rows=1,
         )
 
@@ -378,8 +380,44 @@ def test_cmd_stats_sync_prints_summary(
         args, repo_root=repo_root, sync_stats=fake_sync_stats
     )
 
+    out = capsys.readouterr().out
     assert exit_code == 0
-    assert "synced stats for 2025" in capsys.readouterr().out
+    assert "synced stats for 2025" in out
+    assert fetched_at.isoformat() in out
+
+
+def test_cmd_stats_ids_freshness_reports_last_fetch(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.stats.sync import _write_ids_meta
+
+    repo_root = make_repo_root(tmp_path)
+    fetched_at = datetime(2025, 9, 1, 12, 0, 0, tzinfo=UTC)
+    _write_ids_meta(repo_root / "data" / "stats" / "ids.meta.json", fetched_at)
+
+    args = argparse.Namespace()
+    exit_code = stats_cmd.cmd_stats_ids_freshness(
+        args,
+        repo_root=repo_root,
+        now=lambda: datetime(2025, 9, 2, 12, 0, 0, tzinfo=UTC),
+    )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert fetched_at.isoformat() in out
+
+
+def test_cmd_stats_ids_freshness_reports_never_synced(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    args = argparse.Namespace()
+    exit_code = stats_cmd.cmd_stats_ids_freshness(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "never been synced" in out
 
 
 def test_cmd_adp_sync_prints_summary(

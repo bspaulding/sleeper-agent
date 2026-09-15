@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 
 import polars as pl
@@ -40,6 +41,11 @@ def add_subcommands(subparsers: argparse._SubParsersAction) -> None:
     sync_parser.add_argument("--season", type=int, required=True)
     sync_parser.set_defaults(func=cmd_stats_sync)
 
+    ids_freshness_parser = stats_subparsers.add_parser(
+        "ids-freshness", help="Show when the player-id crosswalk was last synced"
+    )
+    ids_freshness_parser.set_defaults(func=cmd_stats_ids_freshness)
+
     vorp_parser = stats_subparsers.add_parser("vorp", help="Compute VORP for a season")
     vorp_parser.add_argument("--season", type=int, required=True)
     vorp_parser.set_defaults(func=cmd_stats_vorp)
@@ -71,9 +77,27 @@ def cmd_stats_sync(
     print(
         f"synced stats for {result.season}: {result.weekly_rows} weekly rows, "
         f"{result.snap_rows} snap rows, {result.schedule_rows} schedule rows, "
-        f"{result.injury_rows} injury rows, {result.id_crosswalk_rows} id-crosswalk rows, "
+        f"{result.injury_rows} injury rows, {result.id_crosswalk_rows} id-crosswalk rows "
+        f"(fetched {result.id_crosswalk_fetched_at.isoformat()}), "
         f"{result.team_rows} team rows"
     )
+    return 0
+
+
+def cmd_stats_ids_freshness(
+    args: argparse.Namespace,
+    *,
+    repo_root: Path | None = None,
+    now: Callable[[], datetime] = datetime.now,
+) -> int:
+    root = repo_root if repo_root is not None else find_repo_root(Path.cwd())
+    stats_dir = data_dir(root) / "stats"
+    fetched_at = stats_sync.read_ids_fetched_at(stats_dir / "ids.meta.json")
+    if fetched_at is None:
+        print("id-crosswalk has never been synced — run `sleeper-agent stats sync`")
+        return 1
+    age = now() - fetched_at
+    print(f"id-crosswalk last fetched {fetched_at.isoformat()} ({age} ago)")
     return 0
 
 
