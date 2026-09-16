@@ -3,10 +3,11 @@ sleeper_id: '12512'
 name: Quinshon Judkins
 position: RB
 nfl_team: CLE
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News
+- 2026-09-15 [depth-chart] Follow-up: Sampson's IR stint now has a confirmed floor — placed on IR, eligible back Week 6 vs. Baltimore at the earliest — locking in Judkins as Cleveland's clear lead back with only Raheim Sanders and newly-elevated Jaleel McLaughlin as depth through at least Week 5 (see Sampson's page) ([ESPN](https://www.espn.com/nfl/story/_/id/49951024/browns-place-rb-sampson-injured-reserve-knee-injury)).
 - 2026-09-14 [depth-chart] News-sweep update: played every-down Week 1 workload vs. Jacksonville (12 carries, 33 yards — quiet but full-bell-cow role, no committee split). Backup Dylan Sampson left the game in the 1st quarter with a knee injury and was seen on crutches postgame with a brace; official severity wasn't out as of Monday, but a multi-week absence for Sampson would further cement Judkins as the clear lead back with no real handcuff behind him. Positive for Judkins' path to touches even though Week 1 volume was modest ([news5cleveland.com](https://www.news5cleveland.com/sports/browns/browns-rb-dylan-sampson-leaves-week-1-game-against-jaguars)).
 - 2026-09-04 [depth-chart] HC Todd Monken has been openly effusive about Judkins entering Year 2, and with backup Dylan Sampson banged up in camp, Judkins is trending toward a bigger early-season workload than a clean 1a/1b committee would suggest — RB3 Raheim Sanders is the next man up if Sampson can't go ([Yahoo Sports](https://sports.yahoo.com/articles/browns-todd-monken-raves-quinshon-205759817.html)).
 - 2026-08-28 [injury] Follow-up per the 2026-08-27 bigboard review's flagged open case: confirmed still just the "nagging"/precautionary knee issue, no Week 1 concern (live Sleeper `injury_status` now clear as of today's sync). Search also surfaces headlines about a season-ending fractured fibula/dislocated ankle "vs. Bills" — confirmed these are dated **2026-12-21**, a game that has not been played yet relative to today; exactly the date-scoping trap the prior review anticipated, not current information. No bigboard change. ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/todd-monken-quinshon-judkins-dealing-with-nagging-injury-out-as-a-precaution))

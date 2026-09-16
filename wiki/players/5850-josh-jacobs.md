@@ -3,10 +3,11 @@ sleeper_id: '5850'
 name: Josh Jacobs
 position: RB
 nfl_team: GB
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News
+- 2026-09-15 [transaction] Follow-up: pled no contest to both misdemeanor charges (convicted/fined $1,000 on the battery count; deferred judgment on the property-damage count, with a return court date in Sept. 2027), closing the criminal case — but the NFL says there's still no timeline for a personal-conduct suspension while it works to obtain video of the incident. The CBA sets a 6-game floor for domestic-violence cases, and any time already served on the Commissioner's Exempt List would count toward that total; still no fixed return date ([Yahoo Sports](https://sports.yahoo.com/articles/major-emerges-packers-rb-josh-040556944.html), [Pro Football Rumors](https://www.profootballrumors.com/2026/09/no-timeline-for-suspension-of-packers-rb-josh-jacobs)).
 - 2026-09-13 [transaction] Inactive for the Week 1 opener vs. Minnesota, remaining on the Commissioner's Exempt List with no resolution announced yet; MarShawn Lloyd/Kaleb Johnson handled the workload ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/packers-trade-for-steelers-rb-kaleb-johnson-as-josh-jacobs-is-placed-on-commissioner-s-exempt-list)).
 - 2026-09-08 [transaction] News-sweep correction: his next court date has reportedly been moved up from Nov. 17 to Sept. 10 — the day before the Packers' Week 1 game — which could accelerate (or complicate) any decision on lifting the exempt-list status; still no confirmation either way on Week 1 availability ([Yahoo Sports](https://sports.yahoo.com/nfl/article/cardinals-hopeful-rb-jeremiyah-love-can-play-vs-chargers-in-week-1-after-preseason-ankle-injury-234733540.html)).
 - 2026-09-01 [transaction] Packers traded for Steelers RB Kaleb Johnson in direct response to Jacobs' exempt-list placement, adding a fresh committee piece behind MarShawn Lloyd rather than leaving Lloyd as the clean top-of-depth-chart option ([NFL.com](https://www.nfl.com/news/packers-trade-for-steelers-rb-kaleb-johnson-as-josh-jacobs-is-placed-on-commissioner-s-exempt-list))
