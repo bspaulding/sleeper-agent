@@ -4,6 +4,12 @@
 
 - Done 2026-09-15 — `stats sync --season 2026` is unblocked (nflverse is now publishing weekly
   files; Week 1 data synced) and `stats vorp --season 2026` computes real VORP again.
+- CLI footgun found 2026-09-16: `freeagent recommend`/`waiver recommend --value-season` silently
+  defaults to `season - 1` instead of erroring or defaulting to the current season, so it's easy to
+  get stale-season valuations without noticing (missed a real Bryce Young pickup this way — see
+  `decisions/2026/2026-09-16-waiver-week2-qb-upgrade-bryce-young-drop-daniel-jones.md`). Worth
+  changing the default to the current `--season` once in-season VORP exists, or at least printing
+  a loud warning when `--value-season` isn't passed explicitly in-season.
 - Watch Hunt/Ertz FA signings: if either lands somewhere, re-run
   `sleeper players sync` + `wiki sync-frontmatter` so they stop being silently
   dropped by `filter_rostered`.
