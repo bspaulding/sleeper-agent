@@ -3,7 +3,7 @@ sleeper_id: '8121'
 name: Romeo Doubs
 position: WR
 nfl_team: NE
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '9508'
 name: Tyjae Spears
 position: RB
 nfl_team: TEN
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

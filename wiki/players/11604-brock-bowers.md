@@ -3,7 +3,7 @@ sleeper_id: '11604'
 name: Brock Bowers
 position: TE
 nfl_team: LV
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

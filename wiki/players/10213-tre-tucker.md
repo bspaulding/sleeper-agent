@@ -3,7 +3,7 @@ sleeper_id: '10213'
 name: Tre Tucker
 position: WR
 nfl_team: LV
-last_researched: '2026-08-29'
+last_researched: '2026-09-16'
 ---
 
 ## News

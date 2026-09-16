@@ -3,7 +3,7 @@ sleeper_id: '11624'
 name: Xavier Worthy
 position: WR
 nfl_team: KC
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

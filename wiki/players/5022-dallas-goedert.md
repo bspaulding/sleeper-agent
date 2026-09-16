@@ -3,7 +3,7 @@ sleeper_id: '5022'
 name: Dallas Goedert
 position: TE
 nfl_team: PHI
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News
