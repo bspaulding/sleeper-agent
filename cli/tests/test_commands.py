@@ -458,6 +458,43 @@ def test_cmd_adp_sync_prints_summary(
     assert "unmatched: Some Guy" in out
 
 
+def test_cmd_adp_sync_prints_summary_without_unmatched_names(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.adp.sync import AdpSyncResult
+    from sleeper_agent.sleeper_client.players import PLAYERS_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    write_table(
+        pl.DataFrame({"player_id": ["1"], "name": ["Test Player"], "position": ["QB"]}),
+        repo_root / "data" / "sleeper" / "players.parquet",
+        schema_version=PLAYERS_SCHEMA_VERSION,
+    )
+
+    def fake_sync_adp(
+        adp_dir: Path, players_df: pl.DataFrame, *, retrieved_date: str
+    ) -> AdpSyncResult:
+        return AdpSyncResult(
+            retrieved_date=retrieved_date,
+            total_rows=3,
+            matched_rows=3,
+            unmatched_names=[],
+        )
+
+    args = argparse.Namespace()
+    exit_code = adp_cmd.cmd_adp_sync(
+        args,
+        repo_root=repo_root,
+        today=lambda: date(2026, 8, 28),
+        sync_adp=fake_sync_adp,
+    )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "unmatched" not in out
+
+
 def test_cmd_adp_sync_requires_synced_players(tmp_path: Path) -> None:
     repo_root = make_repo_root(tmp_path)
     args = argparse.Namespace()
@@ -1812,6 +1849,124 @@ def test_cmd_value_bigboard_build_reports_malformed_existing_board(
     assert "unknown source 'nonsense'" in out
 
 
+def _write_roster_and_user_parquet_for_bigboard_print(root: Path, season: str) -> None:
+    from sleeper_agent.sleeper_client.sync import (
+        ROSTERS_SCHEMA_VERSION,
+        USERS_SCHEMA_VERSION,
+    )
+
+    sleeper_dir = root / "data" / "sleeper"
+    (sleeper_dir / "rosters").mkdir(parents=True, exist_ok=True)
+    (sleeper_dir / "users").mkdir(parents=True, exist_ok=True)
+    pl.DataFrame(
+        {
+            "roster_id": [1],
+            "owner_id": ["u1"],
+            "schema_version": [ROSTERS_SCHEMA_VERSION],
+        }
+    ).write_parquet(sleeper_dir / "rosters" / f"{season}.parquet")
+    pl.DataFrame(
+        {
+            "user_id": ["u1"],
+            "display_name": ["owner1"],
+            "team_name": ["Team One"],
+            "schema_version": [USERS_SCHEMA_VERSION],
+        }
+    ).write_parquet(sleeper_dir / "users" / f"{season}.parquet")
+
+
+def test_cmd_value_bigboard_print_writes_report(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.draft_tools.bigboard import BigboardRow, save_bigboard
+
+    repo_root = make_repo_root(tmp_path)
+    save_bigboard(
+        repo_root,
+        "2025",
+        [
+            BigboardRow(
+                rank=1,
+                player_id="1",
+                name="Bijan Robinson",
+                position="RB",
+                source="vorp",
+                vorp=200.0,
+                draft_round=None,
+                rationale="",
+                log_ref=None,
+            )
+        ],
+    )
+    _write_roster_and_user_parquet_for_bigboard_print(repo_root, "2026")
+
+    args = argparse.Namespace(season="2025", draft_season=None, cutoff=10, out=None)
+    exit_code = value_cmd.cmd_value_bigboard_print(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "reports/bigboard-print-2026.html: 1 of 1 rows printed" in out
+    assert "warning" not in out
+
+
+def test_cmd_value_bigboard_print_warns_about_unmatched_keeper(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.draft_tools.bigboard import BigboardRow, save_bigboard
+
+    repo_root = make_repo_root(tmp_path)
+    save_bigboard(
+        repo_root,
+        "2025",
+        [
+            BigboardRow(
+                rank=1,
+                player_id="1",
+                name="Someone Else",
+                position="RB",
+                source="vorp",
+                vorp=200.0,
+                draft_round=None,
+                rationale="",
+                log_ref=None,
+            )
+        ],
+    )
+    wiki_dir = repo_root / "wiki" / "league"
+    wiki_dir.mkdir(parents=True)
+    (wiki_dir / "projected-keepers-2026.md").write_text(
+        """
+## Confirmed real keepers (2026-08-28)
+
+| Roster | Kept | Cost | vs. projection |
+|---|---|---|---|
+| 1 | Nowhere Man | R7 | locked |
+""",
+        encoding="utf-8",
+    )
+    _write_roster_and_user_parquet_for_bigboard_print(repo_root, "2026")
+
+    args = argparse.Namespace(season="2025", draft_season=None, cutoff=10, out=None)
+    exit_code = value_cmd.cmd_value_bigboard_print(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "warning: 1 confirmed keeper(s) not found on the board: Nowhere Man" in out
+
+
+def test_cmd_value_bigboard_print_reports_missing_bigboard(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+
+    args = argparse.Namespace(season="2025", draft_season=None, cutoff=10, out=None)
+    exit_code = value_cmd.cmd_value_bigboard_print(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not" in out.lower()
+
+
 # --- draft -----------------------------------------------------------------
 
 
@@ -1939,6 +2094,41 @@ def test_cmd_draft_keepers_prints_eligible_and_ineligible(
     assert "kept 2 consecutive seasons already" in out  # Runner C
     assert "defaulted to last round" in out  # 104, cost=R15
     assert out.index("Runner A") < out.index("Runner B")  # eligible ranked first
+
+
+def test_cmd_draft_keepers_uses_adp_reset_when_snapshot_covers_undrafted_player(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.adp.sync import ADP_SCHEMA_VERSION
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    _write_draft_keeper_fixtures(repo_root)
+    write_table(
+        pl.DataFrame(
+            {
+                "ds_player_id": [1],
+                "full_name": ["Player Onefour"],
+                "team": ["SF"],
+                "position": ["RB"],
+                "adp_pick": [175],
+                "ds_rank": [200],
+                "pos_adp": [20],
+                "market_index": [0],
+                "sleeper_id": ["104"],
+                "retrieved_date": ["2026-08-28"],
+            }
+        ),
+        repo_root / "data" / "adp" / "2026-08-28.parquet",
+        schema_version=ADP_SCHEMA_VERSION,
+    )
+
+    args = argparse.Namespace(season="2026", roster_id=None, me=True, value_season=None)
+    exit_code = draft_cmd.cmd_draft_keepers(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "ADP-reset: pick #175 as of 2026-08-28" in out
 
 
 def test_cmd_draft_keepers_shows_n_a_value_when_value_season_has_no_vorp_data(
@@ -2516,6 +2706,231 @@ def test_cmd_draft_board_notify_my_turn_prints_your_turn_line(
     out = capsys.readouterr().out
     assert exit_code == 0
     assert "YOUR TURN: pick 1 (round 1)" in out
+
+
+def test_cmd_draft_board_notify_my_turn_warns_when_roster_id_unresolvable(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """--notify-my-turn with a --roster-id not in this draft's
+    slot_to_roster_id map (so turn detection has nothing to match against)
+    prints a warning instead of silently no-op'ing."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            # slot_to_roster_id only maps slot 1 -> roster_id 5.
+            return json_response(_draft_object_payload())
+        if request.path == "/draft/did1/picks":
+            return json_response([])
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        once=False,
+        poll_seconds=1.0,
+        show_picks=False,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=999,
+        draft_slot=None,
+        notify_my_turn=True,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url, max_watch_iterations=1
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "warning: roster_id 999 is not in this draft's slot_to_roster_id" in out
+    assert "--notify-my-turn has nothing to match against" in out
+
+
+def test_cmd_draft_board_tty_reports_unusable_draft_geometry(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A tty with no `run_board_tui` override dispatches to the real
+    `_run_board_tui`, which must bail out before touching the Textual app if
+    the draft object reports unusable geometry (rounds/teams <= 0)."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload(rounds=0))
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        once=False,
+        poll_seconds=1.0,
+        show_picks=False,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=None,
+    )
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_board(
+            args, repo_root=repo_root, base_url=base_url, is_tty=lambda: True
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "reports no usable geometry" in out
+
+
+def test_run_board_tui_warns_and_builds_model_when_roster_id_unresolvable(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`_run_board_tui`'s own turn-detection warning (distinct from the
+    non-tty watch loop's) fires when --roster-id doesn't resolve to a slot,
+    and the board model still gets built and handed to the (here-stubbed)
+    app launcher rather than skipping the TUI."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        once=False,
+        poll_seconds=1.0,
+        show_picks=False,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=999,
+        draft_slot=None,
+    )
+    calls: list[object] = []
+
+    def fake_launch(model, context, launch_args, *, base_url: str) -> int:
+        calls.append(context.my_roster_id)
+        return 0
+
+    with mock_http_server(handler) as base_url:
+        context = draft_cmd._resolve_draft_context(args, repo_root, base_url=base_url)
+        assert context is not None
+        exit_code = draft_cmd._run_board_tui(
+            context, args, base_url=base_url, launch_app=fake_launch
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert calls == [999]
+    assert "warning: roster_id 999 is not in this draft's slot_to_roster_id" in out
+    assert "streaming picks without turn detection" in out
+
+
+def test_run_board_tui_skips_warning_when_turn_detection_slot_resolves(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """When --draft-slot (or --me/--roster-id) resolves cleanly to a slot,
+    `_run_board_tui` builds the model and launches without printing the
+    unresolvable-roster-id warning."""
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1"],
+            "name": ["A"],
+            "position": ["RB"],
+            "vorp_season": [50.0],
+        }
+    )
+    from sleeper_agent.storage.parquet_store import write_table
+
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/league/lid1":
+            return json_response(_league_payload())
+        if request.path == "/draft/did1":
+            return json_response(_draft_object_payload())
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(
+        league_id="lid1",
+        draft_id=None,
+        rounds=15,
+        once=False,
+        poll_seconds=1.0,
+        show_picks=False,
+        value_season="2025",
+        num_teams=12,
+        me=False,
+        roster_id=None,
+        draft_slot=1,
+    )
+    calls: list[object] = []
+
+    def fake_launch(model, context, launch_args, *, base_url: str) -> int:
+        calls.append(context.my_draft_slot)
+        return 0
+
+    with mock_http_server(handler) as base_url:
+        context = draft_cmd._resolve_draft_context(args, repo_root, base_url=base_url)
+        assert context is not None
+        exit_code = draft_cmd._run_board_tui(
+            context, args, base_url=base_url, launch_app=fake_launch
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert calls == [1]
+    assert "warning" not in out
 
 
 def test_cmd_draft_board_tty_dispatches_to_tui(
@@ -3131,6 +3546,7 @@ def _write_waiver_freeagent_fixtures(repo_root: Path) -> None:
         }
     )
     write_table(vorp_df, repo_root / "data" / "vorp" / "2024.parquet", schema_version=2)
+    write_table(vorp_df, repo_root / "data" / "vorp" / "2025.parquet", schema_version=2)
 
     players_df = pl.DataFrame(
         {
@@ -3283,6 +3699,36 @@ def test_cmd_freeagent_recommend_prints_upgrades(
     assert exit_code == 0
     assert "Free RB" in out
     assert "Weak RB" in out
+
+
+def test_cmd_freeagent_recommend_defaults_value_season_to_current_season(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    from sleeper_agent.storage.parquet_store import write_table
+
+    repo_root = make_repo_root(tmp_path)
+    _write_waiver_freeagent_fixtures(repo_root)
+    write_table(
+        pl.DataFrame(
+            {
+                "sleeper_id": ["1", "2", "3"],
+                "name": ["Weak RB", "Good WR", "Current Season Free RB"],
+                "position": ["RB", "WR", "RB"],
+                "vorp_season": [-10.0, 50.0, 20.0],
+            }
+        ),
+        repo_root / "data" / "vorp" / "2025.parquet",
+        schema_version=2,
+    )
+
+    args = argparse.Namespace(
+        season="2025", value_season=None, roster_id=None, me=True, top=10
+    )
+    exit_code = freeagent_cmd.cmd_freeagent_recommend(args, repo_root=repo_root)
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Current Season Free RB" in out
 
 
 def test_cmd_freeagent_recommend_reports_missing_roster(
@@ -3678,6 +4124,90 @@ def test_cmd_draft_recap_json_resolves_real_team_names_for_a_league_draft(
     assert team_names == {1: "Only Gold's Finest", 2: "aaron"}
     slot1 = next(t for t in payload["teams"] if t["draft_slot"] == 1)
     assert slot1["picks"][0]["value_delta"] == 0
+
+
+def test_cmd_draft_recap_skips_slot_name_when_roster_owner_has_no_user(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    repo_root = make_repo_root(tmp_path)
+    vorp_df = pl.DataFrame(
+        {
+            "sleeper_id": ["1", "2"],
+            "name": ["A One", "B Two"],
+            "position": ["RB", "WR"],
+            "vorp_season": [50.0, 30.0],
+        }
+    )
+    _write_bigboard(repo_root, "2025", vorp_df)
+
+    def handler(request: Request) -> Response:
+        if request.path == "/draft/did1":
+            return json_response(
+                _draft_object_payload(
+                    draft_id="did1",
+                    slot_to_roster_id={"1": 5, "2": 7},
+                    rounds=1,
+                    teams=2,
+                    league_id="lid1",
+                )
+            )
+        if request.path == "/draft/did1/picks":
+            return json_response(
+                [
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=1,
+                        draft_slot=1,
+                        roster_id=5,
+                        player_id="1",
+                        first_name="A",
+                        last_name="One",
+                        position="RB",
+                    ),
+                    _recap_pick_payload(
+                        round_=1,
+                        pick_no=2,
+                        draft_slot=2,
+                        roster_id=7,
+                        player_id="2",
+                        first_name="B",
+                        last_name="Two",
+                        position="WR",
+                    ),
+                ]
+            )
+        if request.path == "/league/lid1/rosters":
+            # roster_id 7's owner ("u_orphan") has no matching user below —
+            # exercises the "user not found" branch of `_team_names_by_slot`.
+            return json_response(
+                [
+                    *_rosters_payload(),
+                    {
+                        "roster_id": 7,
+                        "owner_id": "u_orphan",
+                        "league_id": "lid1",
+                        "players": [],
+                        "starters": [],
+                        "settings": {},
+                    },
+                ]
+            )
+        if request.path == "/league/lid1/users":
+            return json_response(_users_payload())
+        raise AssertionError(f"unexpected path {request.path}")
+
+    args = argparse.Namespace(draft_id="did1", value_season="2025", json=True)
+    with mock_http_server(handler) as base_url:
+        exit_code = draft_cmd.cmd_draft_recap(
+            args, repo_root=repo_root, base_url=base_url
+        )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    payload = json.loads(out)
+    team_names = {t["draft_slot"]: t["team_name"] for t in payload["teams"]}
+    assert team_names[1] == "Only Gold's Finest"
+    assert team_names[2] == "Slot 2"  # no user resolved for roster_id 7
 
 
 def test_cmd_draft_recap_falls_back_to_slot_names_for_a_mock_draft(

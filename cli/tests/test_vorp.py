@@ -396,6 +396,40 @@ def test_compute_def_vorp_scores_real_stat_line_and_aliases_la_to_lar() -> None:
     assert by_id["SEA"].vorp_season_shrunk == POSITION_YOY_RELIABILITY["DEF"] * -3.0
 
 
+def test_compute_def_vorp_handles_no_teams_at_all() -> None:
+    # No games synced yet (e.g. pre-season) -> zero DEF rows to rank against;
+    # replacement level must fall back to 0 rather than indexing an empty list.
+    team_stats = pl.DataFrame(
+        schema={
+            "team": pl.Utf8,
+            "season_type": pl.Utf8,
+            "game_id": pl.Utf8,
+            "def_sacks": pl.Int64,
+            "def_interceptions": pl.Int64,
+            "fumble_recovery_opp": pl.Int64,
+            "def_tds": pl.Int64,
+            "def_safeties": pl.Int64,
+        }
+    )
+    schedules = pl.DataFrame(
+        schema={
+            "game_id": pl.Utf8,
+            "game_type": pl.Utf8,
+            "home_team": pl.Utf8,
+            "away_team": pl.Utf8,
+            "home_score": pl.Int64,
+            "away_score": pl.Int64,
+        }
+    )
+    def_players = pl.DataFrame({"player_id": [], "name": []})
+
+    results = compute_def_vorp(
+        team_stats, schedules, def_players, DEF_SCORING_SETTINGS, ["DEF"], num_teams=12
+    )
+
+    assert results == []
+
+
 def test_compute_def_vorp_falls_back_to_team_code_when_name_unresolved() -> None:
     team_stats = pl.DataFrame(
         [

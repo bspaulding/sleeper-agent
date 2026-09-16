@@ -9,6 +9,7 @@ from sleeper_agent.draft_tools.board import (
     bigboard_view,
     compute_tiers,
     my_roster_positions,
+    next_unmade_pick_no,
     position_tag,
     remaining_flex_capacity,
     render_board,
@@ -21,6 +22,7 @@ from sleeper_agent.draft_tools.keepers import (
     KeeperCandidate,
     build_season_chain,
     infer_total_rounds,
+    load_latest_adp,
     rank_keeper_candidates,
     value_per_cost,
 )
@@ -83,6 +85,20 @@ def make_pick_no(
         player_position="RB",
         player_team="SF",
     )
+
+
+def test_next_unmade_pick_no_finds_gap_before_the_end() -> None:
+    picks_by_no = {p: make_pick_no(p) for p in (1, 2, 3)}
+    # Pick 2 is missing even though later picks exist (pre-filled keepers).
+    del picks_by_no[2]
+
+    assert next_unmade_pick_no(picks_by_no, total_picks=3) == 2
+
+
+def test_next_unmade_pick_no_returns_none_when_draft_is_complete() -> None:
+    picks_by_no = {p: make_pick_no(p) for p in (1, 2, 3)}
+
+    assert next_unmade_pick_no(picks_by_no, total_picks=3) is None
 
 
 def test_keeper_history_never_kept_before_is_eligible_at_last_round_minus_one() -> None:
@@ -265,6 +281,41 @@ def test_build_season_chain_respects_max_seasons_back(tmp_path: Path) -> None:
     season_chain, _ = build_season_chain(tmp_path, "2026", max_seasons_back=2)
 
     assert season_chain == ["2025", "2024"]
+
+
+def test_load_latest_adp_returns_pick_lookup_from_synced_snapshot(
+    tmp_path: Path,
+) -> None:
+    import polars as pl
+
+    from sleeper_agent.adp.sync import ADP_SCHEMA_VERSION
+
+    write_table(
+        pl.DataFrame(
+            {
+                "ds_player_id": [1, 2],
+                "full_name": ["A Player", "No Sleeper Match"],
+                "team": ["SF", "KC"],
+                "position": ["RB", "WR"],
+                "adp_pick": [12, 300],
+                "ds_rank": [10, 400],
+                "pos_adp": [3, 90],
+                "market_index": [0, 0],
+                "sleeper_id": ["101", None],
+                "retrieved_date": ["2026-08-28", "2026-08-28"],
+            }
+        ),
+        tmp_path / "data" / "adp" / "2026-08-28.parquet",
+        schema_version=ADP_SCHEMA_VERSION,
+    )
+
+    result = load_latest_adp(tmp_path)
+
+    assert result == ("2026-08-28", {"101": 12})
+
+
+def test_load_latest_adp_returns_none_when_unsynced(tmp_path: Path) -> None:
+    assert load_latest_adp(tmp_path) is None
 
 
 # --- KeeperCandidate ranking ----------------------------------------------
@@ -1233,6 +1284,37 @@ def test_model_feed_emits_one_line_per_new_pick() -> None:
     # pick 1 was already seen on the first feed — only pick 2 is new
     assert second.new_pick_lines == ("Pick 2 (slot 2): Beta (RB, SF)",)
     assert second.picks_seen == 2
+
+
+def test_model_feed_shows_rookie_round_detail_for_rookie_row() -> None:
+    board = [
+        _bigboard_row(
+            rank=1,
+            player_id="1",
+            name="Rookie Player",
+            source="rookie",
+            vorp=None,
+            draft_round=2,
+        ),
+    ]
+    model = _model(board)
+
+    state = model.feed([])
+
+    assert state.rows[0].detail == "ROOKIE R2"
+
+
+def test_model_feed_shows_n_a_detail_for_vorp_row_with_no_vorp() -> None:
+    # A hand-edited bigboard CSV can carry source="vorp" with an empty vorp
+    # cell and still load — the live board must render "n/a", not crash.
+    board = [
+        _bigboard_row(rank=1, player_id="1", name="Mystery Player", vorp=None),
+    ]
+    model = _model(board)
+
+    state = model.feed([])
+
+    assert state.rows[0].detail == "n/a"
 
 
 def test_model_feed_marks_my_pick() -> None:
