@@ -3,7 +3,7 @@ sleeper_id: '7523'
 name: Trevor Lawrence
 position: QB
 nfl_team: JAX
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

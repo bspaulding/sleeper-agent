@@ -3,7 +3,7 @@ sleeper_id: '4892'
 name: Baker Mayfield
 position: QB
 nfl_team: TB
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

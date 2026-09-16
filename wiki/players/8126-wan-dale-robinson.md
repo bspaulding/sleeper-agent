@@ -3,7 +3,7 @@ sleeper_id: '8126'
 name: Wan'Dale Robinson
 position: WR
 nfl_team: TEN
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

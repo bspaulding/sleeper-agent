@@ -3,7 +3,7 @@ sleeper_id: '5872'
 name: Deebo Samuel
 position: WR
 nfl_team: SF
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

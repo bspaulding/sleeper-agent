@@ -3,7 +3,7 @@ sleeper_id: '12507'
 name: Omarion Hampton
 position: RB
 nfl_team: LAC
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

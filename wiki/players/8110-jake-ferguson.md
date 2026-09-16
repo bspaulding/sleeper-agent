@@ -3,7 +3,7 @@ sleeper_id: '8110'
 name: Jake Ferguson
 position: TE
 nfl_team: DAL
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

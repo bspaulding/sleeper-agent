@@ -3,7 +3,7 @@ sleeper_id: '8408'
 name: Jordan Mason
 position: RB
 nfl_team: MIN
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News

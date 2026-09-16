@@ -3,7 +3,7 @@ sleeper_id: '8154'
 name: Brian Robinson
 position: RB
 nfl_team: ATL
-last_researched: '2026-09-15'
+last_researched: '2026-09-16'
 ---
 
 ## News
