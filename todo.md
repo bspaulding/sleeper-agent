@@ -9,6 +9,15 @@
   the real Bryce Young pickup — see
   `decisions/2026/2026-09-16-waiver-week2-qb-upgrade-bryce-young-drop-daniel-jones.md`). Both
   commands now default `--value-season` to `--season` itself.
+- `trade evaluate`/`trade propose --value-season` has the same silent
+  `season - 1` default footgun that was just fixed in `freeagent`/`waiver` (see the entry above) —
+  confirmed 2026-09-16 during the weekly trade scan (`cli/src/sleeper_agent/commands/trade_cmd.py`
+  lines 74/130). Not blindly applying the same fix here: unlike a waiver/free-agent call (which
+  wants this week's signal), trade valuation should reflect full-season expectation, and 2-3 games
+  of real 2026 VORP is a much noisier full-season proxy than 2025's complete season — defaulting to
+  current-season VORP this early could make trade suggestions worse, not better. Needs a real
+  decision (maybe a games-played threshold before switching the default, or blending), not a
+  copy-paste of the waiver fix.
 - Watch Hunt/Ertz FA signings: if either lands somewhere, re-run
   `sleeper players sync` + `wiki sync-frontmatter` so they stop being silently
   dropped by `filter_rostered`.
