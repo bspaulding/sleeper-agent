@@ -10,6 +10,11 @@ Tuesdays). `waiver recommend --me --season <year>` gives a ranked list of target
 **suggested bid range** per target, not a single number — picking the actual bid within (or
 outside) that range is this skill's job.
 
+**Before recommending a claim at all**, check whether the target has actually cleared waivers —
+see `.claude/skills/free-agents.md`'s "Check waiver-clearance status" section. A high trending-add
+count does not mean a claim is required; a player untouched for longer than `waiver_clear_days`
+(2) is already a free, instant add.
+
 ## Budget pacing across ~17 weeks
 
 The single biggest mistake FAAB waiver strategy can make is spending too much early on players

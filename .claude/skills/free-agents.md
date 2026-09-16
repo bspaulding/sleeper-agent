@@ -37,6 +37,33 @@ convenience:
   clear, large upgrade — the downside of a bad drop (losing a cheap keeper slot) is asymmetric
   with the upside of a marginal in-season swap.
 
+## Check waiver-clearance status before framing a recommendation
+
+Before telling the user "submit a waiver claim" vs. "just add this player," check whether the
+player has actually cleared waivers — don't infer it from trending-add count (that measures
+interest, not eligibility).
+
+The signal is **days since the player's most recent transaction, vs. this league's
+`waiver_clear_days`** (2 for this league). Pull it from the transactions endpoint/parquet
+(`data/sleeper/transactions/<season>.parquet`, or `GET
+/league/<league_id>/transactions/<week>` for anything not yet synced locally) and find the
+player's last `adds`/`drops` entry:
+
+- **Recently transacted** (within `waiver_clear_days`, or never yet touched this season after
+  being rostered/dropped) → still on waivers. A direct add will be rejected; it needs an actual
+  `waiver`-type claim, and FAAB competition is real if others want it too.
+- **No transaction in longer than `waiver_clear_days`** → already cleared. It's addable right now
+  as a plain `free_agent` transaction, no claim, no bid, no waiting — recommending a waiver claim
+  here just costs the user FAAB/time for nothing.
+
+Caught this the hard way 2026-09-16: recommended a waiver claim + a bigger FAAB bid for a
+free-agent DEF (New England) based on its ~92K trending-add count, without checking transaction
+history. Its last transaction was 8 days prior — long cleared — and the user simply added it
+instantly for free. Meanwhile a same-day pickup attempt on a *different* free agent (Tampa Bay)
+correctly needed a waiver claim, because that one had changed hands via `waiver complete` just two
+days earlier. Same "unrostered player with real interest" surface, opposite mechanics — always
+check the transaction timestamp, not the trending count, before recommending which path applies.
+
 ## Logging the decision
 
 `decisions new --kind freeagent --slug <slug> --season <year>` — note explicitly whether a
