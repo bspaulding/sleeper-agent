@@ -3,15 +3,18 @@ from __future__ import annotations
 from pathlib import Path
 
 import polars as pl
-import pytest
 
 from sleeper_agent.draft_tools.bigboard import BigboardRow, save_bigboard
 from sleeper_agent.draft_tools.bigboard_print import (
     _appendix_worthy,
+    _load_confirmed_keepers,
     _parse_confirmed_keepers_section,
     generate_bigboard_print,
 )
-from sleeper_agent.sleeper_client.sync import ROSTERS_SCHEMA_VERSION, USERS_SCHEMA_VERSION
+from sleeper_agent.sleeper_client.sync import (
+    ROSTERS_SCHEMA_VERSION,
+    USERS_SCHEMA_VERSION,
+)
 
 
 def _row(
@@ -83,6 +86,22 @@ def test_parse_confirmed_keepers_section_missing_returns_empty() -> None:
     assert _parse_confirmed_keepers_section("# no such section here") == {}
 
 
+def test_parse_confirmed_keepers_section_skips_row_with_no_names_after_cleanup() -> (
+    None
+):
+    # The Kept cell is neither a recognized "none" sentinel nor a real name —
+    # after splitting on commas and stripping, no names survive, so the row
+    # is skipped rather than recorded with an empty name list.
+    text = """
+## Confirmed real keepers (2026-08-28)
+
+| Roster | Kept | Cost | vs. projection |
+|---|---|---|---|
+| 3 | , | — | blank cell |
+"""
+    assert _parse_confirmed_keepers_section(text) == {}
+
+
 def test_parse_confirmed_keepers_section_tolerates_annotated_roster_cell() -> None:
     # The "our own roster" row is annotated e.g. "5 (us)", not a bare number —
     # regression test for a bug where that annotation silently dropped the
@@ -117,6 +136,38 @@ def _write_roster_and_user_parquet(root: Path, season: str) -> None:
             "schema_version": [USERS_SCHEMA_VERSION, USERS_SCHEMA_VERSION],
         }
     ).write_parquet(sleeper_dir / "users" / f"{season}.parquet")
+
+
+def test_load_confirmed_keepers_returns_empty_when_section_parses_empty(
+    tmp_path: Path,
+) -> None:
+    wiki_dir = tmp_path / "wiki" / "league"
+    wiki_dir.mkdir(parents=True)
+    (wiki_dir / "projected-keepers-2026.md").write_text(
+        "# no confirmed-keepers section here", encoding="utf-8"
+    )
+
+    assert _load_confirmed_keepers(tmp_path, "2026") == {}
+
+
+def test_load_confirmed_keepers_returns_empty_when_roster_data_missing(
+    tmp_path: Path,
+) -> None:
+    wiki_dir = tmp_path / "wiki" / "league"
+    wiki_dir.mkdir(parents=True)
+    (wiki_dir / "projected-keepers-2026.md").write_text(
+        """
+## Confirmed real keepers (2026-08-28)
+
+| Roster | Kept | Cost | vs. projection |
+|---|---|---|---|
+| 1 | Someone | R7 | locked |
+""",
+        encoding="utf-8",
+    )
+    # Deliberately no data/sleeper/rosters or users parquet written.
+
+    assert _load_confirmed_keepers(tmp_path, "2026") == {}
 
 
 def test_generate_bigboard_print_end_to_end(tmp_path: Path) -> None:
@@ -175,6 +226,28 @@ def test_generate_bigboard_print_end_to_end(tmp_path: Path) -> None:
     assert "moved up, back healthy" in html
     # the mechanical-only rationale must not leak into the appendix
     assert "mechanically re-sorted" not in html.split("Appendix")[1]
+
+
+def test_generate_bigboard_print_annotates_ineligible_kept_flag(tmp_path: Path) -> None:
+    save_bigboard(tmp_path, "2025", [_row(rank=1, name="Romeo Doubs")])
+    wiki_dir = tmp_path / "wiki" / "league"
+    wiki_dir.mkdir(parents=True)
+    (wiki_dir / "projected-keepers-2026.md").write_text(
+        """
+## Confirmed real keepers (2026-08-28)
+
+| Roster | Kept | Cost | vs. projection |
+|---|---|---|---|
+| 1 | Romeo Doubs (only) | — | **ineligible** — see caveat |
+""",
+        encoding="utf-8",
+    )
+    _write_roster_and_user_parquet(tmp_path, "2026")
+
+    result = generate_bigboard_print(tmp_path, "2025", cutoff=10)
+
+    html = result.out_path.read_text(encoding="utf-8")
+    assert "KEPT — Team One (ineligible)" in html
 
 
 def test_generate_bigboard_print_reports_unmatched_keeper(tmp_path: Path) -> None:

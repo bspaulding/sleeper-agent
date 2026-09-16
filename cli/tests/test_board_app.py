@@ -192,6 +192,66 @@ def test_app_toggles_picks_panel_with_p_key() -> None:
     asyncio.run(drive())
 
 
+def test_update_status_handles_no_state_yet() -> None:
+    """`_update_status` must not crash if called before any poll has ever
+    populated `_last_state` (e.g. mount ran but `_apply_state` hasn't fired
+    yet in some future refactor) — it should just render an empty status."""
+    app = DraftBoardApp(
+        _model(_bigboard(1)),
+        draft_id="d1",
+        poll_seconds=POLL_SECONDS,
+        fetch_picks=lambda draft_id, base_url: [],
+    )
+
+    async def drive() -> None:
+        async with app.run_test(size=(100, 28)):
+            app._last_state = None
+            app._update_status()
+            assert _status_text(app) == ""
+
+    asyncio.run(drive())
+
+
+def test_update_status_omits_pick_progress_when_total_picks_unknown() -> None:
+    """A mock draft has no reliable `total_picks`, so the status line must
+    skip the "picks X/Y" / turn-detection segment entirely rather than
+    crashing on a None total_picks."""
+    app = DraftBoardApp(
+        _model(_bigboard(1), total_picks=None),
+        draft_id="d1",
+        poll_seconds=POLL_SECONDS,
+        fetch_picks=lambda draft_id, base_url: [],
+    )
+
+    def done() -> bool:
+        return "picks " not in _status_text(app) and _status_text(app) != ""
+
+    def check(app: DraftBoardApp) -> None:
+        status = _status_text(app)
+        assert "picks " not in status
+        assert "YOUR PICK" not in status
+        assert "next: pick" not in status
+
+    _run_until_done(app, done, check)
+
+
+def test_action_toggle_surplus_before_any_poll_is_a_noop() -> None:
+    """Pressing 's' before the first poll has populated `_last_state` must
+    just flip the flag, not crash trying to re-render a board that doesn't
+    exist yet."""
+    app = DraftBoardApp(
+        _model(_bigboard(1)),
+        draft_id="d1",
+        poll_seconds=POLL_SECONDS,
+        fetch_picks=lambda draft_id, base_url: [],
+    )
+
+    assert app._last_state is None
+    app.action_toggle_surplus()
+
+    assert app._hide_surplus is True
+
+
 def test_app_toggles_surplus_filter_with_s_key() -> None:
     bigboard = [
         BigboardRow(

@@ -9,6 +9,7 @@ from sleeper_agent.adp.draftsharks import (
     AdpBlobNotFoundError,
     AdpBlobShapeError,
     AdpEntry,
+    _extract_json_object,
     parse_adp_html,
 )
 from sleeper_agent.adp.sync import (
@@ -77,10 +78,39 @@ def test_parse_adp_html_raises_when_var_missing() -> None:
         parse_adp_html("<html><body>no data here</body></html>")
 
 
-def test_parse_adp_html_raises_on_multiple_adp_sets() -> None:
+def test_extract_json_object_raises_when_no_brace_follows_var_name() -> None:
+    with pytest.raises(AdpBlobNotFoundError):
+        _extract_json_object("vueAppData = ; done", "vueAppData")
+
+
+def test_extract_json_object_raises_when_unterminated() -> None:
+    with pytest.raises(AdpBlobShapeError):
+        _extract_json_object('vueAppData = {"a": 1', "vueAppData")
+
+
+def test_parse_adp_html_handles_escaped_quote_inside_string() -> None:
     html = make_fixture_html(
-        '{"seed": {"players": {}, "adpSets": {"a": [], "b": []}}}'
+        '{"seed": {"players": {'
+        '"1": {"fn": "Zach", "ln": "O\\"Brien", "tm": "SF", "pos": "WR"}'
+        '}, "adpSets": {"k": ['
+        '{"id": 1, "pick": 1, "dsRank": 1, "posAdp": 1, "marketIndex": 0}'
+        "]}}}"
     )
+
+    entries = parse_adp_html(html)
+
+    assert entries[0].last_name == 'O"Brien'
+
+
+def test_parse_adp_html_raises_on_missing_seed_key() -> None:
+    html = make_fixture_html('{"seed": {"players": {}}}')
+
+    with pytest.raises(AdpBlobShapeError):
+        parse_adp_html(html)
+
+
+def test_parse_adp_html_raises_on_multiple_adp_sets() -> None:
+    html = make_fixture_html('{"seed": {"players": {}, "adpSets": {"a": [], "b": []}}}')
 
     with pytest.raises(AdpBlobShapeError):
         parse_adp_html(html)
@@ -168,3 +198,12 @@ def test_latest_adp_snapshot_picks_the_max_date(tmp_path: Path) -> None:
 
 def test_latest_adp_snapshot_returns_none_when_unsynced(tmp_path: Path) -> None:
     assert latest_adp_snapshot(tmp_path / "adp") is None
+
+
+def test_latest_adp_snapshot_returns_none_when_dir_exists_but_empty(
+    tmp_path: Path,
+) -> None:
+    adp_dir = tmp_path / "adp"
+    adp_dir.mkdir()
+
+    assert latest_adp_snapshot(adp_dir) is None

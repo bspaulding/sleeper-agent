@@ -68,7 +68,7 @@ def cmd_freeagent_recommend(
     all_player_ids = set(players_df["player_id"].to_list())
     available_player_ids = all_player_ids - rostered_player_ids
 
-    value_season = args.value_season or str(int(args.season) - 1)
+    value_season = args.value_season or args.season
     vorp_path = data_dir(root) / "vorp" / f"{value_season}.parquet"
     if not vorp_path.exists():
         raise VorpNotComputedError(value_season)

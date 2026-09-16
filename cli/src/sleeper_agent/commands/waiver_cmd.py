@@ -69,7 +69,7 @@ def cmd_waiver_recommend(
         )
         budget_remaining = league.settings.waiver_budget - roster.waiver_budget_used
 
-    value_season = args.value_season or str(int(args.season) - 1)
+    value_season = args.value_season or args.season
     vorp_path = data_dir(root) / "vorp" / f"{value_season}.parquet"
     value_by_id: dict[str, PlayerValueRow] = {}
     if vorp_path.exists():

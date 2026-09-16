@@ -624,8 +624,30 @@ def cmd_draft_board(
     return _run_board_tui(context, args, base_url=base_url)
 
 
+def _launch_board_app(  # pragma: no cover - launches a real terminal UI
+    model: DraftBoardModel,
+    context: DraftContext,
+    args: argparse.Namespace,
+    *,
+    base_url: str,
+) -> int:
+    app = DraftBoardApp(
+        model,
+        draft_id=context.draft_id,
+        poll_seconds=args.poll_seconds,
+        show_picks=args.show_picks,
+        base_url=base_url,
+    )
+    app.run()
+    return 0
+
+
 def _run_board_tui(
-    context: DraftContext, args: argparse.Namespace, *, base_url: str
+    context: DraftContext,
+    args: argparse.Namespace,
+    *,
+    base_url: str,
+    launch_app: Callable[..., int] = _launch_board_app,
 ) -> int:
     # Draft geometry comes from the Draft object Sleeper itself returned, not
     # from --num-teams/--rounds. Those flags default to 12/15 and are silently
@@ -663,15 +685,7 @@ def _run_board_tui(
         team_changes=context.team_changes,
         injury_statuses=context.injury_statuses,
     )
-    app = DraftBoardApp(
-        model,
-        draft_id=context.draft_id,
-        poll_seconds=args.poll_seconds,
-        show_picks=args.show_picks,
-        base_url=base_url,
-    )
-    app.run()
-    return 0
+    return launch_app(model, context, args, base_url=base_url)
 
 
 def _render_context_board(
