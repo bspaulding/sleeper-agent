@@ -3,7 +3,7 @@ sleeper_id: '6904'
 name: Jalen Hurts
 position: QB
 nfl_team: PHI
-last_researched: '2026-09-16'
+last_researched: '2026-09-21'
 ---
 
 ## News

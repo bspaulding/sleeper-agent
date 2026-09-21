@@ -1,9 +1,10 @@
 ---
 team_code: WAS
-last_researched: '2026-09-16'
+last_researched: '2026-09-21'
 ---
 
 ## News
+- 2026-09-20 [injury] Jayden Daniels dislocated his left elbow late in the Wk2 loss to DAL (stepped on by his own lineman, arm buckled), ruled out; X-rays showed no fracture, MRI/further tests to follow, status "out indefinitely" — Marcus Mariota is now the starter, materially affecting the McLaurin/Diggs passing-game outlook ([Washington Times](https://www.washingtontimes.com/news/2026/sep/20/commanders-daniels-appears-injure-left-elbow-cowboys/))
 - 2026-09-13 [injury] Lost the Week 1 opener to Philadelphia; TE Chig Okonkwo exited with a hamstring injury (2/16 before leaving) — see his page ([Yahoo Sports](https://sports.yahoo.com/articles/commanders-te-chig-okonwo-departs-232728515.html)).
 - 2026-09-14 [depth-chart] Stefon Diggs made his Commanders debut in the same Week 1 game at Philadelphia, pairing with Terry McLaurin as expected. Note: a separate search result referencing a Jayden Daniels elbow re-injury and a "31-0 loss to Minnesota" is dated to later in the season, not Week 1 — not filed as current news ([search corroboration via Eagles/Commanders Week 1 coverage]).
 - 2026-08-22 [depth-chart] 2026 D/ST outlook: outside consensus top-24, NBC/Rotoworld tier ranking #31 of 32 — Major changes (Daronte Jones DC, Oweh/Chaisson adds, R1 Sonny Styles) after one of the worst 2025 defenses; wait-and-see ([FantasyPros consensus](https://www.fantasypros.com/2026/08/fantasy-football-draft-rankings-tiers-defenses-d-st-broncos-texans/), [NBC Sports](https://www.nbcsports.com/fantasy/football/news/2026-fantasy-football-tiered-defense-dst-rankings-and-strategy), [CBS ADP](https://www.cbssports.com/fantasy/football/draft/averages/both/h2h/DST/))

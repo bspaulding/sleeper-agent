@@ -3,10 +3,11 @@ sleeper_id: '12529'
 name: TreVeyon Henderson
 position: RB
 nfl_team: NE
-last_researched: '2026-09-16'
+last_researched: '2026-09-21'
 ---
 
 ## News
+- 2026-09-20 [injury-return/depth-chart] Returned from an ankle injury (out since 8/24) for his Wk2 season debut vs Steelers: 16 car/76 yds/TD, out-snapping Rhamondre Stevenson 31-18 ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/henderson-scores-long-td-in-week-2-win))
 - 2026-09-15 [injury] Follow-up: returned to practice Monday for the first time since the Aug 24 ankle injury, putting him in play for a Week 2 season debut Sunday vs. Pittsburgh — first positive signal since the Week 1 miss ([Boston.com](https://www.boston.com/sports/new-england-patriots/2026/09/14/new-england-patriots-treveyon-henderson-practice-nfl-football/)).
 - 2026-09-09 [injury] Ruled out and missed the Week 1 opener at Seattle after failing to practice all three days that week; Rhamondre Stevenson started and took the bulk of the workload in his absence. No confirmed practice return or Week 2 (at NYJ) designation yet — worth a targeted re-check before Week 2 news breaks ([Patriots.com](https://www.patriots.com/news/injury-report-analysis-patriots-rb-treveyon-henderson-ankle-ruled-out-for-season-opener-vs-seahawks)).
 - 2026-09-08 [injury] Trending worse, not better: still hasn't practiced as of Sept 7 (two full weeks since the Aug 24 ankle injury), described by Boston.com as "leaning towards missing" the Wednesday Sept 9 opener at Seattle — though the Patriots have not yet issued an official Week 1 designation and HC Vrabel says he's "working hard to return" ([Boston.com](https://www.boston.com/sports/new-england-patriots/2026/09/07/new-england-patriots-treveyon-henderson-nfl-football-injury-update-seahawks/)).
