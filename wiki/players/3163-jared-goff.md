@@ -3,7 +3,7 @@ sleeper_id: '3163'
 name: Jared Goff
 position: QB
 nfl_team: DET
-last_researched: '2026-09-16'
+last_researched: '2026-09-21'
 ---
 
 ## News

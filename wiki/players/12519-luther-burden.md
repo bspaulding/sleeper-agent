@@ -3,7 +3,7 @@ sleeper_id: '12519'
 name: Luther Burden
 position: WR
 nfl_team: CHI
-last_researched: '2026-09-16'
+last_researched: '2026-09-21'
 ---
 
 ## News

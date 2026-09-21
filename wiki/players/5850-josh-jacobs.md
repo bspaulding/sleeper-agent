@@ -3,10 +3,11 @@ sleeper_id: '5850'
 name: Josh Jacobs
 position: RB
 nfl_team: GB
-last_researched: '2026-09-16'
+last_researched: '2026-09-21'
 ---
 
 ## News
+- 2026-09-18 [transaction] Pleaded no contest (9/10) to a misdemeanor battery/property-damage charge; ESPN's Jeremy Fowler reports a possible 4-6 game NFL suspension once the exempt-list case resolves — no timeline yet, remains off the active roster ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-18/fowler-jacobs-could-face-4-6-game-suspension))
 - 2026-09-15 [transaction] Follow-up: pled no contest to both misdemeanor charges (convicted/fined $1,000 on the battery count; deferred judgment on the property-damage count, with a return court date in Sept. 2027), closing the criminal case — but the NFL says there's still no timeline for a personal-conduct suspension while it works to obtain video of the incident. The CBA sets a 6-game floor for domestic-violence cases, and any time already served on the Commissioner's Exempt List would count toward that total; still no fixed return date ([Yahoo Sports](https://sports.yahoo.com/articles/major-emerges-packers-rb-josh-040556944.html), [Pro Football Rumors](https://www.profootballrumors.com/2026/09/no-timeline-for-suspension-of-packers-rb-josh-jacobs)).
 - 2026-09-13 [transaction] Inactive for the Week 1 opener vs. Minnesota, remaining on the Commissioner's Exempt List with no resolution announced yet; MarShawn Lloyd/Kaleb Johnson handled the workload ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/packers-trade-for-steelers-rb-kaleb-johnson-as-josh-jacobs-is-placed-on-commissioner-s-exempt-list)).
 - 2026-09-08 [transaction] News-sweep correction: his next court date has reportedly been moved up from Nov. 17 to Sept. 10 — the day before the Packers' Week 1 game — which could accelerate (or complicate) any decision on lifting the exempt-list status; still no confirmation either way on Week 1 availability ([Yahoo Sports](https://sports.yahoo.com/nfl/article/cardinals-hopeful-rb-jeremiyah-love-can-play-vs-chargers-in-week-1-after-preseason-ankle-injury-234733540.html)).

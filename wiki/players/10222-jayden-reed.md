@@ -3,7 +3,7 @@ sleeper_id: '10222'
 name: Jayden Reed
 position: WR
 nfl_team: GB
-last_researched: '2026-09-16'
+last_researched: '2026-09-21'
 ---
 
 ## News
