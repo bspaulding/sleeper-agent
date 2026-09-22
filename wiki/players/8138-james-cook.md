@@ -3,7 +3,7 @@ sleeper_id: '8138'
 name: James Cook
 position: RB
 nfl_team: BUF
-last_researched: '2026-09-21'
+last_researched: '2026-09-22'
 ---
 
 ## News
