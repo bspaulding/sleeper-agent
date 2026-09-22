@@ -3,10 +3,11 @@ sleeper_id: '9753'
 name: Zach Charbonnet
 position: RB
 nfl_team: SEA
-last_researched: '2026-09-21'
+last_researched: '2026-09-22'
 ---
 
 ## News
+- 2026-09-21 [injury] Now eligible to return to practice (PUP 4-game min. now satisfied window opening) — HC Mike Macdonald wants to maximize his practice reps before deciding when he's actually ready to play ([Athlon](https://athlonsports.com/nfl/seattle-seahawks/mike-macdonald-offers-encouraging-update-zach-charbonnet))
 
 - 2026-08-31 [injury] Officially moved to Reserve/PUP at the 53-man cutdown, which locks in a minimum 4-game absence (out through at least Weeks 1-4); earliest eligible return is Seattle's Week 5 game at San Francisco on Oct. 11, though ESPN's Jeremy Fowler frames mid-October as the more realistic target rather than the calendar minimum ([Heavy.com](https://heavy.com/sports/nfl/seattle-seahawks/zach-charbonnet-injury-update-reserve-pup/)).
 - 2026-07-22 [injury] Seahawks placed Charbonnet on the PUP list to start camp after he tore his ACL in the 2025 playoffs vs. the 49ers; Week 1 availability is in doubt and the team is expected to be cautious with his return timeline ([Seahawks.com](https://www.seahawks.com/news/seahawks-rb-zach-charbonnet-placed-on-pup-list)).

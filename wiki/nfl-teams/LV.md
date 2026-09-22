@@ -1,6 +1,6 @@
 ---
 team_code: LV
-last_researched: '2026-09-21'
+last_researched: '2026-09-22'
 ---
 
 ## News

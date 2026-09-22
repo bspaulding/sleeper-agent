@@ -3,7 +3,7 @@ sleeper_id: '11576'
 name: Braelon Allen
 position: RB
 nfl_team: NYJ
-last_researched: '2026-09-21'
+last_researched: '2026-09-22'
 ---
 
 ## News

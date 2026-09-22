@@ -3,7 +3,7 @@ sleeper_id: '13311'
 name: Chris Bell
 position: WR
 nfl_team: MIA
-last_researched: '2026-09-21'
+last_researched: '2026-09-22'
 ---
 
 ## News

@@ -3,10 +3,11 @@ sleeper_id: '5849'
 name: Kyler Murray
 position: QB
 nfl_team: MIN
-last_researched: '2026-09-21'
+last_researched: '2026-09-22'
 ---
 
 ## News
+- 2026-09-21 [injury] Cleared the concussion protocol Monday; set to start Wk3 vs. Tampa Bay after missing Wk2 vs. Chicago (Carson Wentz went 9-3 win in relief) ([NFL.com](https://www.nfl.com/news/kyler-murray-clears-concussion-protocol-will-start-vikings-bears))
 
 - 2026-09-15 [injury] Follow-up: officially in the NFL's concussion protocol; day-to-day, with Carson Wentz set to start until he clears it — Murray is considered no better than Questionable for Week 2 vs. Chicago ([Central Oregon Daily](https://www.centraloregondaily.com/sports/kyler-murray-injury-update-as-vikings-qb-suffers-concussion-vs-packers/article_abd39a4d-f7ce-5ebe-afb2-35b69bf8cecf.html)).
 - 2026-09-13 [injury] Suffered a concussion midway through the 1st quarter of the Week 1 win over Green Bay (39-22) on a hard, helmet-popping-off hit from Packers S Javon Bullard (flagged for unnecessary roughness) while sliding; walked off under his own power, and Carson Wentz finished the game in relief — in the league's concussion protocol, Week 2 availability to be confirmed ([Yardbarker](https://www.yardbarker.com/nfl/articles/justin_jeffersons_emotional_reaction_to_kyler_murray_concussion_after_scary_hit_during_vikings_win/s1_17664_44301247)).
