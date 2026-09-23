@@ -3,7 +3,7 @@ sleeper_id: '11620'
 name: Rome Odunze
 position: WR
 nfl_team: CHI
-last_researched: '2026-09-22'
+last_researched: '2026-09-23'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '12489'
 name: RJ Harvey
 position: RB
 nfl_team: DEN
-last_researched: '2026-09-22'
+last_researched: '2026-09-23'
 ---
 
 ## News

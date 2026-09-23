@@ -3,7 +3,7 @@ sleeper_id: '12512'
 name: Quinshon Judkins
 position: RB
 nfl_team: CLE
-last_researched: '2026-09-22'
+last_researched: '2026-09-23'
 ---
 
 ## News

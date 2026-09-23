@@ -3,7 +3,7 @@ sleeper_id: '12492'
 name: Pat Bryant
 position: WR
 nfl_team: DEN
-last_researched: '2026-09-22'
+last_researched: '2026-09-23'
 ---
 
 ## News

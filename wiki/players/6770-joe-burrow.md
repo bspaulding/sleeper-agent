@@ -3,7 +3,7 @@ sleeper_id: '6770'
 name: Joe Burrow
 position: QB
 nfl_team: CIN
-last_researched: '2026-09-22'
+last_researched: '2026-09-23'
 ---
 
 ## News

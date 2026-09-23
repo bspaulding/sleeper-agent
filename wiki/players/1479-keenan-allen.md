@@ -3,7 +3,7 @@ sleeper_id: '1479'
 name: Keenan Allen
 position: WR
 nfl_team: IND
-last_researched: '2026-09-22'
+last_researched: '2026-09-23'
 ---
 
 ## News
