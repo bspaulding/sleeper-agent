@@ -3,7 +3,7 @@ sleeper_id: '9754'
 name: Quentin Johnston
 position: WR
 nfl_team: LAC
-last_researched: '2026-09-22'
+last_researched: '2026-09-23'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '11610'
 name: Malik Washington
 position: WR
 nfl_team: MIA
-last_researched: '2026-08-29'
+last_researched: '2026-09-23'
 ---
 
 ## News
