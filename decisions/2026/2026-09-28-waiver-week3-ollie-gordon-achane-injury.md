@@ -40,15 +40,22 @@ rather than noise.
   stash on a plausible every-down role with real Week 4+ fantasy relevance. Roster is full at 15
   (`wiki/team/roster-philosophy.md`'s `QB,RB,RB,WR,WR,TE,FLEX,FLEX,DEF,BN×6` grid, no IR slot), so
   the claim needs a corresponding drop.
-- **Drop candidate: Kyle Pitts** (TE, ranked outside `value rank`'s top 40 at the position,
-  well behind Trey McBride #1 at 22.8 and Juwan Johnson at 5.2). We rostered 3 TEs; McBride is the
-  clear starter and Johnson has been the better bench option in his own right this season. The
-  2026-09-23 review held Pitts on the theory that Michael Penix's return would revive his target
-  share — worth re-checking Week 3 box score results before this claim is submitted Tuesday, since
-  local stats don't yet have Week 3 synced; if Pitts had a strong bounce-back game Sunday, swap the
-  drop candidate for Juwan Johnson instead. Flagging this explicitly rather than deciding
-  blind — commissioner should verify Week 3 Pitts/Johnson stat lines once available before
-  finalizing which TE to cut.
+- **Drop candidate: Kyle Pitts, confirmed** (TE, ranked outside `value rank`'s top 40 at the
+  position, well behind Trey McBride #1 at 22.8 and Juwan Johnson at 5.2). The 2026-09-23 review
+  held Pitts on the theory that Michael Penix's return would revive his target share; the
+  2026-09-28 full news sweep resolved that open question — Pitts stayed nearly invisible in Week 3
+  even with Penix back (2 catches/20 yds on 6 targets through 3 games total), so the bounce-back
+  didn't materialize. Pitts is the drop.
+  - **New wrinkle from the same sweep**: Trey McBride, our TE1, is now in the concussion protocol
+    after Week 3 and did not practice Wednesday — Week 4 availability is in doubt. That doesn't
+    change the drop call (Pitts is still the clearly weaker asset even accounting for this), but it
+    does mean cutting our only remaining TE depth the same week our starter's status is shaky.
+    Worth the commissioner's judgment call: if McBride is ruled out for Week 4, consider whether
+    Pitts' minimal Week 4 upside is worth more than Gordon's speculative RB upside just for that one
+    week, though the season-long value case for Gordon still stands either way.
+  - Also from the sweep: Bryce Young (our backup QB) picked up an unspecified lower-body injury in
+    the Week 3 loss at Cleveland but finished the game; evaluation pending. Doesn't affect this
+    claim, but worth a Week 4 status check before assuming he's a clean fallback if Darnold falters.
 - **Bid sizing**: $95 FAAB remaining, ~15 fantasy-relevant weeks left. Early-season guidance says
   bid low unless it's a real starting-role change from injury — this qualifies, but the MRI isn't
   confirmed and Gordon shares change-of-pace duties even in a best case, so $18-$22 (not a
@@ -72,5 +79,6 @@ rather than noise.
 ## Outcome
 
 Not yet executed — this routine has no Sleeper write access. Commissioner to place the FAAB claim
-manually in Sleeper before the Tuesday 9/29 waiver deadline, confirming Week 3 Pitts/Johnson stat
-lines first to pick the better drop candidate.
+manually in Sleeper before the Tuesday 9/29 waiver deadline: claim Ollie Gordon II for $18-$22,
+drop Kyle Pitts (confirmed weakest TE post-sweep), with McBride's Week 4 concussion-protocol status
+worth a last look before submitting.
