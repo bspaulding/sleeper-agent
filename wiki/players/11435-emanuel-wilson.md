@@ -3,7 +3,7 @@ sleeper_id: '11435'
 name: Emanuel Wilson
 position: RB
 nfl_team: SEA
-last_researched: '2026-08-31'
+last_researched: '2026-09-28'
 ---
 
 ## News

@@ -3,10 +3,11 @@ sleeper_id: '6819'
 name: Michael Pittman
 position: WR
 nfl_team: PIT
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [injury] Cleared his questionable (foot) tag and will play Week 3 vs. Cincinnati after missing Week 2 — his 2nd absence risk in as many weeks resolved. ([The Big Lead](https://www.thebiglead.com/michael-pittman-jr-injury-update-reveals-steelers-receivers-week-3-status-vs-bengals/))
 - 2026-09-23 [injury] Status for Week 3 vs. Cincinnati still uncertain — HC Mike McCarthy said he's unsure if Pittman (foot) will play, but noted "positive steps forward" and expects him to practice (likely limited) Wednesday. McCarthy also clarified this foot issue is unrelated to the training-camp/preseason injury ([Yahoo Sports](https://sports.yahoo.com/articles/mccarthy-clarifies-steelers-wr-michael-210111954.html), [NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-21/mccarthy-unsure-if-pittman-foot-will-play-week-3)).
 - 2026-09-19/20 [injury] Downgraded to out for Wk2 vs New England with a foot injury — limited Wed, DNP Thu/Fri; a break from the hamstring issue that had him fine for Week 1 ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/steelers-downgrade-wr-michael-pittman-jr-to-out-with-a-foot-injury))
 - 2026-09-14 [depth-chart] News-sweep update: played through the hamstring issue in Pittsburgh's Week 1 win over Atlanta as the team expected; no new injury news found. Confirmed active alongside DK Metcalf in the Steelers' outside-WR rotation ([search corroboration via Steelers Week 1 coverage]).

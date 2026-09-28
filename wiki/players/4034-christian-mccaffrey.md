@@ -3,10 +3,11 @@ sleeper_id: '4034'
 name: Christian McCaffrey
 position: RB
 nfl_team: SF
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-27 [injury] Fully healthy and playing a full workload through the season's first three weeks — the camp calf/tightness concern flagged in the 2026-08-27 bigboard review has not resurfaced. ([SF 49ers beat coverage])
 - 2026-09-09 [injury] News-sweep update: did not participate in drills during the 49ers' first open Melbourne practice Sept 7 ahead of the Week 1 opener vs. LAR (no official designation required due to the international-game scheduling exception), but returned to practice Tuesday Sept 8 and is in line to play Thursday's opener — brief scare, not a new setback ([Yahoo Sports](https://sports.yahoo.com/articles/49ers-christian-mccaffrey-injury-emerges-084500791.html)).
 - 2026-09-02 [injury] Returned to full practice in uniform on Aug 23 for the first time in three weeks, ending the "tightness" absence that began ~Aug 8; McCaffrey says the absence was planned load management, not a setback ("part of the plan from the jump") — positive resolution of the durability concern flagged in the 2026-08-27 bigboard injury review (moved #1→#4) ([Heavy.com](https://heavy.com/sports/nfl/san-francisco-49ers/massive-update-christian-mccaffrey-returns/))
 - 2026-08-20 [injury] Still sidelined by the "tightness" more than a week after it first surfaced; Shanahan frames sitting him as precautionary, location never specified by the team ([Yahoo Sports](https://sports.yahoo.com/articles/christian-mccaffrey-injury-shanahan-explains-224543892.html), [ESPN camp intel](https://www.espn.com/nfl/story/_/id/49427696/san-francisco-49ers-training-camp-2026-intel-updates))

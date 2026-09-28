@@ -1,9 +1,10 @@
 ---
 team_code: PIT
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [injury] Rico Dowdle (toe) OUT again for Week 3 vs. Cincinnati (Steelers signed RB Travis Homer for depth), while Michael Pittman (foot) and Jaylen Warren (shoulder) both cleared their questionable tags and are expected to play. See individual player pages. ([Athlon](https://athlonsports.com/nfl/trending/final-injury-report-for-bengals-steelers-will-michael-pittman-jr-jaylen-warren-play))
 - 2026-09-19/20 [injury] Michael Pittman downgraded to out for Wk2 vs NE with a foot injury (unrelated to the earlier hamstring) — see his page ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/steelers-downgrade-wr-michael-pittman-jr-to-out-with-a-foot-injury))
 - 2026-09-20 [injury] Rico Dowdle (toe) ruled out (done for the day) in Wk2 vs NE; Jaylen Warren took over the majority of backfield snaps ([CBS Sports](https://www.cbssports.com/fantasy/football/news/steelers-rico-dowdle-done-for-day-with-toe-injury/))
 - 2026-09-14 [depth-chart] Steelers beat Atlanta in Week 1 with both WRs (DK Metcalf, Michael Pittman) active despite lingering camp injuries, and a genuine RB committee at the top of the depth chart: Jaylen Warren (10 carries/46 yds + 5 catches/27 yds) had the better overall day but Rico Dowdle matched him in touches (10) — no clear lead back has separated yet ([Steelers Depot](https://steelersdepot.com/2026/09/2026-week-1-steelers-vs-falcons-live-update-and-discussion-thread-second-half/)).

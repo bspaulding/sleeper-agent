@@ -3,10 +3,11 @@ sleeper_id: '8228'
 name: Jaylen Warren
 position: RB
 nfl_team: PIT
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [injury] Questionable (shoulder, from Wk2) but cleared to play Week 3 vs. Cincinnati; Rico Dowdle (toe) remains out, so Warren keeps the larger early-down share for another week. ([Yahoo Sports](https://sports.yahoo.com/articles/steelers-news-michael-pittman-jr-135352464.html))
 - 2026-09-20 [depth-chart] Took over the majority of backfield snaps in Wk2 vs NE after Rico Dowdle (toe) was ruled out ([CBS Sports](https://www.cbssports.com/fantasy/football/news/steelers-rico-dowdle-done-for-day-with-toe-injury/))
 - 2026-09-14 [depth-chart] News-sweep update: Week 1 vs. Atlanta confirmed a true committee, not a Warren-led backfield — Warren out-touched Dowdle on paper (10 carries/46 yards + 5 catches/27 yards on 6 targets vs. Dowdle's 10 touches) and had the better overall day, but both backs played meaningful, similar-volume roles in the win. Worth continued tracking rather than assuming Warren has pulled away ([Steelers Depot Week 1 thread](https://steelersdepot.com/2026/09/2026-week-1-steelers-vs-falcons-live-update-and-discussion-thread-second-half/)).
 - 2026-09-04 [depth-chart] Warren and Rico Dowdle combined for only 10 preseason carries (35 yards) all summer, leaving the actual regular-season split genuinely unresolved; Dowdle is nursing a nagging, undisclosed injury he's opted to play through rather than get evaluated for, which could tilt early-season work back toward Warren if it flares up ([CBS Sports](https://www.cbssports.com/fantasy/football/news/steelers-jaylen-warren-to-share-backfield-with-dowdle/)).

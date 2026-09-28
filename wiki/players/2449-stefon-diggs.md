@@ -3,10 +3,11 @@ sleeper_id: '2449'
 name: Stefon Diggs
 position: WR
 nfl_team: WAS
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-21 [depth-chart] Leading Washington's offense in target share (23.8%) and red-zone target share (36.4%) through 2 games, running WR11 in PPG (18.6) — clearly the primary target with Terry McLaurin, now catching passes from Marcus Mariota after Jayden Daniels' elbow injury. ([SI/OnSI](https://www.si.com/onsi/fantasy/injuries/latest-fantasy-football-injury-update-for-jayden-daniels-lowers-ceiling-of-commanders-wide-receivers))
 - 2026-09-20 [depth-chart] Jayden Daniels (elbow, out indefinitely) replaced by Marcus Mariota at QB — material headwind for the passing-game outlook, see WAS team page ([Washington Times](https://www.washingtontimes.com/news/2026/sep/20/commanders-daniels-appears-injure-left-elbow-cowboys/))
 - 2026-09-15 [depth-chart] Box score resolves the prior entry's follow-up flag: led all Commanders in targets (9), catching 4 for 55 yards and a TD (with two drops mixed in) vs. Philadelphia — a clear signal he's a primary target alongside Terry McLaurin, not a complementary piece ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-13/diggs-goes-for-4-55-1-in-commanders-debut)).
 - 2026-09-14 [depth-chart] News-sweep update: made his Commanders debut in Washington's Week 1 game vs. Philadelphia. No injury designation entering the game; paired with Terry McLaurin as expected. No detailed box score found in this pass — worth a follow-up if a real target-share signal is needed ([CBS Sports](https://www.cbssports.com/fantasy/football/news/patriots-stefon-diggs-not-on-week-1-injury-report/) — note: headline is a stale wire-service title from before his Patriots release, content covers the Commanders debut).

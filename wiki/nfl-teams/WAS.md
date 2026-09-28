@@ -1,9 +1,10 @@
 ---
 team_code: WAS
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-21 [injury] Jayden Daniels won't need surgery on the dislocated elbow and won't go to IR for now, but is out at least through the Week 4 game vs. Atlanta with Marcus Mariota starting; Stefon Diggs has emerged as the clear early-season #1 target (23.8% target share, WR11 in PPG) in the meantime. See Diggs' page. ([PrizePicks](https://www.prizepicks.com/playbook-article/jayden-daniels-injury-update-how-much-time-will-commanders-qb-miss))
 - 2026-09-20 [injury] Jayden Daniels dislocated his left elbow late in the Wk2 loss to DAL (stepped on by his own lineman, arm buckled), ruled out; X-rays showed no fracture, MRI/further tests to follow, status "out indefinitely" — Marcus Mariota is now the starter, materially affecting the McLaurin/Diggs passing-game outlook ([Washington Times](https://www.washingtontimes.com/news/2026/sep/20/commanders-daniels-appears-injure-left-elbow-cowboys/))
 - 2026-09-13 [injury] Lost the Week 1 opener to Philadelphia; TE Chig Okonkwo exited with a hamstring injury (2/16 before leaving) — see his page ([Yahoo Sports](https://sports.yahoo.com/articles/commanders-te-chig-okonwo-departs-232728515.html)).
 - 2026-09-14 [depth-chart] Stefon Diggs made his Commanders debut in the same Week 1 game at Philadelphia, pairing with Terry McLaurin as expected. Note: a separate search result referencing a Jayden Daniels elbow re-injury and a "31-0 loss to Minnesota" is dated to later in the season, not Week 1 — not filed as current news ([search corroboration via Eagles/Commanders Week 1 coverage]).
