@@ -3,10 +3,11 @@ sleeper_id: '6790'
 name: D'Andre Swift
 position: RB
 nfl_team: CHI
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [depth-chart] Remains Chicago's clear workhorse (61.4% snap rate, 48.6% rush share, 9.4% target share, RB5 in PPG averaging ~20 touches/116 total yds) through 2 games — but QB Caleb Williams' Week 2 hamstring injury (will miss time) is a real headwind for passing-game/game-script volume heading into Week 3 vs. Philadelphia. ([FantasyPros](https://www.fantasypros.com/nfl/notes/443073/dandre-swift-2026-week-3-outlook.php))
 - 2026-09-14 [depth-chart] News-sweep update: dominant Week 1 vs. Carolina — 18 carries for 124 yards and 3 rushing TDs (his first career 3-TD game) plus a catch, in a 59-37 Bears win. Confirms the Sept 3 cramping scare was a non-issue and that he's firmly Chicago's clear lead back, not a committee timeshare with Kyle Monangai ([Yahoo Sports](https://sports.yahoo.com/articles/dandre-swift-goes-bonkers-week-023549178.html)).
 - 2026-09-09 [injury] News-sweep update: returned to practice Sept 7 alongside Kyle Monangai for a full "brisk, 50-minute" session — confirms the Sept 3 cramp was not a lingering issue, no Week 1 concern ([Yahoo Sports](https://sports.yahoo.com/articles/latest-injury-updates-bears-rbs-184429103.html)).
 - 2026-09-03 [injury] Left a Sept 3 practice with an apparent left-leg injury after an otherwise-healthy camp; ESPN reported it was only cramping, not a new soft-tissue injury — no practice time expected to be missed ([Chicago Sun-Times](https://chicago.suntimes.com/bears/2026/09/03/bears-practice-report-rb-dandre-swift-wr-rome-odunze-injuries)).

@@ -3,10 +3,11 @@ sleeper_id: '7553'
 name: Kyle Pitts
 position: TE
 nfl_team: ATL
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-27 [depth-chart] Follow-up on the Penix-return optimism: still nearly invisible in Week 3 vs. Green Bay even with Michael Penix Jr. starting — 1-of-2 targets for 5 yards; blocking TE Austin Hooper (not Pitts) scored Atlanta's TE touchdown. Through 3 games: 2 catches, 20 yards, 6 targets (7.4% target share, 50% snap share). The expected target-share bump with Penix back hasn't materialized yet — worth re-checking after a larger sample. ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-24/kyle-pitts-silent-austin-hooper-scores-in-win), [FantasyPros](https://www.fantasypros.com/nfl/notes/443081/kyle-pitts-2026-week-3-outlook.php))
 - 2026-09-23 [depth-chart] Michael Penix Jr. is back from injury and starting Week 3's Thursday-night game at Green Bay, ending the Cooper Rush stint that produced Pitts' catchless/1-catch openings. Reporting frames this as a clear positive for Pitts' target share — he saw more targets per game with Penix under center in 2025 than in either 2026 game under Rush ([Yahoo Sports](https://sports.yahoo.com/articles/kyle-pitts-michael-penix-history-182642237.html)).
 - 2026-09-18 [depth-chart] Cooper Rush starting at QB again (Penix still on ACL rehab) — see ATL team page; near-term efficiency headwind ([NFL.com](https://www.nfl.com/news/falcons-qb-cooper-rush-start-week-2-panthers))
 - 2026-09-14 [injury] News-sweep update: the Sept 4 hamstring concern didn't cost him Week 1 — he played, resolving the uncertainty. Production was a non-factor (1 target, 0 catches) in a loss to Pittsburgh, but the cause was backup QB Cooper Rush playing in place of both an unavailable Tua Tagovailoa and Michael Penix Jr. (note: those are the Falcons' Week 1 QB circumstances per the recap, worth double-checking against the roster since Atlanta's starter has otherwise been reported as Penix) rather than any Pitts-specific issue — not a role/health concern, just a bad-QB-play game ([Yahoo Sports](https://ca.sports.yahoo.com/news/kyle-pitts-delivers-bagel-season-010518605.html)).

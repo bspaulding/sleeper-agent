@@ -1,9 +1,10 @@
 ---
 team_code: CHI
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-23 [injury] QB Caleb Williams' Week 2 hamstring injury will cost him Week 3 vs. Philadelphia — a headwind for D'Andre Swift's passing-game volume even as Swift remains the clear lead back (61.4% snap rate, RB5 in PPG). See Swift's page. ([FantasyPros](https://www.fantasypros.com/nfl/notes/443073/dandre-swift-2026-week-3-outlook.php))
 - 2026-09-20 [injury] Caleb Williams was carted off in the Wk2 9-3 loss to Minnesota with a non-contact right hamstring injury; severity/timetable unknown pending Monday tests, uncertain for the Wk3 MNF vs Philadelphia ([ESPN](https://www.espn.com/nfl/story/_/id/49991729/bears-caleb-williams-leaves-cart-falling-scramble))
 - 2026-09-14 [depth-chart] Bears blew out Carolina 59-37 in Week 1. D'Andre Swift (our fantasy roster) had his best game in years — 18 carries, 124 yards, 3 rushing TDs — confirming the Sept 3 cramping scare was a non-issue and that he's the clear lead back over Kyle Monangai ([Yahoo Sports](https://sports.yahoo.com/articles/dandre-swift-goes-bonkers-week-023549178.html)).
 - 2026-09-09 [injury] Bears skill-position group banged up simultaneously heading into the Sept 13 opener at Carolina: D'Andre Swift (cramp, resolved, returned to practice Sept 7), Rome Odunze (foot, non-participant Sept 8, officially day-to-day — the most unresolved of the group), Luther Burden (groin, limited participant, trending toward Week 1), and Kyle Monangai (hyperextended knee, out "several weeks," not a Week 1 factor) — see player pages for individual detail ([Chicago Sun-Times](https://chicago.suntimes.com/bears/2026/09/03/bears-practice-report-rb-dandre-swift-wr-rome-odunze-injuries), [Yahoo Sports](https://sports.yahoo.com/articles/rome-odunze-injury-latest-bears-011357462.html)).

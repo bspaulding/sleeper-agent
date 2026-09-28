@@ -1,9 +1,10 @@
 ---
 team_code: BAL
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-27 [injury] TE Mark Andrews exited the Week 3 game vs. Dallas (played in Rio de Janeiro) with a hand injury, returned after halftime; WR Zay Flowers played through a hamstring issue on a reported snap/pitch-count plan. Rashod Bateman picked up added target share. See individual player pages. ([Yahoo Sports](https://sports.yahoo.com/articles/ravens-te-mark-andrews-listed-213916737.html), [CBS Sports](https://www.cbssports.com/nfl/news/zay-flowers-cowboys-week-3-ravens-wr-status/))
 - 2026-09-18/19 [injury] Zay Flowers doubtful for Wk2 vs Saints with an aggravated hamstring — likely boosts Mark Andrews' target share ([Baltimore Beatdown](https://www.baltimoreravens.com/news/jakobi-lane-injured-reserve-wrist-surgery-ravens-rookie-wide-receiver-2026))
 - 2026-09-16/17 [injury] Ja'Kobi Lane fractured his wrist in the Wk1 loss to the Colts, had surgery, and was placed on IR — out a minimum of 4 games (~thru Wk6) ([Baltimore Ravens official](https://www.baltimoreravens.com/news/jakobi-lane-injured-reserve-wrist-surgery-ravens-rookie-wide-receiver-2026))
 - 2026-09-13 [injury] Won the Week 1 opener over Indianapolis 41-23 (Jackson 324 pass yds/1 TD, Henry 144 rush yds) but banged up the WR room: Zay Flowers went for a huge first half (5/150/1) before being ruled out with an aggravated hamstring, and rookie Ja'Kobi Lane suffered a fractured wrist — see both pages ([Yahoo Sports](https://sports.yahoo.com/articles/ravens-qb-lamar-jackson-dealt-134642151.html)).

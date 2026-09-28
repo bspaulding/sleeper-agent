@@ -3,10 +3,11 @@ sleeper_id: '9997'
 name: Zay Flowers
 position: WR
 nfl_team: BAL
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-27 [injury] Active for the Week 3 game vs. Dallas despite the hamstring that cost him Week 2 — DNP Wed/Thu, limited Fri, tested it pregame and was cleared, but reportedly on a snap/pitch-count plan rather than a full workload. ([CBS Sports](https://www.cbssports.com/nfl/news/zay-flowers-cowboys-week-3-ravens-wr-status/))
 - 2026-09-18/19 [injury] Doubtful for Wk2 vs Saints, aggravated hamstring, unlikely to play ([Baltimore Beatdown](https://www.baltimorebeatdown.com/baltimore-ravens-injuries/85135/ravens-week-2-injury-report-flowers-doubtful-3-starters-questionable))
 - 2026-09-15 [injury] Follow-up: per NFL Network's Ian Rapoport, the hamstring is "not considered serious"; HC Jesse Minter called him day-to-day and is optimistic for Week 2 vs. New Orleans, pending further evaluation ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/jesse-minter-calls-zay-flowers-day-to-day-with-hamstring-injury)).
 - 2026-09-13 [injury] Had a career day in the Week 1 win over Indianapolis (5 catches for 150 yards and a TD in the first half alone) before being ruled out for the rest of the game after aggravating the hamstring injury that had bothered him in camp; not viewed as serious, but worth confirming ahead of Week 2 ([Athlon](https://athlonsports.com/nfl/trending/lamar-jackson-ravens-double-loss-zay-flowers-injury-colts)).
