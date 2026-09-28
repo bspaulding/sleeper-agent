@@ -1,9 +1,10 @@
 ---
 team_code: DEN
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [injury] J.K. Dobbins (hip/hamstring) and RJ Harvey (hamstring) both worked through minor issues ahead of Week 3 vs. the Rams — Dobbins trending to play and remains the depth-chart RB1 over Harvey. ([SI Broncos](https://www.si.com/nfl/broncos/onsi/broncos-jk-dobbins-good-hamstring-injury))
 - 2026-09-20 [injury] RJ Harvey (hamstring) and J.K. Dobbins (hamstring, left game ~3rd quarter after 10 car/36 yds) both banged up in the Wk2 win over Jacksonville — Jonah Coleman (10 car/39 yds/TD + 3 rec/19 yds) and Tyler Badie stepped into the lead-back reps ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/rj-harvey-is-out-for-the-broncos-on-sunday), [Yahoo Sports](https://sports.yahoo.com/articles/jonah-coleman-thrives-bigger-role))
 - 2026-09-15 [depth-chart] Result: lost the MNF opener at Kansas City 31-10. Bo Nix's season debut was rough (131 yds passing, 1 TD/1 INT, 3 fumbles); J.K. Dobbins was capped at 8 carries/36 yards by the lopsided game script; Marvin Mims was the only injury-report name and played — see individual player pages for full lines ([ESPN](https://www.espn.com/nfl/story/_/id/49944600/2026-nfl-week-1-kansas-city-chiefs-denver-broncos-kenneth-walker-patrick-mahomes)).
 - 2026-09-14 [depth-chart] Bo Nix (recovered from an ankle fracture suffered in the Jan. 2026 playoffs) is set to make his season debut tonight (Sept 14) at Kansas City — the Broncos' Week 1 game is the last of the week's slate, so no result yet as of this sweep. RJ Harvey (offseason labrum repair) is fully cleared for practice. A separate "Xavier Worthy shoulder injury in season opener" story that surfaced while researching this matchup is dated to the *2025* opener vs. the Chargers, not this game — flagging so it isn't mistaken for current news ([Denverbroncos.com](https://www.denverbroncos.com/news/i-can-t-wait-broncos-qb-bo-nix-ready-for-return-to-regular-season-action-in-prime-time-matchup-vs-chiefs)).

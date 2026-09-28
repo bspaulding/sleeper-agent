@@ -1,6 +1,6 @@
 ---
 team_code: DAL
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News

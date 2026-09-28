@@ -3,10 +3,11 @@ sleeper_id: '5001'
 name: Dalton Schultz
 position: TE
 nfl_team: HOU
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-20 [depth-chart] Confirmed as C.J. Stroud's go-to target with Nico Collins out a 2nd straight week — 12-of-14 targets for 140 yards in the Week 2 loss to Cincinnati. ([search corroboration via Texans Week 2/3 coverage])
 - 2026-09-19 [depth-chart] Nico Collins (hamstring) out for Wk2 — expected uptick in passing-game usage with Collins sidelined ([RotoBaller](https://www.rotoballer.com/player-news/kayshon-boutte-is-set-for-a-bigger-role-without-nico-collins/1944773))
 - 2026-09-15 [depth-chart] Week 1: 4 catches on 8 targets for 35 yards in the loss to Buffalo — second on the team in targets behind Nico Collins' 10, confirming a steady early-down/red-zone role in Houston's offense ([CBS Sports](https://www.cbssports.com/fantasy/football/news/cowboys-dalton-schultz-four-targets-week-1)).
 - 2026-08-29 [transaction] Signed a one-year, $12.6M extension through 2027 ($17.6M guaranteed) after a career-best 82-catch, 106-target season ([Yahoo Sports](https://sports.yahoo.com/nfl/players/31107/))
