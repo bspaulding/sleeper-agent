@@ -1,9 +1,10 @@
 ---
 team_code: MIN
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-27 [injury] Justin Jefferson (ankle) was ruled OUT of the Week 3 loss to Tampa Bay, status uncertain into Week 4 vs. Miami — Jordan Addison stepped into the WR1 role in his absence (3 rec/75 yds/1 TD). See both players' pages. ([MPR News](https://www.mprnews.org/story/2026/09/27/justin-jefferson-out-to-ankle-injury-as-vikings-beat-buccaneers))
 - 2026-09-21 [injury] Kyler Murray cleared the concussion protocol Monday, set to start Wk3 vs. Tampa Bay — see his page ([NFL.com](https://www.nfl.com/news/kyler-murray-clears-concussion-protocol-will-start-vikings-bears))
 - 2026-09-20 [depth-chart] With Jordan Mason on IR, Aaron Jones assumed the full lead-back role: 23 car/105 yds in the Wk2 win over Chicago ([FantasyPros](https://www.fantasypros.com/nfl/news/609348/aaron-jones-sr-leads-ground-attack-week-2-win-over-bears.php))
 - 2026-09-16 [injury] Jordan Mason placed on IR (fractured thumb, surgery), out a minimum of 4 games (Wk2-5) ([ESPN](https://www.espn.com/nfl/story/_/id/49959077/vikings-rb-jordan-mason-put-ir-having-surgery-thumb))

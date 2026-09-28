@@ -3,10 +3,11 @@ sleeper_id: '9493'
 name: Puka Nacua
 position: WR
 nfl_team: LAR
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [injury] Now diagnosed as primarily a groin injury (not just hip soreness) — officially doubtful for the Week 3 road game at Denver. Team optimistic he could return as soon as Week 4 vs. Philadelphia if there's no setback; surgery not currently expected. ([Bleacher Report](https://bleacherreport.com/articles/25501963-puka-nacua-injury-update-new-timeline-return-rams-after-missing-week-2-vs-giants))
 - 2026-09-21 [injury] Inactive (hip) for the Mon night Wk2 win over the Giants after missing practice Fri/Sat — watched in street clothes; no return timeline given ([NFL.com](https://www.nfl.com/news/rams-wr-puka-nacua-hip-inactive-monday-giants))
 - 2026-09-21 [injury] Groin/hip soreness, questionable, a game-time decision for the Mon night Wk2 game vs Giants ([SI Rams](https://www.si.com/nfl/rams/onsi/rams-injury-report-puka-nacua-questionable-groin-injury))
 - 2026-09-08 [injury] Positive resolution: ESPN's Jeremy Fowler reported Sept 6 that Nacua's "been back in stride this week, no setbacks," and the Rams expect him to play in the Sept 10 opener vs. San Francisco in Melbourne — first clear Week 1 confirmation since the Aug 11 psoas exit ([heavy.com](https://heavy.com/sports/nfl/los-angeles-rams/espn-fowler-puka-nacua-psoas-injury-update/)).

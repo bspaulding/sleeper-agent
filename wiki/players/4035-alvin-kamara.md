@@ -3,10 +3,11 @@ sleeper_id: '4035'
 name: Alvin Kamara
 position: RB
 nfl_team: 'NO'
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [injury] Fully practicing (knee) for a second straight day heading into Week 3 vs. Baltimore — trending toward an uncapped role after his Week 2 season debut. ([SI Saints](https://www.si.com/nfl/saints/onsi/saints-get-concerning-injury-updates-on-two-key-players-before-ravens-01m2pqgfcsgd))
 - 2026-09-20 [injury-return] Came off the injury report (knee) and made his season debut in Wk2 vs Ravens after missing Wk1 entirely ([Canal Street Chronicles](https://www.canalstreetchronicles.com/new-orleans-saints-injuries/114905/fridays-saints-vs-ravens-final-injury-report-alvin-kamara-cam-jordan-are-back))
 - 2026-09-12 [injury] Officially held out of the Week 1 opener at Detroit despite full practice participation Friday — Saints erring cautious with the MCL sprain; targeting a Week 2 season debut at Baltimore instead ([lastwordonsports.com](https://lastwordonsports.com/nfl/2026/09/13/alvin-kamara-injury-update-2/)).
 - 2026-09-03 [injury] Still not on the practice field as of Thursday Sept 3, about a week and a half before the Saints' Sept 13 opener; on track to miss at least the opener and possibly all three of New Orleans' September games if recovery runs the full month-plus. Travis Etienne is the clear early-season lead back in his absence ([SI Saints](https://www.si.com/nfl/saints/onsi/news/saints-get-alvin-kamara-injury-update-after-star-rb-misses-practice-zach3)).

@@ -1,9 +1,10 @@
 ---
 team_code: LAR
-last_researched: '2026-09-23'
+last_researched: '2026-09-28'
 ---
 
 ## News
+- 2026-09-25 [injury] Puka Nacua's groin injury has him doubtful for Week 3 at Denver, with a possible Week 4 return vs. Philadelphia if no setback; Davante Adams stepped up big in his absence (8 catches, 195 yds, 2 TD in Wk2). See both players' pages. ([Bleacher Report](https://bleacherreport.com/articles/25501963-puka-nacua-injury-update-new-timeline-return-rams-after-missing-week-2-vs-giants))
 - 2026-09-21 [depth-chart] Beat the Giants 28-6 on Mon night Wk2 (Stafford 4 TD passes, Kyren Williams TD, Davante Adams big game) with Puka Nacua inactive (hip) — see his page ([KSAT](https://www.ksat.com/sports/2026/09/22/davante-adams-matthew-stafford-lead-rams-past-giants-28-6-after-jaxson-darts-injury/))
 - 2026-09-21 [injury] Puka Nacua dealing with groin/hip soreness, questionable, a game-time decision for the Mon night Wk2 game vs Giants ([SI Rams](https://www.si.com/nfl/rams/onsi/rams-injury-report-puka-nacua-questionable-groin-injury))
 - 2026-09-14 [depth-chart] Puka Nacua's training-camp psoas/groin soreness resolved in time for the Rams' international Week 1 opener vs. San Francisco in Melbourne (Sept 10); he and Davante Adams were both expected to play. No confirmed final score found in this pass — worth a quick follow-up if it becomes decision-relevant ([Yahoo Sports](https://sports.yahoo.com/articles/puka-nacua-play-week-1-215248884.html)).
