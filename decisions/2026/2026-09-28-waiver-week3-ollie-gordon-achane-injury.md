@@ -3,7 +3,7 @@ date: '2026-09-28'
 kind: waiver
 season: '2026'
 week: 3
-status: recommended
+status: executed
 players_involved: ['12495', '4034']
 related_wiki:
   - wiki/players/12495-ollie-gordon.md
@@ -78,7 +78,6 @@ rather than noise.
 
 ## Outcome
 
-Not yet executed — this routine has no Sleeper write access. Commissioner to place the FAAB claim
-manually in Sleeper before the Tuesday 9/29 waiver deadline: claim Ollie Gordon II for $18-$22,
-drop Kyle Pitts (confirmed weakest TE post-sweep), with McBride's Week 4 concussion-protocol status
-worth a last look before submitting.
+Commissioner submitted the claim manually in Sleeper on 2026-09-29: Ollie Gordon II for **$20**
+FAAB (within the $18-$22 suggested range), dropping Kyle Pitts. This routine has no Sleeper write
+access, so the actual transaction happened outside this tool; recorded here for the log.
