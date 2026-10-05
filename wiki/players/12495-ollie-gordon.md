@@ -3,10 +3,11 @@ sleeper_id: '12495'
 name: Ollie Gordon
 position: RB
 nfl_team: MIA
-last_researched: '2026-09-28'
+last_researched: '2026-10-05'
 ---
 
 ## News
+- 2026-09-28 [injury] Achane's knee diagnosed as a torn ACL (season over, to IR); Gordon played 84% of Wk3 snaps (17 car/41 yds + TD, 3 rec) with Jaylen Wright (neck/foot) inactive. HC Hafley: RBs "going to have their roles" — Wright may reclaim early-down work when healthy. ([RotoStreetJournal](https://www.rotostreetjournal.com/2026/09/28/ollie-gordon-or-jaylen-wright-which-dolphins-rb-to-target-on-the-fantasy-week-4-waiver-wire/))
 - 2026-09-28 [depth-chart] Stepped in for De'Von Achane (knee, exited Wk3 vs. KC in the 1st
   quarter — see `wiki/nfl-teams/MIA.md`) and posted 37 yards + a TD before himself battling
   cramps late in the game; checked back in and finished it out. Trending count spiked to
