@@ -26,9 +26,11 @@ quality is what predicts DEF output, r≈0.32):
 - NYJ: home vs CLE, NYJ 2.5-pt favorite, total 39.5 -> CLE implied ~18.5.
 - LAC: home vs DEN, 3.5-pt favorite, total 42.5 -> DEN implied ~19.5.
 
-JAX and NYJ are unrostered league-wide as of the 2026-10-08 sync. JAX was dropped by another
-roster this week, so it may still be in the waiver window (claim, not instant add); NYJ is the
-fallback. Drop GB for the add.
+Verified live against the Sleeper API 2026-10-08 ~23:31 UTC: JAX, NYJ, LAC, NE are on no roster;
+GB is still ours. JAX was dropped by roster 3 on 2026-10-07 ~12:49 UTC, so with `waiver_clear_days`
+= 2 it is still in the waiver window until ~2026-10-09 12:49 UTC (claim, not instant add). NYJ has
+no recent drop and can be added immediately. Recommendation: add NYJ now, drop GB; JAX only via
+claim/after it clears (do not drop GB until a JAX claim succeeds).
 
 ## Outcome
 
