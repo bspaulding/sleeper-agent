@@ -3,7 +3,7 @@ date: '2026-10-08'
 kind: waiver
 season: '2026'
 week: 5
-status: proposed
+status: executed
 players_involved: ['GB', 'JAX', 'NYJ']
 related_wiki: []
 related_decisions:
@@ -34,4 +34,7 @@ claim/after it clears (do not drop GB until a JAX claim succeeds).
 
 ## Outcome
 
-Proposed; awaiting manager decision and execution in Sleeper.
+Executed 2026-10-08 by the manager: added New York Jets D/ST as a free agent (no FAAB spent,
+budget still $75 remaining), dropped Green Bay D/ST. Chose NYJ over JAX: the matchups are nearly
+identical (CLE implied ~18.5 vs PHI implied ~18.0) and JAX was still in its waiver window, so no
+JAX claim was placed. Re-check DEF matchups for Week 6.
