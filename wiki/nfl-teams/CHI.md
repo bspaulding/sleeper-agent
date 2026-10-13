@@ -1,9 +1,10 @@
 ---
 team_code: CHI
-last_researched: '2026-09-28'
+last_researched: '2026-10-13'
 ---
 
 ## News
+- 2026-10-13 [injury] Wk5 at GB: Monangai (toe) OUT week-to-week; Caleb Williams (hamstring) questionable, Tyson Bagent named starter; Swift full participant Fri ([Bears.com](https://www.chicagobears.com/news/injury-update-bears-rb-kyle-monangai-ruled-out-qb-caleb-williams-questionable-for-packers-game))
 - 2026-09-23 [injury] QB Caleb Williams' Week 2 hamstring injury will cost him Week 3 vs. Philadelphia — a headwind for D'Andre Swift's passing-game volume even as Swift remains the clear lead back (61.4% snap rate, RB5 in PPG). See Swift's page. ([FantasyPros](https://www.fantasypros.com/nfl/notes/443073/dandre-swift-2026-week-3-outlook.php))
 - 2026-09-20 [injury] Caleb Williams was carted off in the Wk2 9-3 loss to Minnesota with a non-contact right hamstring injury; severity/timetable unknown pending Monday tests, uncertain for the Wk3 MNF vs Philadelphia ([ESPN](https://www.espn.com/nfl/story/_/id/49991729/bears-caleb-williams-leaves-cart-falling-scramble))
 - 2026-09-14 [depth-chart] Bears blew out Carolina 59-37 in Week 1. D'Andre Swift (our fantasy roster) had his best game in years — 18 carries, 124 yards, 3 rushing TDs — confirming the Sept 3 cramping scare was a non-issue and that he's the clear lead back over Kyle Monangai ([Yahoo Sports](https://sports.yahoo.com/articles/dandre-swift-goes-bonkers-week-023549178.html)).

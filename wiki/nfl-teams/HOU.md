@@ -1,9 +1,10 @@
 ---
 team_code: HOU
-last_researched: '2026-09-28'
+last_researched: '2026-10-13'
 ---
 
 ## News
+- 2026-10-13 [injury] Wk5 win vs TEN: Montgomery left with groin injury (week-to-week), Woody Marks took over lead role; Nico Collins 5 catches ([Fantasy Footballers](https://www.thefantasyfootballers.com/news/642038/nico-collins-five-grabs-in-week-5-win/))
 - 2026-09-25 [injury] Nico Collins (hamstring) is missing a 2nd straight game (Week 3 vs. Colts), still not practicing and very much in doubt — TE Dalton Schultz has emerged as Stroud's top target in his absence (12-of-14 targets, 140 yds Wk2). See both players' pages. ([Yahoo Sports](https://sports.yahoo.com/articles/deep-breath-h-town-nico-010738819.html))
 - 2026-09-19 [injury] Nico Collins ruled OUT for Wk2 vs Bengals with a Grade 1 hamstring strain (tweaked in Wed practice); not believed serious per Adam Schefter — Texans expected to lean on Xavier Hutchinson/Kayshon Boutte/Jaylin Noel at WR and more passing-game usage for Dalton Schultz, David Montgomery and Woody Marks with him out ([ESPN](https://www.espn.com/nfl/story/_/id/49975040), [RotoBaller](https://www.rotoballer.com/player-news/kayshon-boutte-is-set-for-a-bigger-role-without-nico-collins/1944773))
 - 2026-09-14 [injury] WR2 Jayden Higgins suffered a season-ending knee injury in practice; Texans traded for Kayshon Boutte (from New England) in response. Xavier Hutchinson, Jaylin Noel (hamstring) and Jared Wayne are competing for the remaining WR2 role behind Nico Collins, and Tank Dell (knee) opens the season on IR. No new Nico Collins injury — his camp rest was described as workload management, not health-related ([Yahoo Sports](https://sports.yahoo.com/articles/nico-collins-injury-confirms-status-213225666.html)).
