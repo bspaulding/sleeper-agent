@@ -30,8 +30,11 @@ top VORP name (+3.0), was rejected because his targets faded to 2 and 4 the last
 Keon Coleman (BUF) was the runner-up. Bateman was dropped in Week 5, past the 2-day
 `waiver_clear_days` window, so no claim or bid was needed.
 
-Open question not acted on: Sam Darnold is a likely dead bench spot too (Bryce Young 23.2 PPG
-vs Darnold 13.7), but check his keeper value before dropping.
+Darnold checked and kept (user call, 2026-10-15): best ball means bench spots are depth, not dead
+weight. His 13.7 PPG includes a Week 1 early exit; in three full games he averaged about 16.4.
+Best unrostered QBs (Brissett ARI 17.9, Watson CLE 16.6, Geno Smith 14.3) are only marginally
+better, and bye weeks don't favor a swap (Young's CAR bye was Week 5; Darnold's is Week 11,
+Brissett's Week 14). Revisit the QB pool only if Young is hurt.
 
 ## Data
 
