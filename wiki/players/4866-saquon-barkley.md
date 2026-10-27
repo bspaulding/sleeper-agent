@@ -3,10 +3,11 @@ sleeper_id: '4866'
 name: Saquon Barkley
 position: RB
 nfl_team: PHI
-last_researched: '2026-10-12'
+last_researched: '2026-10-27'
 ---
 
 ## News
+- 2026-10-26 [injury] Returned from a 2-game hamstring absence for MNF vs DAL, then left with a back injury (also visited the medical tent; Sirianni: on a pitch count) — status for Wk 8 unconfirmed ([NFL.com](https://www.nfl.com/news/nfl-news-roundup-latest-league-updates-from-monday-oct-26))
 - 2026-10-11 [injury] Listed OUT for Week 5 vs JAX with a hamstring injury ([CBS Sports](https://www.cbssports.com/nfl/news/nfl-week-5-injury-report-eagles-saquon-barkley-devonta-smith-out/))
 - 2026-09-20 [injury] Took a hard hit/stinger on the first offensive snap of Wk2 vs TEN, sat much of the 1st half, returned after halftime, getting an MRI ([CBS Sports](https://www.cbssports.com/nfl/news/eagles-saquon-barkley-exits-game-vs-titans-questionable-to-return/))
 - 2026-08 [injury] Tweaked his left foot/ankle at an Eagles practice (cleat came off, trainers checked him on the field); no further update on severity found — appears minor/precautionary given no absence reported since ([NBC Sports Philadelphia](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/saquon-barkley-gets-left-foot-ankle-checked-out-at-eagles-practice)).

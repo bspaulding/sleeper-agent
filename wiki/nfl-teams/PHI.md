@@ -1,9 +1,10 @@
 ---
 team_code: PHI
-last_researched: '2026-10-12'
+last_researched: '2026-10-27'
 ---
 
 ## News
+- 2026-10-26 [injury] Lost 38-21 to DAL on MNF (5th straight loss), short-handed: Hurts (clots, likely season-long), DeVonta Smith, Dontayvion Wicks out; Barkley left with back injury; Covey (knee) out — see player pages ([NFL.com](https://www.nfl.com/news/nfl-news-roundup-latest-league-updates-from-monday-oct-26), [ESPN recap](https://www.espn.com/nfl/recap?gameId=401873009))
 - 2026-10-11 [injury] Week 5 pregame (London vs JAX): Saquon Barkley (hamstring), DeVonta Smith (hamstring) and Marquise Brown (ankle) listed OUT; Darius Cooper expected to see an expanded WR role (waiver-trending add, role likely shrinks when starters return). Outcome of game not verified in this pass ([CBS Sports](https://www.cbssports.com/nfl/news/nfl-week-5-injury-report-eagles-saquon-barkley-devonta-smith-out/))
 - 2026-09-21 [injury] Follow-up: Dallas Goedert's Wk2 knee injury believed to be a sprained MCL, likely out "a few weeks" per Schefter/Rapoport — see his page ([Philadelphia Inquirer](https://www.inquirer.com/eagles/live/eagles-news-injury-report-next-game-dallas-goedert-20260921.html))
 - 2026-09-20 [injury] Dallas Goedert suffered a right knee injury vs TEN (hard hit on a block), questionable to return, Johnny Mundt next man up at TE ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/dallas-goedert-questionable-with-right-knee-injury))

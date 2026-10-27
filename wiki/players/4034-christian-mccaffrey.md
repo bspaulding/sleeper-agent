@@ -3,10 +3,11 @@ sleeper_id: '4034'
 name: Christian McCaffrey
 position: RB
 nfl_team: SF
-last_researched: '2026-09-28'
+last_researched: '2026-10-27'
 ---
 
 ## News
+- 2026-10-26 [injury] Mild hamstring strain in Sunday's loss to ATL; Shanahan 'pretty optimistic' he's fine after the bye ([NFL.com](https://www.nfl.com/news/nfl-news-roundup-latest-league-updates-from-monday-oct-26))
 - 2026-09-27 [injury] Fully healthy and playing a full workload through the season's first three weeks — the camp calf/tightness concern flagged in the 2026-08-27 bigboard review has not resurfaced. ([SF 49ers beat coverage])
 - 2026-09-09 [injury] News-sweep update: did not participate in drills during the 49ers' first open Melbourne practice Sept 7 ahead of the Week 1 opener vs. LAR (no official designation required due to the international-game scheduling exception), but returned to practice Tuesday Sept 8 and is in line to play Thursday's opener — brief scare, not a new setback ([Yahoo Sports](https://sports.yahoo.com/articles/49ers-christian-mccaffrey-injury-emerges-084500791.html)).
 - 2026-09-02 [injury] Returned to full practice in uniform on Aug 23 for the first time in three weeks, ending the "tightness" absence that began ~Aug 8; McCaffrey says the absence was planned load management, not a setback ("part of the plan from the jump") — positive resolution of the durability concern flagged in the 2026-08-27 bigboard injury review (moved #1→#4) ([Heavy.com](https://heavy.com/sports/nfl/san-francisco-49ers/massive-update-christian-mccaffrey-returns/))

@@ -1,9 +1,10 @@
 ---
 team_code: WAS
-last_researched: '2026-09-29'
+last_researched: '2026-10-27'
 ---
 
 ## News
+- 2026-10-19 [injury] WR Terry McLaurin out for season (torn patellar tendon); Mariota (knee) returning to practice this week ([CBS Sports](https://www.cbssports.com/nfl/news/commanders-terry-mclaurin-knee-injury-monday-night-football/), [NFL.com](https://www.nfl.com/news/nfl-news-roundup-latest-league-updates-from-monday-oct-26))
 - 2026-09-28 [transaction] RB Austin Ekeler expected to sign with Washington; TE Chig Okonkwo (hamstring) and LB Frankie Luvu (groin) uncertain for Week 4 in London, QB Jayden Daniels (elbow) practicing ([NFL.com roundup](https://www.nfl.com/news/nfl-news-roundup-latest-league-updates-from-monday-sept-28))
 - 2026-09-21 [injury] Jayden Daniels won't need surgery on the dislocated elbow and won't go to IR for now, but is out at least through the Week 4 game vs. Atlanta with Marcus Mariota starting; Stefon Diggs has emerged as the clear early-season #1 target (23.8% target share, WR11 in PPG) in the meantime. See Diggs' page. ([PrizePicks](https://www.prizepicks.com/playbook-article/jayden-daniels-injury-update-how-much-time-will-commanders-qb-miss))
 - 2026-09-20 [injury] Jayden Daniels dislocated his left elbow late in the Wk2 loss to DAL (stepped on by his own lineman, arm buckled), ruled out; X-rays showed no fracture, MRI/further tests to follow, status "out indefinitely" — Marcus Mariota is now the starter, materially affecting the McLaurin/Diggs passing-game outlook ([Washington Times](https://www.washingtontimes.com/news/2026/sep/20/commanders-daniels-appears-injure-left-elbow-cowboys/))
