@@ -27,3 +27,5 @@ Scouting only (no offer sent). Candidate: give D'Andre Swift (RB, CHI) to roster
 `{"give_value": 94.9, "get_value": 91.7, "value_delta": -3.2, "give_position_totals": {"RB": 94.9}, "get_position_totals": {"QB": 91.7}}`
 
 ## Outcome
+
+Passed 2026-11-04 by the manager: roster 10 is unlikely to accept (5-2, RB-heavy, Allen is their QB1) and QB is not costing wins. No offer sent. See decisions/2026/2026-11-04-waiver-week9-def-stream-check-hold-tb-no-moves.md.
