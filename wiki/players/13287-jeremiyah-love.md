@@ -3,10 +3,11 @@ sleeper_id: '13287'
 name: Jeremiyah Love
 position: RB
 nfl_team: ARI
-last_researched: '2026-09-28'
+last_researched: '2026-11-07'
 ---
 
 ## News
+- 2026-11-07 [injury] Tagged IR in Sleeper; last played Week 8 at 19% of snaps (Sleeper injury tag + nflverse snaps; no article pulled)
 - 2026-09-20 [depth-chart] Out-touched Allgeier 12-7 (9 car/29yd, 3 rec) in the Wk2 loss to Seattle but was outsnapped, so the committee still tilts toward Allgeier in snaps despite Love's better per-touch efficiency ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/jeremiyah-love-leads-backfield-with-12-touches))
 - 2026-09-15 [depth-chart] Week 1 debut: Allgeier out-snapped him 44-32 and out-touched him 19-13, but Love scored on his first career NFL touch and finished 11 carries/41 yards/TD plus 2 catches/9 yards in the 26-14 win over the Chargers — the committee tilts toward Allgeier early despite Love's draft pedigree ([Arizona Sports](https://arizonasports.com/nfl/arizona-cardinals/what-to-make-of-cardinals-usage-of-jeremiyah-love-tyler-allgeier-in-week-1-win)).
 - 2026-09-13 [injury] Played in the Week 1 win over the Chargers despite the questionable ankle designation; HC Mike LaFleur had signaled a rotation with Tyler Allgeier, so early-week workload split is worth checking against the box score ([CBS Sports](https://www.cbssports.com/nfl/news/jeremiyah-love-injury-update-cardinals-chargers/)).

@@ -3,10 +3,11 @@ sleeper_id: '12529'
 name: TreVeyon Henderson
 position: RB
 nfl_team: NE
-last_researched: '2026-10-22'
+last_researched: '2026-11-07'
 ---
 
 ## News
+- 2026-11-07 [transaction] Still tagged Out (Sleeper) with snap share down from 60% in Week 2 to 24% by Week 7; dropped by us — see decisions/2026/2026-11-07-freeagent-week9-darnold-out-add-geno-smith-robinson.md
 - 2026-10-22 [injury] High-ankle sprain (suffered Wk5 vs LV, out since); expected to miss multiple weeks but avoided surgery, and one report has him limited at Wednesday practice (a surprise). Thursday night Wk7 vs CHI status unconfirmed — check the official report. (search aggregates; no primary report pulled)
 - 2026-09-27 [depth-chart] Split touches roughly evenly with Rhamondre Stevenson in a 35-6 Week 3 blowout loss at Jacksonville (8 car/23 yds + 1 catch for Henderson) — a step down from his clear Week 2 lead role (60% snaps, 16 car/76 yds/TD); game-script driven (Patriots trailed big), not an apparent injury or role change. ([CBS Sports](https://www.cbssports.com/fantasy/football/news/patriots-treveyon-henderson-stymied-in-week-3-loss/))
 - 2026-09-20 [injury-return/depth-chart] Returned from an ankle injury (out since 8/24) for his Wk2 season debut vs Steelers: 16 car/76 yds/TD, out-snapping Rhamondre Stevenson 31-18 ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/henderson-scores-long-td-in-week-2-win))

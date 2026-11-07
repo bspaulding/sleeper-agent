@@ -74,6 +74,12 @@ mode (e.g. "has this specific rostered player been looked at recently") — it i
 sweep decides scope, since a player with no wiki page at all wouldn't show up in `wiki stale`
 regardless.
 
+- **File news whenever you find it, in any mode.** Standing rule from the manager (2026-11-07): any
+  news found during a targeted lookup, waiver/free-agent/trade analysis, or an ad hoc question must
+  be filed to the relevant wiki pages (and bump `last_researched`) in the same session, even when no
+  full sweep is running. Don't bump `wiki/news-sources.md`'s `last_swept` for these — that
+  checkpoint is only for full sweeps.
+
 ## 2. Source prioritization
 
 There's no fixed source list — judge on the fly. Prefer, roughly in this order:

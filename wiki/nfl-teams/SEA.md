@@ -1,9 +1,11 @@
 ---
 team_code: SEA
-last_researched: '2026-09-28'
+last_researched: '2026-11-07'
 ---
 
 ## News
+- 2026-11-04 [injury] QB Sam Darnold (quad) is out for Week 9 vs Arizona and week-to-week; Drew Lock (elbow) expected to start with Jalen Milroe as backup, and Seattle may add a QB — see Darnold's page ([Yahoo Sports](https://sports.yahoo.com/nfl/breaking-news/article/sam-darnold-ruled-out-for-week-9-game-vs-cardinals-due-to-quad-injury-191334773.html))
+- 2026-11-02 [depth-chart] Zach Charbonnet cleared to make his 2026 debut and Jadarian Price returning from IR, pushing Emanuel Wilson to special teams only (7 snaps vs Chicago) — see Wilson's page ([RotoWire](https://apps.rotowire.com/football/headlines/emanuel-wilson-news-joining-seattles-backfield-629813))
 - 2026-09-21 [injury] Jaxon Smith-Njigba added to the injury report with an illness, questionable for Wk3 vs. Saints; Zach Charbonnet now eligible to return to practice as his PUP window opens — see their pages ([SI/OnSI](https://www.si.com/nfl/seahawks/onsi/seahawks-news/seattle-seahawks-get-troubling-update-jaxon-smith-njigba-leading-into-saints-game))
 - 2026-09-20 [injury] Jadarian Price suffered a chest injury in Wk2 vs ARI, questionable to return; X-rays came back negative. Relevant since he's Seattle's primary early-down back with Zach Charbonnet (ACL, on PUP since 8/30) still out ([Seahawks.com](https://www.seahawks.com/news/2026-week-2-seahawks-at-cardinals-in-game-injury-updates))
 - 2026-09-14 [injury] QB Sam Darnold left the Sept 9 Week 1 win over New England early with what turned out to be a glute tendon injury (not the feared fractured hip), out at least through the Week 2 game at Arizona (Sept 20) and possibly longer — see his player page for the full timeline. Drew Lock started in relief and connected with Jaxon Smith-Njigba for a 45-yard TD; Kenneth Walker III was also unavailable for the opener. Encouraging sign for JSN's target share even in a backup-QB game ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/report-seahawks-seek-multiple-medical-opinons-on-sam-darnolds-injury)).
