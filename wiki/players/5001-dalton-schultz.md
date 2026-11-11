@@ -3,7 +3,7 @@ sleeper_id: '5001'
 name: Dalton Schultz
 position: TE
 nfl_team: HOU
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

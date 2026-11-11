@@ -3,7 +3,7 @@ sleeper_id: '11625'
 name: Adonai Mitchell
 position: WR
 nfl_team: NYJ
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

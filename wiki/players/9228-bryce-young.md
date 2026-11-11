@@ -3,7 +3,7 @@ sleeper_id: '9228'
 name: Bryce Young
 position: QB
 nfl_team: CAR
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

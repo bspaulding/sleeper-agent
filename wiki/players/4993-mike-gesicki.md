@@ -3,7 +3,7 @@ sleeper_id: '4993'
 name: Mike Gesicki
 position: TE
 nfl_team: CIN
-last_researched: '2026-09-22'
+last_researched: '2026-11-11'
 ---
 
 ## News

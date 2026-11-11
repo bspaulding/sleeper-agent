@@ -3,7 +3,7 @@ sleeper_id: '13274'
 name: Germie Bernard
 position: WR
 nfl_team: PIT
-last_researched: '2026-08-22'
+last_researched: '2026-11-11'
 ---
 
 ## News

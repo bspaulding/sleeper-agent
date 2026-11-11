@@ -1,6 +1,6 @@
 ---
 team_code: TB
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

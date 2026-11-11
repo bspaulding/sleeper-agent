@@ -3,7 +3,7 @@ sleeper_id: '8183'
 name: Brock Purdy
 position: QB
 nfl_team: SF
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

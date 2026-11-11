@@ -3,7 +3,7 @@ sleeper_id: '13276'
 name: Omar Cooper
 position: WR
 nfl_team: NYJ
-last_researched: '2026-08-22'
+last_researched: '2026-11-11'
 ---
 
 ## News

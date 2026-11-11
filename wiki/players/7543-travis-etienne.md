@@ -3,7 +3,7 @@ sleeper_id: '7543'
 name: Travis Etienne
 position: RB
 nfl_team: 'NO'
-last_researched: '2026-10-06'
+last_researched: '2026-11-11'
 ---
 
 ## News

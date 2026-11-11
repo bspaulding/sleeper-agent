@@ -3,7 +3,7 @@ sleeper_id: '7021'
 name: Rico Dowdle
 position: RB
 nfl_team: PIT
-last_researched: '2026-09-29'
+last_researched: '2026-11-11'
 ---
 
 ## News

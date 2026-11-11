@@ -3,7 +3,7 @@ sleeper_id: '12517'
 name: Colston Loveland
 position: TE
 nfl_team: CHI
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

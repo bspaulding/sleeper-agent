@@ -3,7 +3,7 @@ sleeper_id: '7571'
 name: Rashod Bateman
 position: WR
 nfl_team: BAL
-last_researched: '2026-10-22'
+last_researched: '2026-11-11'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '8150'
 name: Kyren Williams
 position: RB
 nfl_team: LAR
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

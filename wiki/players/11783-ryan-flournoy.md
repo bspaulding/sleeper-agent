@@ -3,7 +3,7 @@ sleeper_id: '11783'
 name: Ryan Flournoy
 position: WR
 nfl_team: DAL
-last_researched: '2026-08-29'
+last_researched: '2026-11-11'
 ---
 
 ## News

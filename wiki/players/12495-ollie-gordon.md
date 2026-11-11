@@ -3,7 +3,7 @@ sleeper_id: '12495'
 name: Ollie Gordon
 position: RB
 nfl_team: MIA
-last_researched: '2026-10-05'
+last_researched: '2026-11-11'
 ---
 
 ## News

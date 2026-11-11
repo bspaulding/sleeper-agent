@@ -1,6 +1,6 @@
 ---
 team_code: WAS
-last_researched: '2026-10-27'
+last_researched: '2026-11-11'
 ---
 
 ## News

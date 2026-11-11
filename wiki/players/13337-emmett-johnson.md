@@ -3,7 +3,7 @@ sleeper_id: '13337'
 name: Emmett Johnson
 position: RB
 nfl_team: KC
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

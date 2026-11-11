@@ -3,7 +3,7 @@ sleeper_id: '12474'
 name: Woody Marks
 position: RB
 nfl_team: HOU
-last_researched: '2026-10-13'
+last_researched: '2026-11-11'
 ---
 
 ## News

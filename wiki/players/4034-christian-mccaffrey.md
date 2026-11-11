@@ -3,7 +3,7 @@ sleeper_id: '4034'
 name: Christian McCaffrey
 position: RB
 nfl_team: SF
-last_researched: '2026-10-27'
+last_researched: '2026-11-11'
 ---
 
 ## News

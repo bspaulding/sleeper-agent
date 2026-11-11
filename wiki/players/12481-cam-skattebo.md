@@ -3,7 +3,7 @@ sleeper_id: '12481'
 name: Cam Skattebo
 position: RB
 nfl_team: NYG
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

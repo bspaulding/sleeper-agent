@@ -3,7 +3,7 @@ sleeper_id: '6797'
 name: Justin Herbert
 position: QB
 nfl_team: LAC
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

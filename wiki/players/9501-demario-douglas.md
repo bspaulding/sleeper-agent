@@ -3,7 +3,7 @@ sleeper_id: '9501'
 name: DeMario Douglas
 position: WR
 nfl_team: NE
-last_researched: '2026-08-29'
+last_researched: '2026-11-11'
 ---
 
 ## News

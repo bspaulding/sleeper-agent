@@ -3,7 +3,7 @@ sleeper_id: '9758'
 name: C.J. Stroud
 position: QB
 nfl_team: HOU
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News

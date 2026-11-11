@@ -3,7 +3,7 @@ sleeper_id: '10236'
 name: Dalton Kincaid
 position: TE
 nfl_team: BUF
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
