@@ -1,9 +1,10 @@
 ---
 team_code: HOU
-last_researched: '2026-10-13'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-11 [injury] Heading into the Week 10 SNF game vs. Detroit (Nov 15): WR Nico Collins (designated to return from IR) is a non-participant at midweek practice and trending doubtful, with the coach unwilling to commit to him playing; RB David Montgomery's groin injury (since Oct 11) has kept him out for weeks, with a return more likely around Week 11 (Nov 15 at Cleveland per that report's numbering) than this week. Woody Marks remains the clear lead back in Montgomery's absence. See both players' pages. ([4for4](https://www.4for4.com/news/texans-wr-nico-collins-doubtful-week-10))
 - 2026-10-13 [injury] Wk5 win vs TEN: Montgomery left with groin injury (week-to-week), Woody Marks took over lead role; Nico Collins 5 catches ([Fantasy Footballers](https://www.thefantasyfootballers.com/news/642038/nico-collins-five-grabs-in-week-5-win/))
 - 2026-09-25 [injury] Nico Collins (hamstring) is missing a 2nd straight game (Week 3 vs. Colts), still not practicing and very much in doubt — TE Dalton Schultz has emerged as Stroud's top target in his absence (12-of-14 targets, 140 yds Wk2). See both players' pages. ([Yahoo Sports](https://sports.yahoo.com/articles/deep-breath-h-town-nico-010738819.html))
 - 2026-09-19 [injury] Nico Collins ruled OUT for Wk2 vs Bengals with a Grade 1 hamstring strain (tweaked in Wed practice); not believed serious per Adam Schefter — Texans expected to lean on Xavier Hutchinson/Kayshon Boutte/Jaylin Noel at WR and more passing-game usage for Dalton Schultz, David Montgomery and Woody Marks with him out ([ESPN](https://www.espn.com/nfl/story/_/id/49975040), [RotoBaller](https://www.rotoballer.com/player-news/kayshon-boutte-is-set-for-a-bigger-role-without-nico-collins/1944773))

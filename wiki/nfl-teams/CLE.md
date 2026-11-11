@@ -1,9 +1,10 @@
 ---
 team_code: CLE
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-11 [injury] Full-sweep re-check: the long-flagged "Judkins ankle/fibula" search ambiguity from the Aug 27 bigboard review is resolved — that story is confirmed dated to the Week 16 2025 injury that ended his rookie season, not a new 2026 event. Judkins' live Sleeper status is clear (Active, no designation) as of this sync. See his page.
 - 2026-09-15 [transaction/injury] Dylan Sampson placed on IR (left knee, injured Wk1 vs Jacksonville), out a minimum of 4 games (eligible back ~Wk7, Oct 18 vs Baltimore); Browns signed Jaleel McLaughlin to fill the RB2/return role — clears the path for Quinshon Judkins as lead back ([Washington Times](https://www.washingtontimes.com/news/2026/sep/15/cleveland-browns-place-running-back-dylan-sampson-injured-reserve/))
 - 2026-09-15 [transaction] RB Dylan Sampson officially placed on IR for the Week 1 knee injury, eligible back as early as Week 6 vs. Baltimore; cements Quinshon Judkins as the clear lead back through at least Week 5. See both players' pages.
 - 2026-09-13 [injury] Lost the Week 1 opener at Jacksonville and lost RB Dylan Sampson to a first-quarter knee injury (downgraded to out, left on crutches with a brace postgame); Quinshon Judkins (12 carries, 33 yards in his return from last year's ankle fracture) and RB3 Raheim Sanders picked up the change-of-pace work — a multi-week Sampson absence would further cement Judkins as an every-down back — see Sampson/Judkins pages ([ClevelandBrowns.com](https://www.clevelandbrowns.com/news/dylan-sampson-questionable-to-return-vs-jaguars-with-knee-injury), [news5cleveland.com](https://www.news5cleveland.com/sports/browns/browns-rb-dylan-sampson-leaves-week-1-game-against-jaguars)).

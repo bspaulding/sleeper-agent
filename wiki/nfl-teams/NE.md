@@ -1,9 +1,10 @@
 ---
 team_code: NE
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-06/09 [injury] Both backfield/receiving pieces banged up in the Week 9 game vs. Green Bay (Nov 8): A.J. Brown ruled OUT beforehand with a new knee injury (separate from his earlier ankle sprain; has played only 3 games all season) and TreVeyon Henderson also ruled out; Rhamondre Stevenson left the game itself with a knee injury of his own and has no confirmed diagnosis yet, status unsettled for Week 10 at Detroit (Nov 15). See all three players' pages. ([Boston.com](https://www.boston.com/sports/new-england-patriots/2026/11/06/patriots-packers-injury-report-aj-brown/))
 - 2026-09-27 [depth-chart] RB touches split roughly evenly between TreVeyon Henderson and Rhamondre Stevenson in a 35-6 Week 3 blowout loss to Jacksonville (8 car/23 yds + 1 catch for Henderson vs. Stevenson) — a step down from Henderson's clear Week 2 lead role (60% snaps); appears game-script driven rather than a role change. See Henderson's page. ([CBS Sports](https://www.cbssports.com/fantasy/football/news/patriots-treveyon-henderson-stymied-in-week-3-loss/))
 - 2026-09-25 [injury] Lost both starting edge rushers this week — Dre'Mont Jones and Quintayvious Hutchins (Hutchins to IR) — plus safety Craig Woodson (shoulder, deactivated) entering the Week 3 loss to Jacksonville; already thin at edge after losing Harold Landry III in the offseason. Negative signal for DEF fantasy value, especially without a healthy pass rush. ([NESN](https://nesn.com/new-england-patriots/news/defensive-starters-patriots-injury-report-week-3/556ab3b1fc3156e125c4a253))
 - 2026-09-20 [injury-return/depth-chart] TreVeyon Henderson returned from an ankle injury (out since 8/24) for his Wk2 season debut vs Steelers: 16 car/76 yds/TD, out-snapping Rhamondre Stevenson 31-18; Stevenson fumbled early and finished with just 6 car/43 yds on 18 snaps ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/henderson-scores-long-td-in-week-2-win), [NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/rhamondre-stevenson-fumbles-in-week-2-win))

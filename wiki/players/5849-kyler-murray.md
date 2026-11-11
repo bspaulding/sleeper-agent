@@ -3,10 +3,11 @@ sleeper_id: '5849'
 name: Kyler Murray
 position: QB
 nfl_team: MIN
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-05 [injury] Ruled out of the Week 9 Monday-nighter vs. Buffalo with a hamstring strain, confirmed by MRI; HC Kevin O'Connell says he's not under consideration for IR. Carson Wentz started in his place. Next game is at Green Bay on Nov 15 (Week 10) — matches the current "Doubtful" tag ([AP via valleynewslive/alaskasnewssource](https://www.alaskasnewssource.com/2026/11/05/vikings-sit-murray-with-hamstring-strain-will-start-wentz-qb-against-bills-monday-night/))
 - 2026-09-21 [injury] Cleared the concussion protocol Monday; set to start Wk3 vs. Tampa Bay after missing Wk2 vs. Chicago (Carson Wentz went 9-3 win in relief) ([NFL.com](https://www.nfl.com/news/kyler-murray-clears-concussion-protocol-will-start-vikings-bears))
 
 - 2026-09-15 [injury] Follow-up: officially in the NFL's concussion protocol; day-to-day, with Carson Wentz set to start until he clears it — Murray is considered no better than Questionable for Week 2 vs. Chicago ([Central Oregon Daily](https://www.centraloregondaily.com/sports/kyler-murray-injury-update-as-vikings-qb-suffers-concussion-vs-packers/article_abd39a4d-f7ce-5ebe-afb2-35b69bf8cecf.html)).

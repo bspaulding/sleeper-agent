@@ -3,10 +3,11 @@ sleeper_id: '4943'
 name: Sam Darnold
 position: QB
 nfl_team: SEA
-last_researched: '2026-11-07'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-10 [injury] Still not ready to return as of this update — remains week-to-week with the quad strain (not the cracked rib, per HC Macdonald). Has a chance to play Week 10 (Nov 15 at Las Vegas) since Seattle's bye follows in Week 11, but no confirmed timeline yet ([Covers.com](https://www.covers.com/nfl/when-will-sam-darnold-return-2026))
 - 2026-11-07 [transaction] Dropped by us for Geno Smith while out for Week 9 — see decisions/2026/2026-11-07-freeagent-week9-darnold-out-add-geno-smith-robinson.md
 - 2026-11-04 [injury] Ruled out for Week 9 vs Arizona with a quad injury; HC Macdonald calls him week-to-week, no IR. Drew Lock (elbow) expected to start with Jalen Milroe as backup, and Seattle may add a QB ([Yahoo Sports](https://sports.yahoo.com/nfl/breaking-news/article/sam-darnold-ruled-out-for-week-9-game-vs-cardinals-due-to-quad-injury-191334773.html), [NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-11-04/lock-will-start-in-place-of-darnold-vs-arizona), [Fox/Outkick](https://www.foxnews.com/outkick-sports/sam-darnold-out-seahawks-week-9-game-arizona-cardinals-drew-lock))
 - 2026-09-25 [injury] Cleared the glute injury that cost him Week 2 — full practice participant Thursday/Friday ahead of Week 3 vs. Washington, back under center as Seattle's starter. ([Seahawks.com](https://www.seahawks.com/news/seahawks-qb-sam-darnold-ready-to-go-s-julian-love-ruled-out))

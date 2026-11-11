@@ -1,9 +1,10 @@
 ---
 team_code: GB
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-08/09 [injury] RB Josh Jacobs broke his right ring finger in the Week 9, 45-27 win over New England (Nov 8); needs surgery, reported "maximum of 3 weeks" absence per CBS's Matt Zenitz, and coach LaFleur wouldn't rule out IR. Week 10 availability vs. Minnesota is uncertain — a major hit to Green Bay's backfield. See his page. ([TSN](https://www.tsn.ca/nfl/article/lafleur-packers-rb-jacobs-needs-surgery-on-finger-ir-not-ruled-out-n1-50435349/))
 - 2026-09-20/21 [injury] WR Jayden Reed carted off face-first with a neck injury vs. NYJ, hospitalized overnight for observation with movement in extremities (positive sign) but no return timeline; ruled out for Wk3 vs. Atlanta — see his page ([Spectrum News 1](https://spectrumnews1.com/wi/milwaukee/news/2026/09/21/packers-jayden-reed-neck-injury))
 - 2026-09-18 [transaction] Josh Jacobs pleaded no contest (9/10) to a misdemeanor battery/property-damage charge; ESPN's Jeremy Fowler reports Jacobs could face a 4-6 game NFL suspension once the exempt-list case resolves — no timeline yet, remains off the active roster ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-18/fowler-jacobs-could-face-4-6-game-suspension))
 - 2026-09-20 [depth-chart] With Jacobs still out, the Wk2 OT win over NYJ produced a muddled committee: MarShawn Lloyd (6 car/20 yds, 2 rec TD) fumbled in the 4th quarter and lost his remaining touches, Kaleb Johnson took over as early-down back in OT (8 car, 4.0 ypc), and Chris Brooks remained the passing-down back ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/lloyd-loses-fumble-and-touches-in-packers-win))

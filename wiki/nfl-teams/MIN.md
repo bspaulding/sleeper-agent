@@ -1,9 +1,10 @@
 ---
 team_code: MIN
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-05 [injury] QB Kyler Murray ruled out of the Week 9 MNF game vs. Buffalo with a hamstring strain (confirmed by MRI), not under IR consideration; Carson Wentz started in his place. Next game is at Green Bay Nov 15 (Week 10), status still uncertain — see Murray's page. ([AP via alaskasnewssource](https://www.alaskasnewssource.com/2026/11/05/vikings-sit-murray-with-hamstring-strain-will-start-wentz-qb-against-bills-monday-night/))
 - 2026-09-27 [injury] Justin Jefferson (ankle) was ruled OUT of the Week 3 loss to Tampa Bay, status uncertain into Week 4 vs. Miami — Jordan Addison stepped into the WR1 role in his absence (3 rec/75 yds/1 TD). See both players' pages. ([MPR News](https://www.mprnews.org/story/2026/09/27/justin-jefferson-out-to-ankle-injury-as-vikings-beat-buccaneers))
 - 2026-09-21 [injury] Kyler Murray cleared the concussion protocol Monday, set to start Wk3 vs. Tampa Bay — see his page ([NFL.com](https://www.nfl.com/news/kyler-murray-clears-concussion-protocol-will-start-vikings-bears))
 - 2026-09-20 [depth-chart] With Jordan Mason on IR, Aaron Jones assumed the full lead-back role: 23 car/105 yds in the Wk2 win over Chicago ([FantasyPros](https://www.fantasypros.com/nfl/news/609348/aaron-jones-sr-leads-ground-attack-week-2-win-over-bears.php))

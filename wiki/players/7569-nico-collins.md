@@ -3,10 +3,11 @@ sleeper_id: '7569'
 name: Nico Collins
 position: WR
 nfl_team: HOU
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-11 [injury] Designated to return from IR but a non-participant at Wed/Thu practice ahead of the Week 10 SNF game vs. Detroit (Nov 15); HC DeMeco Ryans would not commit to him playing, and he's trending doubtful. Treat any "officially inactive" headlines with caution — the game itself is still days away as of this sweep ([4for4](https://www.4for4.com/news/texans-wr-nico-collins-doubtful-week-10))
 - 2026-09-25 [injury] Missing a second straight game (Week 3 vs. Colts) with the hamstring strain — has not practiced this week and is very much in doubt for Sunday; a longer absence than the original Grade 1 read suggested. ([Yahoo Sports](https://sports.yahoo.com/articles/deep-breath-h-town-nico-010738819.html))
 - 2026-09-19 [injury] Ruled OUT for Wk2 vs Bengals with a Grade 1 hamstring strain (tweaked in Wed practice); not believed serious per Adam Schefter ([ESPN](https://www.espn.com/nfl/story/_/id/49975040))
 - 2026-09-09 [depth-chart] News-sweep note: Collins himself is fine and the clear WR1, but the WR room behind him is thin entering Week 1 — Jayden Higgins (who was set to start opposite him) suffered a season-ending knee injury and was replaced via trade for Kayshon Boutte, and Tank Dell will miss at least the first four games. Minimal direct impact on Collins' own workload/target share, if anything a slight bump ([CBS Sports](https://www.cbssports.com/fantasy/football/news/texans-nico-collins-depth-chart-uncertain-behind-him/)).

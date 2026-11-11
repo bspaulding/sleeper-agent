@@ -3,10 +3,11 @@ sleeper_id: '5850'
 name: Josh Jacobs
 position: RB
 nfl_team: GB
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-08/09 [injury] Broke his right ring finger trying to stiff-arm a defender in the 1st quarter of the Week 9, 45-27 win over New England (Nov 8) — popped the bone back into place himself on the field. Needs surgery; CBS's Matt Zenitz reports a "maximum of 3 weeks" absence, and coach Matt LaFleur wouldn't rule out an IR stint. Week 10 availability vs. Minnesota is uncertain — matches the current "Out" tag, a major hit to Green Bay's backfield ([TSN](https://www.tsn.ca/nfl/article/lafleur-packers-rb-jacobs-needs-surgery-on-finger-ir-not-ruled-out-n1-50435349/), [Bleacher Report](https://bleacherreport.com/articles/25530880-josh-jacobs-injured-latest-rumors-surgery-decision-and-packers-rbs-timeline-return))
 - 2026-09-18 [transaction] Pleaded no contest (9/10) to a misdemeanor battery/property-damage charge; ESPN's Jeremy Fowler reports a possible 4-6 game NFL suspension once the exempt-list case resolves — no timeline yet, remains off the active roster ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-18/fowler-jacobs-could-face-4-6-game-suspension))
 - 2026-09-15 [transaction] Follow-up: pled no contest to both misdemeanor charges (convicted/fined $1,000 on the battery count; deferred judgment on the property-damage count, with a return court date in Sept. 2027), closing the criminal case — but the NFL says there's still no timeline for a personal-conduct suspension while it works to obtain video of the incident. The CBA sets a 6-game floor for domestic-violence cases, and any time already served on the Commissioner's Exempt List would count toward that total; still no fixed return date ([Yahoo Sports](https://sports.yahoo.com/articles/major-emerges-packers-rb-josh-040556944.html), [Pro Football Rumors](https://www.profootballrumors.com/2026/09/no-timeline-for-suspension-of-packers-rb-josh-jacobs)).
 - 2026-09-13 [transaction] Inactive for the Week 1 opener vs. Minnesota, remaining on the Commissioner's Exempt List with no resolution announced yet; MarShawn Lloyd/Kaleb Johnson handled the workload ([NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/packers-trade-for-steelers-rb-kaleb-johnson-as-josh-jacobs-is-placed-on-commissioner-s-exempt-list)).

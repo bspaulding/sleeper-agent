@@ -1,9 +1,10 @@
 ---
 team_code: 'NO'
-last_researched: '2026-09-28'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-11 [injury] Full-sweep re-check: the long-flagged "Olave concussion/IR" search ambiguity from the Aug 27 bigboard review is resolved — that headline referenced a hypothetical Week 13 absence, which hasn't happened yet relative to today (Week 10), so it's not acted on. Olave's live Sleeper status is clear (Active, no designation) as of this sync. See his page.
 - 2026-09-20 [injury-return] Alvin Kamara came off the injury report (knee) and made his season debut in Wk2 vs Ravens after missing Wk1 entirely — likely cuts into Travis Etienne's touches going forward ([Canal Street Chronicles](https://www.canalstreetchronicles.com/new-orleans-saints-injuries/114905/fridays-saints-vs-ravens-final-injury-report-alvin-kamara-cam-jordan-are-back))
 - 2026-09-17 [injury] Chris Olave (hamstring) was limited in practice and questionable for Wk2, described as precautionary ([Canal Street Chronicles](https://www.canalstreetchronicles.com/new-orleans-saints-injuries/114899/thursdays-saints-vs-ravens-injury-report-olave-limited-with-hamstring-injury))
 - 2026-09-09 [injury] New Orleans opens the season without both its WR2 and RB2: rookie WR Jordyn Tyson (hamstring, ~8 weeks, likely opens on IR) and RB Alvin Kamara (sprained MCL, out at least a month, could miss all three September games) are both sidelined. Travis Etienne is the clear lead back and Chris Olave the clear top WR target in their absence; see player pages ([SI Saints](https://www.si.com/nfl/saints/onsi/news/saints-get-alvin-kamara-injury-update-after-star-rb-misses-practice-zach3)).

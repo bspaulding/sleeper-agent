@@ -1,9 +1,10 @@
 ---
 team_code: SEA
-last_researched: '2026-11-07'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-10 [injury] Darnold update: still not ready to return as of this check, remains week-to-week with the quad (not the previously-reported cracked rib); has a chance to play Week 10 at Las Vegas (Nov 15) since the team's bye follows in Week 11. See his page. ([Covers.com](https://www.covers.com/nfl/when-will-sam-darnold-return-2026))
 - 2026-11-04 [injury] QB Sam Darnold (quad) is out for Week 9 vs Arizona and week-to-week; Drew Lock (elbow) expected to start with Jalen Milroe as backup, and Seattle may add a QB — see Darnold's page ([Yahoo Sports](https://sports.yahoo.com/nfl/breaking-news/article/sam-darnold-ruled-out-for-week-9-game-vs-cardinals-due-to-quad-injury-191334773.html))
 - 2026-11-02 [depth-chart] Zach Charbonnet cleared to make his 2026 debut and Jadarian Price returning from IR, pushing Emanuel Wilson to special teams only (7 snaps vs Chicago) — see Wilson's page ([RotoWire](https://apps.rotowire.com/football/headlines/emanuel-wilson-news-joining-seattles-backfield-629813))
 - 2026-09-21 [injury] Jaxon Smith-Njigba added to the injury report with an illness, questionable for Wk3 vs. Saints; Zach Charbonnet now eligible to return to practice as his PUP window opens — see their pages ([SI/OnSI](https://www.si.com/nfl/seahawks/onsi/seahawks-news/seattle-seahawks-get-troubling-update-jaxon-smith-njigba-leading-into-saints-game))

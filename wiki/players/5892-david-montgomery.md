@@ -3,10 +3,11 @@ sleeper_id: '5892'
 name: David Montgomery
 position: RB
 nfl_team: HOU
-last_researched: '2026-10-13'
+last_researched: '2026-11-11'
 ---
 
 ## News
+- 2026-11-09 [injury] Groin injury (originally suffered Oct 11 at Tennessee) has kept him out for several games since; HC DeMeco Ryans hopeful Montgomery can resume practicing this week, with a return not expected before Houston's Week 11 game (Nov 15 at Cleveland in this report's numbering). Woody Marks remains the clear lead back in his absence — matches the current "Questionable" tag ([search corroboration, Nov 9 2026 coverage])
 - 2026-10-13 [injury] Groin injury ended his Wk5 game vs TEN early; DeMeco Ryans calls him week-to-week ([Fantasy Footballers](https://www.thefantasyfootballers.com/news/642038/nico-collins-five-grabs-in-week-5-win/))
 - 2026-09-19 [depth-chart] Nico Collins (hamstring) out for Wk2 — expected uptick in passing-game usage with Collins sidelined; remains the clear goal-line/lead back over Woody Marks (all 3 Wk1 goal-line TDs) ([RotoBaller](https://www.rotoballer.com/player-news/kayshon-boutte-is-set-for-a-bigger-role-without-nico-collins/1944773))
 - 2026-08-22 [trade] Traded from Detroit to Houston (Texans sent a 4th and a 7th) and had his deal restructured; the vacated-opportunity read is more muted than the trade alone suggests — reports indicate Montgomery and incumbent Woody Marks will split RB1 reps rather than Montgomery taking clean bell-cow volume ([SI/OnSI](https://www.si.com/nfl/texans/onsi/news/houston-texans-projected-depth-chart-braden-smith-montgomery-moves))
