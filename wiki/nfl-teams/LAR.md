@@ -1,9 +1,10 @@
 ---
 team_code: LAR
-last_researched: '2026-11-11'
+last_researched: '2026-11-16'
 ---
 
 ## News
+- 2026-11-09 [injury] Puka Nacua suffered a new knee (MCL/PCL sprain) + turf toe injury on the final snap of the Nov 8 win at Washington; expected on IR for at least a month. With Davante Adams already on IR, the Rams are thin at WR behind him and said they'll look to add depth. See Nacua's page. ([Boston25](https://www.boston25news.com/sports/rams-receiver-puka/SJLLPGI4744YHESA5QJQXSG4AI/?outputType=amp))
 - 2026-10-19 [injury] Davante Adams out 6-10 weeks (ruptured hamstring tendon, Wk6 vs ARI); DT Poona Ford out for season. See Adams's page. ([AJC](https://www.ajc.com/news/2026/10/rams-wr-davante-adams-out-6-10-weeks-with-hamstring-injury-dt-poona-ford-out-for-season/))
 - 2026-09-25 [injury] Puka Nacua's groin injury has him doubtful for Week 3 at Denver, with a possible Week 4 return vs. Philadelphia if no setback; Davante Adams stepped up big in his absence (8 catches, 195 yds, 2 TD in Wk2). See both players' pages. ([Bleacher Report](https://bleacherreport.com/articles/25501963-puka-nacua-injury-update-new-timeline-return-rams-after-missing-week-2-vs-giants))
 - 2026-09-21 [depth-chart] Beat the Giants 28-6 on Mon night Wk2 (Stafford 4 TD passes, Kyren Williams TD, Davante Adams big game) with Puka Nacua inactive (hip) — see his page ([KSAT](https://www.ksat.com/sports/2026/09/22/davante-adams-matthew-stafford-lead-rams-past-giants-28-6-after-jaxson-darts-injury/))
