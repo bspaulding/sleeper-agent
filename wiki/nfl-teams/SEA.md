@@ -1,6 +1,6 @@
 ---
 team_code: SEA
-last_researched: '2026-11-11'
+last_researched: '2026-11-16'
 ---
 
 ## News
