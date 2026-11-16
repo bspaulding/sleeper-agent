@@ -3,10 +3,11 @@ sleeper_id: '7525'
 name: DeVonta Smith
 position: WR
 nfl_team: PHI
-last_researched: '2026-11-11'
+last_researched: '2026-11-16'
 ---
 
 ## News
+- 2026-11-16 [injury] Hamstring issue has lingered since Week 6 — ruled out again for Week 9 (per a Nov 2 report) and live Sleeper `injury_status` still shows Out as of this sweep (Week 11). No clear return timeline found; re-check before relying on him as a trade/streaming target. ([Yahoo/StackedFantasy](https://ca.sports.yahoo.com/news/devonta-smith-injury-updates-latest-004629744.html))
 - 2026-10-11 [injury] Listed OUT for Week 5 vs JAX with a hamstring injury ([CBS Sports](https://www.cbssports.com/nfl/news/nfl-week-5-injury-report-eagles-saquon-barkley-devonta-smith-out/))
 - 2026-09-20 [injury] Hamstring flared up again in Week 2 prep, returned to practice and produced 10 catches for 117 yards and a TD in the Week 2 win over Tennessee; fully off the injury report entering the Week 3 MNF game vs. Chicago. ([NBC Sports Philadelphia](https://www.nbcsportsphiladelphia.com/nfl/philadelphia-eagles/eagles-injury-update-devonta-smith-tank-bigsby-will-shipley-saquon-barkley/753804/))
 - 2026-09-13 [injury] Closes the hamstring loop: played through the full Week 1 win over Washington, 3 catches on 6 targets for 53 yards including a 31-yard third-down grab from Jalen Hurts — no re-injury, confirmed as the unquestioned WR1 in the post-A.J. Brown offense ([search corroboration via Eagles Week 1 coverage]).
