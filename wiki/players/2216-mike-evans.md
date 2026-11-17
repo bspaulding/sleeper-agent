@@ -3,10 +3,11 @@ sleeper_id: '2216'
 name: Mike Evans
 position: WR
 nfl_team: SF
-last_researched: '2026-11-11'
+last_researched: '2026-11-17'
 ---
 
 ## News
+- 2026-11-15 [injury] Ruled Out for the Week 10 game vs. Dallas (Achilles) — a recurrence of the Achilles tendinitis that first popped up in the Week 6 MNF win over Washington (he exited early, didn't return) and already cost him Week 7 vs. Atlanta. Three absences tied to the same issue since early October is a chronic-pattern signal, not a one-off tweak ([CBS Sports](https://www.cbssports.com/nfl/news/mike-evans-injury-update-achilles-49ers/), [ABC7](https://abc7news.com/post/49ers-rule-mike-evans-due-achilles-injury/19957736/)).
 - 2026-09-20 [injury] Exited the Wk2 win over Miami early with a hip injury; Shanahan sounded "less concerned" about this one than his earlier groin/hamstring trouble, but it adds to a pattern of games missed the last two seasons ([49ers Webzone](https://www.49erswebzone.com/articles/203448-provide-post-game-updates-demarcus-robinson/))
 - 2026-09-08 [injury] Update/correction on the Aug 22 calf note: the issue is now being described as a groin/adductor strain, and optimism has cooled — Shanahan initially said Evans was "ahead of schedule" and could practice before the team left for Australia, but GM John Lynch said Sept 1 the team merely hopes he returns to practice "next week." Evans is still reportedly planning to play in the Sept 10 opener vs. the Rams, but this is a step down from the earlier framing ([NBC Sports Bay Area](https://www.nbcsportsbayarea.com/nfl/san-francisco-49ers/mike-evans-injury-update-week-1/1958924/)).
 - 2026-08-22 [injury] Suffered a calf injury early in 49ers camp; not expected to be a season-long issue but adds to a worrying trend — 12 games missed over the past two seasons ([Yahoo Sports](https://sports.yahoo.com/articles/mike-evans-fantasy-outlook-2026-113626655.html))

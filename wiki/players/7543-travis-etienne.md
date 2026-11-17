@@ -3,11 +3,12 @@ sleeper_id: '7543'
 name: Travis Etienne
 position: RB
 nfl_team: 'NO'
-last_researched: '2026-11-11'
+last_researched: '2026-11-17'
 ---
 
 ## News
 
+- 2026-11-15 [injury] Questionable for the Week 10 game vs. Carolina (hamstring) — a recurrence of the same body part that put him on IR in Week 3; worth tracking as a durability pattern given two hamstring issues already this season ([NFL.com injury report](https://www.nfl.com/)).
 - 2026-10-01 [injury] Hamstring strain (Wk3 vs. LV) — placed on IR, out at least 4 games, ineligible to return before Wk9; Kamara/Kendre Miller/CJ Donaldson absorb work ([Rotoballer](https://www.rotoballer.com/?p=1955666))
 - 2026-09-25 [injury] Dealing with his own left hamstring issue, on the injury report all week ahead of Week 3 vs. Baltimore — compounding the Alvin Kamara-return workload squeeze already on file. ([SI Saints](https://www.si.com/nfl/saints/onsi/saints-get-concerning-injury-updates-on-two-key-players-before-ravens-01m2pqgfcsgd))
 - 2026-09-20 [depth-chart] Alvin Kamara made his season debut in Wk2 (off the knee injury report) — likely cuts into Etienne's touches going forward ([Canal Street Chronicles](https://www.canalstreetchronicles.com/new-orleans-saints-injuries/114905/fridays-saints-vs-ravens-final-injury-report-alvin-kamara-cam-jordan-are-back))

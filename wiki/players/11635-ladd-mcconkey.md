@@ -3,10 +3,11 @@ sleeper_id: '11635'
 name: Ladd McConkey
 position: WR
 nfl_team: LAC
-last_researched: '2026-11-11'
+last_researched: '2026-11-17'
 ---
 
 ## News
+- 2026-11-16 [injury] Questionable for the Monday-nighter vs. Baltimore (back) — new issue, unrelated to the Week 1 rib injury below ([NFL.com injury report](https://www.nfl.com/)).
 - 2026-09-19 [injury] Cracked rib suffered Wk1 vs Cardinals — cleared the questionable tag, active/started Wk2 vs Raiders ([Chargers.com](https://www.chargers.com/news/raiders-injury-report-ladd-mcconkey-fantasy))
 - 2026-09-15 [injury] Follow-up: diagnosed as a rib injury (not just general "chest"); HC Jim Harbaugh labeled him day-to-day Monday with no firm placement either way, and the Chargers want to see how he feels this week before deciding on Week 2 vs. Las Vegas ([Yahoo Sports](https://sports.yahoo.com/articles/ladd-mcconkey-return-chargers-wr-224604839.html)).
 - 2026-09-13 [injury] Left the Week 1 loss to Arizona in the third quarter with a chest injury after colliding with a Cardinals defender on a middle-of-the-field target; had 5 catches for 82 yards and a TD on 7 targets before departing, was questionable to return, and HC Jim Harbaugh had no update on his status after the game — worth confirming before Week 2 lineup decisions ([ESPN/Yahoo Sports](https://sports.yahoo.com/articles/ladd-mcconkey-suffers-chest-injury-231813665.html)).

@@ -3,10 +3,11 @@ sleeper_id: '9756'
 name: Jordan Addison
 position: WR
 nfl_team: MIN
-last_researched: '2026-11-11'
+last_researched: '2026-11-17'
 ---
 
 ## News
+- 2026-11-15 [injury] Questionable for the Week 10 game vs. Green Bay (thumb) — same body part flagged in September camp reports; played through it this week per the Vikings' official report ([NFL.com injury report](https://www.nfl.com/)).
 - 2026-09-27 [depth-chart] Stepped into the WR1 role when Justin Jefferson exited Week 3 with an ankle injury — 3 catches, 75 yards, 1 TD in the game. Clear near-term beneficiary if Jefferson misses time. ([SI/OnSI](https://www.si.com/onsi/fantasy/injuries/justin-jefferson-week-3-injury-vikings-fantasy-football-sleeper))
 - 2026-09-09 [injury] Dealing with a minor thumb injury that limited practice reps in camp, but expected to be close to a full participant and not viewed as a Week 1 threat ([Yahoo Sports](https://sports.yahoo.com/articles/vikings-major-jordan-addison-injury-213814009.html)).
 - 2026-03 [transaction] Vikings' QB situation shifted — Kyler Murray signed after being released by Arizona and was named 2026 starter over J.J. McCarthy, a relevant context change for Addison's target quality ([NFL.com](https://www.nfl.com/news/vikings-sign-kyler-murray-one-year-deal-release-cardinals))
