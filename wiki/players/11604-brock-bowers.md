@@ -3,10 +3,11 @@ sleeper_id: '11604'
 name: Brock Bowers
 position: TE
 nfl_team: LV
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News
+- 2026-11-18 [injury] New ankle injury suffered in the Raiders' Week 10 loss to Seattle (played only 11 snaps); per Rapoport the team doesn't believe it's major, but coach Kubiak called it "not as bad as we thought, but still a significant injury." Viewed as day-to-day/more tests planned; expected to be able to play the Week 11 game vs. Denver per Florio ([SI Raiders](https://www.si.com/nfl/raiders/onsi/las-vegas-mixed-bag-injuries-denver-broncos), [TSN](https://www.tsn.ca/nfl/article/raiders-lose-te-bowers-to-ankle-injury-vs-seahawks-n1-50495181/)).
 - 2026-09-20 [injury] Knee (meniscus trim, Sept 8 procedure) — inactive/doubtful for Wk2 vs Chargers, trending toward a Wk3 return @ Saints (9/27) ([NBC Sports](https://www.nbcsports.com/fantasy/football/player-news/2026-09-20/brock-bowers-knee-headlines-raiders-inactives))
 - 2026-09-08 [injury] Ruled out for the Week 1 opener vs. Miami after undergoing a meniscus trim on the knee (diagnosed the prior week, procedure done in Dallas); Raiders believe there's a realistic chance he only misses this one game and returns Week 2 at the Chargers ([NFL.com](https://www.nfl.com/news/raiders-te-brock-bowers-knee-procedure-out-week-1)).
 - 2026-08-29 [injury] Says he feels "100 percent" after a knee injury limited him to 12 games in 2025 and required season-ending surgery with two games left; back to full speed in camp ([Bleacher Report](https://bleacherreport.com/articles/25431900-brock-bowers-updates-knee-injury-status-2026-nfl-season-amid-raiders-otas))

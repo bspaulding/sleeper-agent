@@ -3,7 +3,7 @@ sleeper_id: '8167'
 name: Christian Watson
 position: WR
 nfl_team: GB
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News

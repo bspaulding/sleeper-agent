@@ -3,10 +3,11 @@ sleeper_id: '8151'
 name: Kenneth Walker
 position: RB
 nfl_team: KC
-last_researched: '2026-11-17'
+last_researched: '2026-11-18'
 ---
 
 ## News
+- 2026-11-15 [injury] Ruled out of the Week 10 game at Atlanta (groin); Ian Rapoport reports he's expected to be able to go for the Week 11 Cardinals game barring a setback ([KY3](https://www.ky3.com/2026/11/15/chiefs-rule-out-kenneth-walker-nfls-no-2-rusher-sundays-game-atlanta-with-groin-injury/)).
 - 2026-11-15 [injury] Questionable for the Week 10 game vs. Atlanta (groin) — new issue, first injury note of his Chiefs tenure; no word yet on whether it affects his workhorse workload ([NFL.com injury report](https://www.nfl.com/)).
 - 2026-09-15 [depth-chart] Dominant KC debut in the Week 1 MNF win over Denver (31-10): career-high 173 rushing yards (most by a Chiefs player since 2018) plus 18 receiving yards on 3 catches — 191 all-purpose yards and 2 TDs on 26 touches, including a 60-yard 4th-and-inches TD run, with 14 forced missed tackles. Strongly confirms the projected workhorse role ([ESPN](https://www.espn.com/nfl/story/_/id/49944600/2026-nfl-week-1-kansas-city-chiefs-denver-broncos-kenneth-walker-patrick-mahomes)).
 - 2026-08-22 [depth-chart] Signed in free agency to be Kansas City's clear, workhorse lead back (15-18 carries/game plus goal-line work projected, ESPN projects 276-233 stat line); Chiefs are set on him as a true three-down back after an ailing 2025 run game ([Fantasy Points](https://www.fantasypoints.com/nfl/articles/2026/fantasy-fallout-kenneth-walker-to-chiefs))

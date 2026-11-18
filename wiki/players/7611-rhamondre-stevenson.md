@@ -3,7 +3,7 @@ sleeper_id: '7611'
 name: Rhamondre Stevenson
 position: RB
 nfl_team: NE
-last_researched: '2026-11-17'
+last_researched: '2026-11-18'
 ---
 
 ## News

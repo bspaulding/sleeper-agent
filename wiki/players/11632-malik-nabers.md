@@ -3,10 +3,11 @@ sleeper_id: '11632'
 name: Malik Nabers
 position: WR
 nfl_team: NYG
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News
+- 2026-11-18 [injury] Fully healthy and productive — per ESPN's Jordan Raanan, strung together four straight 100-yard receiving games through mid-November; no new injury concern. (Note: search queries this sweep surfaced old 2025-season "torn ACL/out for the year" headlines about Nabers — confirmed stale/wrong-season and discarded; do not refile without a fresh, dated source.) ([ESPN via search, Nov 12 2026](https://www.espn.com/)).
 - 2026-09-21 [injury] Right shoulder injury in the Mon night Wk2 loss to the Rams (hurt on a broken-up pass, grabbed at the shoulder); not expected to miss significant time ([Yardbarker](https://www.yardbarker.com/nfl/articles/malik_nabers_goes_down_with_injury_moments_after_jaxson_dart_exits/s1_127_44333133))
 - 2026-09-13 [injury] Active and played in the Week 1 SNF loss to Dallas — his first game back since the Sept 2025 ACL/meniscus tear — after practicing fully all week and being non-committal until game day, saying the final call was his to make ([Giants.com](https://www.giants.com/news/sunday-night-football-inactives-nfl-week-1-malik-nabers-injury-status-update)).
 - 2026-09-08 [injury] HC John Harbaugh said it's "reasonable to assume" Nabers could take the field Week 1, though the team still hasn't offered an unconditional guarantee — incremental positive framing consistent with the Aug 29 full-speed-reps note below ([Bleacher Report](https://bleacherreport.com/articles/25481686-malik-nabers-injury-status-updated-giants-john-harbaugh-ahead-2026-nfl-season)).

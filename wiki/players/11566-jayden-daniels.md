@@ -3,7 +3,7 @@ sleeper_id: '11566'
 name: Jayden Daniels
 position: QB
 nfl_team: WAS
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '6130'
 name: Devin Singletary
 position: RB
 nfl_team: NYG
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News

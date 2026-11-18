@@ -3,7 +3,7 @@ sleeper_id: '12514'
 name: Emeka Egbuka
 position: WR
 nfl_team: TB
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '1466'
 name: Travis Kelce
 position: TE
 nfl_team: KC
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News

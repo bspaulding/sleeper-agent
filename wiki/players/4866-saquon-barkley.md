@@ -3,7 +3,7 @@ sleeper_id: '4866'
 name: Saquon Barkley
 position: RB
 nfl_team: PHI
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News

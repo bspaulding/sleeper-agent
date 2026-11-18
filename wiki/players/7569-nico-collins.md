@@ -3,7 +3,7 @@ sleeper_id: '7569'
 name: Nico Collins
 position: WR
 nfl_team: HOU
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News

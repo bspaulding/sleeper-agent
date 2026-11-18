@@ -3,7 +3,7 @@ sleeper_id: '4066'
 name: Evan Engram
 position: TE
 nfl_team: DEN
-last_researched: '2026-11-11'
+last_researched: '2026-11-18'
 ---
 
 ## News
