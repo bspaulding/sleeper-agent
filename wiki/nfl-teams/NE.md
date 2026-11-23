@@ -1,9 +1,10 @@
 ---
 team_code: NE
-last_researched: '2026-11-18'
+last_researched: '2026-11-23'
 ---
 
 ## News
+- 2026-11-23 [injury/depth-chart] Backfield thinned further: Rhamondre Stevenson (knee) reportedly facing a multi-week absence per Rapoport (conflicts with other Patriots reporting that only had him Questionable — see his page) and TreVeyon Henderson is out with an illness. Corey Kiner (previously unrostered-in-wiki) and Lan Larison are now the top two healthy RBs on the depth chart per ESPN's Mike Reiss. See Stevenson's and Kiner's pages. ([Bleacher Report](https://bleacherreport.com/articles/25531418-rhamondre-stevenson-injured-latest-rumors-patriots-rb-and-fantasy-outlook-depth-chart))
 - 2026-11-06/09 [injury] Both backfield/receiving pieces banged up in the Week 9 game vs. Green Bay (Nov 8): A.J. Brown ruled OUT beforehand with a new knee injury (separate from his earlier ankle sprain; has played only 3 games all season) and TreVeyon Henderson also ruled out; Rhamondre Stevenson left the game itself with a knee injury of his own and has no confirmed diagnosis yet, status unsettled for Week 10 at Detroit (Nov 15). See all three players' pages. ([Boston.com](https://www.boston.com/sports/new-england-patriots/2026/11/06/patriots-packers-injury-report-aj-brown/))
 - 2026-09-27 [depth-chart] RB touches split roughly evenly between TreVeyon Henderson and Rhamondre Stevenson in a 35-6 Week 3 blowout loss to Jacksonville (8 car/23 yds + 1 catch for Henderson vs. Stevenson) — a step down from Henderson's clear Week 2 lead role (60% snaps); appears game-script driven rather than a role change. See Henderson's page. ([CBS Sports](https://www.cbssports.com/fantasy/football/news/patriots-treveyon-henderson-stymied-in-week-3-loss/))
 - 2026-09-25 [injury] Lost both starting edge rushers this week — Dre'Mont Jones and Quintayvious Hutchins (Hutchins to IR) — plus safety Craig Woodson (shoulder, deactivated) entering the Week 3 loss to Jacksonville; already thin at edge after losing Harold Landry III in the offseason. Negative signal for DEF fantasy value, especially without a healthy pass rush. ([NESN](https://nesn.com/new-england-patriots/news/defensive-starters-patriots-injury-report-week-3/556ab3b1fc3156e125c4a253))

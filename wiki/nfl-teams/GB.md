@@ -1,6 +1,6 @@
 ---
 team_code: GB
-last_researched: '2026-11-18'
+last_researched: '2026-11-23'
 ---
 
 ## News

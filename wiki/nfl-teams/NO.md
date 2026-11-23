@@ -1,6 +1,6 @@
 ---
 team_code: 'NO'
-last_researched: '2026-11-18'
+last_researched: '2026-11-23'
 ---
 
 ## News
