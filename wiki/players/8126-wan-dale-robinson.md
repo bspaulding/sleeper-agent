@@ -3,10 +3,11 @@ sleeper_id: '8126'
 name: Wan'Dale Robinson
 position: WR
 nfl_team: TEN
-last_researched: '2026-11-18'
+last_researched: '2026-11-23'
 ---
 
 ## News
+- 2026-11-18 [injury] Placed on IR with an ankle injury suffered in the 40-23 loss to Jacksonville; HC Robert Saleh confirmed the next day Robinson is out for the **rest of the 2026 season** — not just a 4-game minimum. Led the team with 38 catches/3 TD before the injury. Xavier Restrepo promoted to the 53-man roster as the replacement in TEN's WR rotation; no realistic return this year for a non-dynasty keeper league. ([WSMV](https://www.wsmv.com/2026/11/18/titans-receiver-wandale-robinson-out-season/), [TSN](https://www.tsn.ca/nfl/article/titans-wr-robinson-out-for-season-with-ankle-injury-n1-50523261/))
 - 2026-11-07 [transaction/depth-chart] Added by us for Week 10 on. 94% of snaps and 15.7 PPR in Week 8 (60% in Week 7) per nflverse; Tennessee's Week 9 is a bye. RotoBaller flags a shifting Tennessee rotation ([RotoBaller](https://www.rotoballer.com/?p=1977802))
 - 2026-08-27 [injury] Evaluated for a concussion after a hit from Bears S Xavier Woods during a joint practice (HC Robert Saleh called the hit "cheap," sparking a scuffle); left the field under his own power, and the team subsequently reported he is not believed to have suffered a concussion ([NFL.com](https://www.nfl.com/news/titans-wr-wan-dale-robinson-evaluated-for-concussion-after-cheap-hit-in-joint-practice-with-bears), [NBC Sports](https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/report-wandale-robinson-is-not-believed-to-have-suffered-a-concussion)).
 - 2026-08-22 [transaction] Signed a 4yr/$70M deal with Tennessee, locking him in as Cam Ward's slot receiver; real OC-continuity signal — he's reunited with Brian Daboll, Tennessee's new OC who was his Giants HC during his 2025 breakout, an actual known-scheme fit rather than a blind bet ([FantasyLife](https://www.fantasylife.com/articles/fantasy/wandale-robinson-fantasy-football-stock-with-tennessee-titans))

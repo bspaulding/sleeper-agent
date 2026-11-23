@@ -3,7 +3,7 @@ sleeper_id: '12540'
 name: Chimere Dike
 position: WR
 nfl_team: TEN
-last_researched: '2026-08-29'
+last_researched: '2026-11-23'
 ---
 
 ## News

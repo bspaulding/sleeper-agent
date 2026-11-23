@@ -3,7 +3,7 @@ sleeper_id: '4147'
 name: Samaje Perine
 position: RB
 nfl_team: CIN
-last_researched: '2026-08-29'
+last_researched: '2026-11-23'
 ---
 
 ## News

@@ -3,7 +3,7 @@ sleeper_id: '5844'
 name: T.J. Hockenson
 position: TE
 nfl_team: MIN
-last_researched: '2026-11-11'
+last_researched: '2026-11-23'
 ---
 
 ## News

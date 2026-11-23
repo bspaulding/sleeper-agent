@@ -3,7 +3,7 @@ sleeper_id: '13269'
 name: Fernando Mendoza
 position: QB
 nfl_team: LV
-last_researched: '2026-08-22'
+last_researched: '2026-11-23'
 ---
 
 ## News

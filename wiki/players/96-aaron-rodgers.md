@@ -3,7 +3,7 @@ sleeper_id: '96'
 name: Aaron Rodgers
 position: QB
 nfl_team: PIT
-last_researched: 2026-08-11
+last_researched: '2026-11-23'
 ---
 
 ## News

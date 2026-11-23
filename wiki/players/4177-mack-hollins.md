@@ -3,7 +3,7 @@ sleeper_id: '4177'
 name: Mack Hollins
 position: WR
 nfl_team: NE
-last_researched: '2026-08-29'
+last_researched: '2026-11-23'
 ---
 
 ## News

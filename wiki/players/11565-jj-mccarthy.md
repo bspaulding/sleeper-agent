@@ -3,7 +3,7 @@ sleeper_id: '11565'
 name: J.J. McCarthy
 position: QB
 nfl_team: MIN
-last_researched: '2026-08-29'
+last_researched: '2026-11-23'
 ---
 
 ## News
