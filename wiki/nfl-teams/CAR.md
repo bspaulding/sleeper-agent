@@ -1,6 +1,6 @@
 ---
 team_code: CAR
-last_researched: '2026-11-23'
+last_researched: '2026-11-24'
 ---
 
 ## News

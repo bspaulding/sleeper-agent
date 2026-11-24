@@ -1,6 +1,6 @@
 ---
 team_code: IND
-last_researched: '2026-11-23'
+last_researched: '2026-11-24'
 ---
 
 ## News
