@@ -3,7 +3,7 @@ sleeper_id: '11628'
 name: Marvin Harrison
 position: WR
 nfl_team: HOU
-last_researched: '2026-11-23'
+last_researched: '2026-11-25'
 ---
 
 ## News

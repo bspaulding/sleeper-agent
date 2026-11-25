@@ -3,7 +3,7 @@ sleeper_id: '8228'
 name: Jaylen Warren
 position: RB
 nfl_team: PIT
-last_researched: '2026-11-23'
+last_researched: '2026-11-25'
 ---
 
 ## News
