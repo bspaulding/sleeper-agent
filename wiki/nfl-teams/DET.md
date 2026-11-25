@@ -1,6 +1,6 @@
 ---
 team_code: DET
-last_researched: '2026-11-23'
+last_researched: '2026-11-25'
 ---
 
 ## News
